@@ -5,18 +5,24 @@ import Image from "next/image";
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
 
 export default function Produtos() {
+
+  interface Informacao {
+    nome: string;
+    empresa: string;
+  }
+  
+//  ===================================== States ====================================
+
   const [produtos, setProdutos] = useState<any[]>([]); 
   const [buscarTermo, setBuscarTermo] = useState("");
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
   const [subcategoriaSelecionada, setSubcategoriaSelecionada] = useState("");
   const [produtosBuscados, setProdutosBuscados] = useState(produtos);
+  const [infor, setInfor] = useState<Informacao[]>([]);
 
-  const infor = [
-    {
-      nome: "XPTO",
-      empresa: "XPTA",
-    },
-  ];
+
+// ===================================================================================
+
 
   const categorias = [
     "Drinks de Verão",
@@ -28,11 +34,17 @@ export default function Produtos() {
     "Porções",
   ];
 
+// ================================ Contar os produtos cadastrados ====================================
+
   const prodsCadastrados = [
     {
       quantProd: `${produtos.length} produtos cadastrados`,
     },
   ];
+
+// ====================================================================================================
+
+// ============================== Verifica se os filtros estão limpos para voltar tudo ================
 
   const aplicarFiltros = () => {
     if (
@@ -43,6 +55,11 @@ export default function Produtos() {
       setProdutosBuscados(produtos);
       return;
     }
+
+// =====================================================================================================
+
+
+// ===================== Buscar por nome ou id =========================================================
 
     const termo = buscarTermo.toLowerCase();
 
@@ -62,6 +79,9 @@ export default function Produtos() {
     setProdutosBuscados(filtrado);
   };
 
+// =======================================================================================
+
+// ========================== Carregar dados na tela =====================================
   const carregarProdutos = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/produtos');
@@ -81,8 +101,9 @@ export default function Produtos() {
     }
   };
   
-  
+// ============================================================================ 
 
+//  ================================ Caso != filtros carrega os dados =========
   useEffect(() => {
     carregarProdutos();
   }, []);
@@ -90,6 +111,31 @@ export default function Produtos() {
   useEffect(() => {
     aplicarFiltros();
   }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
+
+// ============================================================================
+
+// =============================== Effect para informações do usuário =========
+  useEffect(() => {
+    const fetchInformacoes = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/informacoes");
+        
+        if (!response.ok) {
+          throw new Error("Erro ao buscar informações");
+        }
+        
+        const data = await response.json();
+        console.log("Dados retornados da API:", data);
+        setInfor(data);
+      } catch (error) {
+        console.error("Erro ao buscar informações:", error);
+      }
+    };
+
+    fetchInformacoes();
+  }, []);
+//  ===========================================================================================
+
 
   return (
     <>
@@ -105,25 +151,25 @@ export default function Produtos() {
           ))}
 
           <div className="flex items-center gap-4">
-            {infor.map((item, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <Image
-                  src={ftPerfil}
-                  alt="perfil"
-                  width={50}
-                  height={50}
-                  className="rounded-full border border-gray-300"
-                />
-                <div className="flex flex-col">
-                  <p className="text-base font-medium text-gray-700">
-                    Nome: {item.nome}
-                  </p>
-                  <p className="text-base font-medium text-gray-500">
-                    Empresa: {item.empresa}
-                  </p>
+            {infor.length > 0 ? (
+              infor.map((item, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <Image
+                    src={ftPerfil} // Corrigido para usar a imagem importada corretamente
+                    alt="perfil"
+                    width={50}
+                    height={50}
+                    className="rounded-full border border-gray-300"
+                  />
+                  <div className="flex flex-col">
+                    <p className="text-base font-medium text-gray-700">Nome: {item.nome}</p>
+                    <p className="text-base font-medium text-gray-500">Empresa: {item.empresa}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-500">Nenhuma informação disponível.</p>
+            )}
           </div>
         </div>
       </header>
