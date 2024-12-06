@@ -1,3 +1,5 @@
+-- ================================= Produtos ====================================
+
 CREATE TABLE produtos (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(255),
@@ -44,3 +46,21 @@ VALUES ('Gabriel', 'Categoria Teste', 'Subcategoria Teste', 10, 99.99, 'Catálog
 select * from produtos
 
 delete from produtos
+
+-- ===============================================================================
+
+-- ================================= Informações =================================
+
+CREATE TABLE informacoes (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(255),
+  empresa VARCHAR(255)
+);
+
+insert into informacoes (nome, empresa) values ('Evandir', 'Mercadão Aki Variedades');
+
+select * from informacoes
+
+delete from informacoes
+
+-- ===============================================================================
