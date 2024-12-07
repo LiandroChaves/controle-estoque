@@ -29,6 +29,14 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.get('/login', async (req, res) =>{
+    try {
+        const result = await pool.query('SELECT login, senha from informacoesLogin');
+        res.json(result.rows);
+    } catch (error) {
+        console.log('Erro ao pegar dados de logins cadastrados: ' + error.message);
+    }
+});
 
 
 module.exports = router;
