@@ -7,20 +7,20 @@ const pool = require('./src/database/db');
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000',  
-    methods: ['GET', 'POST'], 
-    allowedHeaders: ['Content-Type', 'Authorization'] 
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
 const testDatabaseConnection = async () => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    console.log('Conexão com o banco de dados bem-sucedida:', result.rows[0]);
-  } catch (err) {
-    console.error('Erro de conexão com o banco de dados:', err);
-  }
+    try {
+        const result = await pool.query('SELECT NOW()');
+        console.log('Conexão com o banco de dados bem-sucedida:', result.rows[0]);
+    } catch (err) {
+        console.error('Erro de conexão com o banco de dados:', err);
+    }
 };
 
 testDatabaseConnection();
@@ -31,5 +31,5 @@ app.use("/api", loginRouter);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
