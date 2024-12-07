@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Importando o roteador do Next.js para redirecionar
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
-  const router = useRouter(); // Instância do roteador
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,16 +23,15 @@ export default function Login() {
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Erro do servidor:", errorData); // Veja a mensagem exata de erro
+        console.error("Erro do servidor:", errorData);
         setErro(errorData.error || "Credenciais inválidas");
         return;
       }
   
       const data = await response.json();
       console.log("Login bem-sucedido:", data);
-  
-      // Redirecionar para a página de produtos
-      router.push("/produtos"); // Redireciona para a página de produtos
+
+      router.push("/produtos"); 
     } catch (error) {
       setErro("Erro ao conectar ao servidor");
       console.error("Erro:", error);
