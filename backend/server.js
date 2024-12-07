@@ -1,6 +1,6 @@
 const express = require('express');
 const produtosRouter = require('./src/routes/produtos');
-const informacoesRoutes = require("./src/routes/informacoes");
+const loginRouter = require("./src/routes/login");
 const cors = require('cors');
 const pool = require('./src/database/db');
 
@@ -26,7 +26,7 @@ const testDatabaseConnection = async () => {
 testDatabaseConnection();
 
 app.use('/api', produtosRouter);
-app.use("/api", informacoesRoutes);
+app.use("/api", loginRouter);
 
 const PORT = process.env.PORT || 5000;
 

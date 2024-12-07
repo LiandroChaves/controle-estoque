@@ -115,25 +115,36 @@ export default function Produtos() {
 // ============================================================================
 
 // =============================== Effect para informações do usuário =========
-  useEffect(() => {
-    const fetchInformacoes = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/informacoes");
-        
-        if (!response.ok) {
-          throw new Error("Erro ao buscar informações");
-        }
-        
-        const data = await response.json();
-        console.log("Dados retornados da API:", data);
-        setInfor(data);
-      } catch (error) {
-        console.error("Erro ao buscar informações:", error);
-      }
-    };
+useEffect(() => {
+  const fetchInformacoes = async () => {
+    try {
+      // Mudando de GET para POST
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          login: "aki04",  // Passe o login aqui, de acordo com a lógica de login que você deseja
+          senha: "123456",  // Passe a senha também
+        }),
+      });
 
-    fetchInformacoes();
-  }, []);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar informações");
+      }
+
+      const data = await response.json();
+      console.log("Dados retornados da API:", data);
+      setInfor([data]);  // Lembre-se de passar os dados como um array
+    } catch (error) {
+      console.error("Erro ao buscar informações:", error);
+    }
+  };
+
+  fetchInformacoes();
+}, []);
+
 //  ===========================================================================================
 
 
