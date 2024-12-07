@@ -51,16 +51,20 @@ delete from produtos
 
 -- ================================= Informações =================================
 
-CREATE TABLE informacoes (
-  id SERIAL PRIMARY KEY,
-  nome VARCHAR(255),
-  empresa VARCHAR(255)
+CREATE TABLE informacoesLogin (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(255) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    nome VARCHAR(255) NOT NULL,
+    empresa VARCHAR(255) NOT NULL
 );
 
-insert into informacoes (nome, empresa) values ('Evandir', 'Mercadão Aki Variedades');
+insert into informacoesLogin (login, senha, nome, empresa) values ('aki04', '123456','Evandir','Aki Variedades');
 
-select * from informacoes
+SELECT senha FROM informacoesLogin WHERE login = 'aki04';
 
-delete from informacoes
+select * from informacoesLogin
+
+delete from informacoesLogin
 
 -- ===============================================================================
