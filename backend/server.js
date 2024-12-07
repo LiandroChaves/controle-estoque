@@ -1,6 +1,7 @@
 const express = require('express');
 const produtosRouter = require('./src/routes/produtos');
 const loginRouter = require("./src/routes/login");
+const cadastroRouter = require("./src/routes/cadastro")
 const cors = require('cors');
 const pool = require('./src/database/db');
 
@@ -27,6 +28,7 @@ testDatabaseConnection();
 
 app.use('/api', produtosRouter);
 app.use("/api", loginRouter);
+app.use("/api", cadastroRouter);
 
 const PORT = process.env.PORT || 5000;
 

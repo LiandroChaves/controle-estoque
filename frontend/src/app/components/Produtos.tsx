@@ -125,8 +125,8 @@ export default function Produtos() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        login: "aki04",  // Passe o login aqui, de acordo com a lógica de login que você deseja
-                        senha: "123456",  // Passe a senha também
+                        login: "lupincesinha", 
+                        senha: "esmiliguido",  
                     }),
                 });
 

@@ -1,6 +1,8 @@
 const express = require('express');
 const pool = require('../database/db');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = 'sua_chave_secreta';
 
 router.post('/login', async (req, res) => {
     const { login, senha } = req.body;
@@ -19,7 +21,14 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: "Senha inválida" });
         }
 
+        const token = jwt.sign(
+            { id: usuario.id, login: usuario.login },
+            SECRET_KEY,
+            { expiresIn: '1h' }
+        );
+
         res.json({
+            token,
             nome: usuario.nome,
             empresa: usuario.empresa,
         });
@@ -31,12 +40,41 @@ router.post('/login', async (req, res) => {
 
 router.get('/login', async (req, res) => {
     try {
-        const result = await pool.query('SELECT login, senha from informacoesLogin');
-        res.json(result.rows);
+        const token = req.headers['authorization']?.split(' ')[1]; // Obtém o token do header
+        console.log('Token recebido:', token);  // Log do token recebido
+
+        if (!token) {
+            return res.status(401).json({ error: 'Token não fornecido' });
+        }
+
+        // Verifique o token JWT
+        const decoded = jwt.verify(token, SECRET_KEY); // Decodifica e valida o token
+        console.log('Token decodificado:', decoded); // Log do token decodificado
+
+        const login = decoded.login;
+
+        // Busca os dados do usuário no banco
+        const result = await pool.query('SELECT login, nome, empresa FROM informacoesLogin WHERE login = $1', [login]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        const usuario = result.rows[0];
+        res.json(usuario); // Retorna o usuário autenticado
+
     } catch (error) {
-        console.log('Erro ao pegar dados de logins cadastrados: ' + error.message);
+        console.error('Erro ao verificar o token ou buscar os dados do usuário:', error.message);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ error: 'Token inválido ou expirado' });
+        }
+        res.status(500).json({ error: 'Erro interno ao autenticar o usuário' });
     }
 });
+
+
+
+
 
 
 module.exports = router;
