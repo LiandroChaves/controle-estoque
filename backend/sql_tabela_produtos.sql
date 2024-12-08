@@ -68,3 +68,39 @@ select * from informacoesLogin
 delete from informacoesLogin
 
 -- ===============================================================================
+
+-- ======================= Logs produtos =========================================
+
+CREATE TABLE IF NOT EXISTS logsProdutos (
+    id SERIAL PRIMARY KEY,
+    cod_produtos INT NOT NULL,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    acao VARCHAR(50) NOT NULL
+);
+
+select * from logsProdutos;
+
+--  ============== Função Trigger ================================================
+
+CREATE OR REPLACE FUNCTION log_produtos_acao()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO logsProdutos (cod_produtos, acao)
+    VALUES (NEW.id, TG_OP);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ===============================================================================
+
+--  ===================== Trigger ================================================
+
+CREATE TRIGGER trigger_log_produtos
+AFTER INSERT ON produtos
+FOR EACH ROW
+EXECUTE FUNCTION log_produtos_acao();
+
+
+-- ===============================================================================
+-- ===============================================================================

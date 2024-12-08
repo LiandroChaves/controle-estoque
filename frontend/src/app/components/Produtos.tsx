@@ -123,7 +123,7 @@ export default function Produtos() {
     useEffect(() => {
         const fetchInformacoes = async () => {
             try {
-                const token = localStorage.getItem("token"); // Recupera o token do localStorage
+                const token = localStorage.getItem("token");
 
                 if (!token) {
                     setError("Usuário não autenticado. Faça login novamente.");
@@ -134,7 +134,7 @@ export default function Produtos() {
                 const response = await fetch("http://localhost:5000/api/login", {
                     method: "GET",
                     headers: {
-                        Authorization: `Bearer ${token}`, // Envia o token no header
+                        Authorization: `Bearer ${token}`,
                     },
                 });
 
@@ -146,7 +146,7 @@ export default function Produtos() {
                 const data = await response.json();
                 console.log("Dados do usuário autenticado:", data);
 
-                setInfor([data]); // Atualiza as informações do usuário
+                setInfor([data]);
             } catch (err: any) {
                 console.error("Erro ao buscar informações do usuário:", err.message);
                 setError(err.message);
@@ -177,7 +177,7 @@ export default function Produtos() {
                             infor.map((item, index) => (
                                 <div key={index} className="flex items-center gap-4">
                                     <Image
-                                        src={ftPerfil} // Corrigido para usar a imagem importada corretamente
+                                        src={ftPerfil}
                                         alt="perfil"
                                         width={50}
                                         height={50}
