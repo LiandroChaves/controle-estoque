@@ -11,7 +11,7 @@ export default function Login() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+    
         try {
             const response = await fetch("http://localhost:5000/api/login", {
                 method: "POST",
@@ -20,23 +20,28 @@ export default function Login() {
                 },
                 body: JSON.stringify({ login, senha }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error("Erro do servidor:", errorData);
                 setErro(errorData.error || "Credenciais inválidas");
                 return;
             }
-
+    
             const data = await response.json();
             console.log("Login bem-sucedido:", data);
-
+    
+            // Salva o token no localStorage
+            localStorage.setItem("token", data.token);
+    
+            // Redireciona para a página de produtos
             router.push("/produtos");
         } catch (error) {
             setErro("Erro ao conectar ao servidor");
             console.error("Erro:", error);
         }
     };
+    
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">

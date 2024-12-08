@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
+import { useRouter } from "next/navigation";
 
 export default function Produtos() {
 
@@ -18,8 +19,9 @@ export default function Produtos() {
     const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
     const [subcategoriaSelecionada, setSubcategoriaSelecionada] = useState("");
     const [produtosBuscados, setProdutosBuscados] = useState(produtos);
-    const [infor, setInfor] = useState<Informacao[]>([]);
-
+    // const [infor, setInfor] = useState<Informacao[]>([]);
+    const [infor, setInfor] = useState<any[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
     // ===================================================================================
 
@@ -115,35 +117,44 @@ export default function Produtos() {
     // ============================================================================
 
     // =============================== Effect para informações do usuário =========
+
+    const router = useRouter();
+
     useEffect(() => {
         const fetchInformacoes = async () => {
             try {
-                // Mudando de GET para POST
+                const token = localStorage.getItem("token"); // Recupera o token do localStorage
+
+                if (!token) {
+                    setError("Usuário não autenticado. Faça login novamente.");
+                    router.push("/login");
+                    return;
+                }
+
                 const response = await fetch("http://localhost:5000/api/login", {
-                    method: "POST",
+                    method: "GET",
                     headers: {
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, // Envia o token no header
                     },
-                    body: JSON.stringify({
-                        login: "lupincesinha", 
-                        senha: "esmiliguido",  
-                    }),
                 });
 
                 if (!response.ok) {
-                    throw new Error("Erro ao buscar informações");
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
                 }
 
                 const data = await response.json();
-                console.log("Dados retornados da API:", data);
-                setInfor([data]);  // Lembre-se de passar os dados como um array
-            } catch (error) {
-                console.error("Erro ao buscar informações:", error);
+                console.log("Dados do usuário autenticado:", data);
+
+                setInfor([data]); // Atualiza as informações do usuário
+            } catch (err: any) {
+                console.error("Erro ao buscar informações do usuário:", err.message);
+                setError(err.message);
             }
         };
 
         fetchInformacoes();
-    }, []);
+    }, [router]);
 
     //  ===========================================================================================
 
