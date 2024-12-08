@@ -270,6 +270,7 @@ export default function Produtos() {
                                         <span className="peer-checked:translate-x-5 inline-block w-4 h-4 bg-white rounded-full transform transition-transform absolute left-1 top-0.5"></span>
                                     </label>
                                 </td>
+                                <td className="flex place-content-center"><button type="button" className="bg-blue-500 p-1 rounded-lg text-white">Editar</button></td>
                             </tr>
                         ))}
                     </tbody>
