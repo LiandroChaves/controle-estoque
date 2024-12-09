@@ -63,4 +63,30 @@ router.post('/produtos/reset-sequence', async (req, res) => {
 });
 
 
+router.put('/produtos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nome, categoria, subcategoria, estoque, preco } = req.body;
+
+    if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE produtos SET nome = $1, categoria = $2, subcategoria = $3, estoque = $4, preco = $5 WHERE id = $6 RETURNING *',
+            [nome, categoria, subcategoria, estoque, preco, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Produto atualizado com sucesso', produto: result.rows[0] });
+    } catch (error) {
+        console.error('Erro ao atualizar produto:', error);
+        res.status(500).json({ error: 'Erro ao atualizar o produto no banco de dados.' });
+    }
+});
+
+
 module.exports = router;
