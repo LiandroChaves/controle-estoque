@@ -5,6 +5,9 @@ import Image from "next/image";
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
 import { useRouter } from "next/navigation";
 import Modal from "./modalEditar";
+import logoEditar from '../../../public/assets/caneta.png'
+import logoDeletar from '../../../public/assets/excluir.png'
+import Footer from "./Footer";
 
 export default function Produtos() {
     interface Informacao {
@@ -127,7 +130,7 @@ export default function Produtos() {
             try {
                 const token = localStorage.getItem("token");
 
-                if (!token) {
+                if (!token  || token === "undefined") {
                     setError("Usuário não autenticado. Faça login novamente.");
                     router.push("/login");
                     return;
@@ -156,6 +159,26 @@ export default function Produtos() {
         fetchInformacoes();
     }, [router]);
 
+    const deletarProduto = async (produto: any) => {
+        if (!produto || !produto.id) return;
+    
+        try {
+            const response = await fetch(
+                `http://localhost:5000/api/produtos/${produto.id}`,
+                { method: "DELETE" }
+            );
+    
+            if (!response.ok) {
+                throw new Error("Erro ao deletar produto!");
+            }
+    
+            console.log("Produto deletado com sucesso.");
+            carregarProdutos(); // Atualizar a lista após deletar
+        } catch (error) {
+            console.error("Erro ao deletar produto:", error);
+        }
+    };
+    
     // ============================= Renderização ===============================
     return (
         <>
@@ -234,28 +257,40 @@ export default function Produtos() {
                 <table className="w-full text-left border-collapse border border-gray-200">
                     <thead>
                         <tr className="bg-gray-100">
-                            <th className="p-3 border border-gray-200">Produto</th>
-                            <th className="p-3 border border-gray-200">Categoria</th>
-                            <th className="p-3 border border-gray-200">Subcategoria</th>
-                            <th className="p-3 border border-gray-200">Estoque</th>
-                            <th className="p-3 border border-gray-200">Preço</th>
-                            <th className="p-3 border border-gray-200">Ações</th>
+                            <th className="p-3 border border-gray-200 text-center">ID</th>
+                            <th className="p-3 border border-gray-200 text-center">Produto</th>
+                            <th className="p-3 border border-gray-200 text-center">Categoria</th>
+                            <th className="p-3 border border-gray-200 text-center">Subcategoria</th>
+                            <th className="p-3 border border-gray-200 text-center">Estoque</th>
+                            <th className="p-3 border border-gray-200 text-center">Preço</th>
+                            <th className="p-3 border border-gray-200 text-center">Ações</th>
+                            <th className="p-3 border border-gray-200 text-center">Ações</th>
+
                         </tr>
                     </thead>
                     <tbody>
                         {produtosBuscados.map((produto, index) => (
                             <tr key={index} className="hover:bg-gray-50 transition duration-200">
-                                <td className="p-3 border border-gray-200">{produto.nome}</td>
-                                <td className="p-3 border border-gray-200">{produto.categoria}</td>
-                                <td className="p-3 border border-gray-200">{produto.subcategoria}</td>
-                                <td className="p-3 border border-gray-200">{produto.estoque}</td>
-                                <td className="p-3 border border-gray-200">{produto.preco}</td>
-                                <td className="p-3 border border-gray-200">
+                                <td className="p-3 border border-gray-200 text-center">{produto.id}</td>
+                                <td className="p-3 border border-gray-200 text-center">{produto.nome}</td>
+                                <td className="p-3 border border-gray-200 text-center">{produto.categoria}</td>
+                                <td className="p-3 border border-gray-200 text-center">{produto.subcategoria}</td>
+                                <td className="p-3 border border-gray-200 text-center">{produto.estoque}</td>
+                                <td className="p-3 border border-gray-200 text-center">{produto.preco} R$</td>
+                                <td className="p-3 border border-gray-200 text-center">
                                     <button
                                         onClick={() => abrirModal(produto)}
-                                        className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                        className=" text-white py-2"
                                     >
-                                        Editar
+                                        <Image src={logoEditar} alt="editar" width={40} height={40}></Image>
+                                    </button>
+                                </td>
+                                <td className="p-3 border border-gray-200 text-center">
+                                    <button
+                                        onClick={() => deletarProduto(produto)}
+                                        className=" text-white py-2"
+                                    >
+                                        <Image src={logoDeletar} alt="deletar" width={40} height={40}></Image>
                                     </button>
                                 </td>
                             </tr>
@@ -358,6 +393,7 @@ export default function Produtos() {
                     </div>
                 </div>
             </Modal>
+            <Footer/>
         </>
     );
 }
