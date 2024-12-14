@@ -10,10 +10,6 @@ import logoDeletar from '../../../public/assets/excluir.png'
 import Footer from "./Footer";
 
 export default function Produtos() {
-    interface Informacao {
-        nome: string;
-        empresa: string;
-    }
 
     // ================================ States ================================
     const [produtos, setProdutos] = useState<any[]>([]);
@@ -130,7 +126,7 @@ export default function Produtos() {
             try {
                 const token = localStorage.getItem("token");
 
-                if (!token  || token === "undefined") {
+                if (!token || token === "undefined") {
                     setError("Usuário não autenticado. Faça login novamente.");
                     router.push("/login");
                     return;
@@ -160,25 +156,27 @@ export default function Produtos() {
     }, [router]);
 
     const deletarProduto = async (produto: any) => {
-        if (!produto || !produto.id) return;
-    
-        try {
-            const response = await fetch(
-                `http://localhost:5000/api/produtos/${produto.id}`,
-                { method: "DELETE" }
-            );
-    
-            if (!response.ok) {
-                throw new Error("Erro ao deletar produto!");
+        if (confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
+            if (!produto || !produto.id) return;
+
+            try {
+                const response = await fetch(
+                    `http://localhost:5000/api/produtos/${produto.id}`,
+                    { method: "DELETE" }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Erro ao deletar produto!");
+                }
+
+                console.log("Produto deletado com sucesso.");
+                carregarProdutos();
+            } catch (error) {
+                console.error("Erro ao deletar produto:", error);
             }
-    
-            console.log("Produto deletado com sucesso.");
-            carregarProdutos(); // Atualizar a lista após deletar
-        } catch (error) {
-            console.error("Erro ao deletar produto:", error);
         }
     };
-    
+
     // ============================= Renderização ===============================
     return (
         <>
@@ -326,9 +324,8 @@ export default function Produtos() {
 
                     <div className="flex items-center gap-2">
                         <label htmlFor="categoria" className="w-32 text-gray-700">Categoria:</label>
-                        <input
+                        <select
                             id="categoria"
-                            type="text"
                             value={produtoSelecionado?.categoria || ""}
                             onChange={(e) =>
                                 setProdutoSelecionado({
@@ -337,15 +334,22 @@ export default function Produtos() {
                                 })
                             }
                             className="border p-2 rounded-md w-full"
-                            placeholder="Categoria do Produto"
-                        />
+                        >
+                            <option value="" disabled>
+                                Selecione uma Categoria
+                            </option>
+                            {categorias.map((categoria, index) => (
+                                <option key={index} value={categoria}>
+                                    {categoria}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <label htmlFor="subcategoria" className="w-32 text-gray-700">Subcategoria:</label>
-                        <input
+                        <select
                             id="subcategoria"
-                            type="text"
                             value={produtoSelecionado?.subcategoria || ""}
                             onChange={(e) =>
                                 setProdutoSelecionado({
@@ -354,8 +358,16 @@ export default function Produtos() {
                                 })
                             }
                             className="border p-2 rounded-md w-full"
-                            placeholder="Subcategoria do Produto"
-                        />
+                        >
+                            <option value="" disabled>
+                                Selecione uma Subcategoria
+                            </option>
+                            {subcategorias.map((subcategoria, index) => (
+                                <option key={index} value={subcategoria}>
+                                    {subcategoria}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -393,7 +405,7 @@ export default function Produtos() {
                     </div>
                 </div>
             </Modal>
-            <Footer/>
+            <Footer />
         </>
     );
 }
