@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const produtosRoutes = require('./routes/produtos');
+const loginRoutes = require("./routes/login");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use('/produtos', produtosRoutes);
+app.use("/login", loginRoutes);
 
 module.exports = app;
