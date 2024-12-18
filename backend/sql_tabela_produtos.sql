@@ -151,3 +151,45 @@ EXECUTE FUNCTION log_produtos_acao();
 
 -- ===============================================================================
 -- ===============================================================================
+
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION log_produtos_acao()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Para INSERT
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO logsProdutos (cod_produtos, acao)
+        VALUES (NEW.id, TG_OP);
+
+    -- Para UPDATE
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO logsProdutos (cod_produtos, acao)
+        VALUES (NEW.id, TG_OP);
+
+    -- Para DELETE
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO logsProdutos (cod_produtos, acao)
+        VALUES (OLD.id, TG_OP);
+    END IF;
+
+    RETURN NEW; -- Retorna NEW para INSERT/UPDATE ou OLD para DELETE, conforme necessário.
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
+
+CREATE TRIGGER trg_log_produtos_acao
+AFTER INSERT OR UPDATE OR DELETE ON produtos
+FOR EACH ROW
+EXECUTE FUNCTION log_produtos_acao();
