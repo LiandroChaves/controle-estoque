@@ -8,7 +8,8 @@ CREATE TABLE produtos (
   estoque INT,
   preco DECIMAL(10, 2),
   catalogo VARCHAR(255),
-  favorito BOOLEAN DEFAULT FALSE
+  favorito BOOLEAN DEFAULT FALSE,
+  usuario_id INT
 );
 
 -- Ver o nome sequencia de id 
@@ -58,9 +59,9 @@ ALTER TABLE produtos ADD CONSTRAINT fk_usuario
 -- Inserir produtos para o usuário 1
 INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
 VALUES 
-('Caipirinha', 'Drinks de Verão', 'Coquetéis', 15, 19.90, 'Catálogo Verão', false, 6),
-('Batida de Morango', 'Drinks de Verão', 'Coquetéis', 20, 24.90, 'Catálogo Verão', true, 6),
-('Cerveja', 'Drinks de Verão', 'Coquetéis', 50, 9.99, 'Catálogo Bebidas', false, 6);
+('Caipirinha', 'Drinks de Verão', 'Coquetéis', 15, 19.90, 'Catálogo Verão', false, 1),
+('Batida de Morango', 'Drinks de Verão', 'Coquetéis', 20, 24.90, 'Catálogo Verão', true, 1),
+('Cerveja', 'Drinks de Verão', 'Coquetéis', 50, 9.99, 'Catálogo Bebidas', false, 1);
 
 -- Inserir produtos para o usuário 2
 INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
@@ -99,13 +100,19 @@ CREATE TABLE informacoesLogin (
     empresa VARCHAR(255) NOT NULL
 );
 
-insert into informacoesLogin (login, senha, nome, empresa) values ('aki04', '123456','Evandir','Aki Variedades');
+INSERT INTO informacoesLogin (login, senha, nome, empresa) VALUES
+('joao.silva', 'Joao@1234', 'João Silva', 'TechNova Solutions'),
+('maria.souza', 'Maria#2024!', 'Maria Souza', 'InovaCorp Ltda'),
+('c.almeida', 'Carlos$Adm2024', 'Carlos Almeida', 'Alpha Systems'),
+('ana.paula', 'AnaP@ss567', 'Ana Paula', 'VisionSoft Technologies')
 
 SELECT senha FROM informacoesLogin WHERE login = 'aki04';
 
 select * from informacoesLogin
 
 delete from informacoesLogin
+
+ALTER SEQUENCE informacoesLogin_id_seq RESTART WITH 1;
 
 -- ===============================================================================
 
