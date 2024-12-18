@@ -34,9 +34,47 @@ export default function Produtos() {
     ];
 
     // ========================== Função para carregar produtos ==================
+
+
+    const fetchUsuario = async () => {
+        try {
+            const token = localStorage.getItem("token");
+    
+            if (!token || token === "undefined") {
+                throw new Error("Usuário não autenticado. Faça login novamente.");
+            }
+    
+            const response = await fetch("http://localhost:5000/api/login", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Erro ao buscar informações do usuário");
+            }
+    
+            const data = await response.json();
+            return data; // Retorna os dados do usuário (incluindo o `id`)
+        } catch (err: any) {
+            console.error("Erro ao buscar informações do usuário:", err.message);
+            throw err; // Propaga o erro para o código que chamou a função
+        }
+    };
+    
+
+
+
+
+
     const carregarProdutos = async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/produtos");
+            const data = await fetchUsuario(); // Chama a função reutilizável
+            console.log(data)
+
+            const response = await fetch(`http://localhost:5000/api/produtos/${data.id}`);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
@@ -47,6 +85,7 @@ export default function Produtos() {
             console.error("Erro ao buscar produtos:", error);
         }
     };
+    
 
     useEffect(() => {
         carregarProdutos();
@@ -255,7 +294,6 @@ export default function Produtos() {
                 <table className="w-full text-left border-collapse border border-gray-200">
                     <thead>
                         <tr className="bg-gray-100">
-                            <th className="p-3 border border-gray-200 text-center">ID</th>
                             <th className="p-3 border border-gray-200 text-center">Produto</th>
                             <th className="p-3 border border-gray-200 text-center">Categoria</th>
                             <th className="p-3 border border-gray-200 text-center">Subcategoria</th>
@@ -269,7 +307,6 @@ export default function Produtos() {
                     <tbody>
                         {produtosBuscados.map((produto, index) => (
                             <tr key={index} className="hover:bg-gray-50 transition duration-200">
-                                <td className="p-3 border border-gray-200 text-center">{produto.id}</td>
                                 <td className="p-3 border border-gray-200 text-center">{produto.nome}</td>
                                 <td className="p-3 border border-gray-200 text-center">{produto.categoria}</td>
                                 <td className="p-3 border border-gray-200 text-center">{produto.subcategoria}</td>

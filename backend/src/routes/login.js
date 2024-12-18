@@ -54,7 +54,7 @@ router.get('/login', async (req, res) => {
         const login = decoded.login;
 
         // Busca os dados do usuário no banco
-        const result = await pool.query('SELECT login, nome, empresa FROM informacoesLogin WHERE login = $1', [login]);
+        const result = await pool.query('SELECT * FROM informacoesLogin WHERE login = $1', [login]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Usuário não encontrado' });

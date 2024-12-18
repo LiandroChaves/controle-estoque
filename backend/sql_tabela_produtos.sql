@@ -47,6 +47,46 @@ select * from produtos
 
 delete from produtos
 
+-- ========================= Fazendo produtos para cada usuário ==================
+
+ALTER TABLE produtos ADD COLUMN usuario_id INT;
+
+ALTER TABLE produtos ADD CONSTRAINT fk_usuario
+    FOREIGN KEY (usuario_id) REFERENCES informacoesLogin(id);
+
+
+-- Inserir produtos para o usuário 1
+INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
+VALUES 
+('Caipirinha', 'Drinks de Verão', 'Coquetéis', 15, 19.90, 'Catálogo Verão', false, 6),
+('Batida de Morango', 'Drinks de Verão', 'Coquetéis', 20, 24.90, 'Catálogo Verão', true, 6),
+('Cerveja', 'Drinks de Verão', 'Coquetéis', 50, 9.99, 'Catálogo Bebidas', false, 6);
+
+-- Inserir produtos para o usuário 2
+INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
+VALUES 
+('Pastel de Carne', 'Comidas', 'Porções', 30, 12.00, 'Catálogo Salgados', true, 2),
+('Coxinha', 'Comidas', 'Porções', 40, 10.50, 'Catálogo Salgados', false, 2),
+('Espetinho de Frango', 'Comidas', 'Porções', 25, 14.00, 'Catálogo Churrasco', true, 2);
+
+-- Inserir produtos para o usuário 3
+INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
+VALUES 
+('Margarita', 'Drinks de Verão', 'Coquetéis', 10, 29.90, 'Catálogo Premium', true, 3),
+('Piña Colada', 'Drinks de Verão', 'Coquetéis', 8, 34.90, 'Catálogo Premium', false, 3),
+('Suco Natural', 'Drinks de Verão', 'Coquetéis', 25, 12.50, 'Catálogo Saudável', true, 3);
+
+-- Inserir produtos para o usuário 4
+INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
+VALUES 
+('Batata Frita', 'Comidas', 'Porções', 35, 15.00, 'Catálogo Snacks', false, 4),
+('Pipoca Gourmet', 'Comidas', 'Porções', 20, 18.50, 'Catálogo Premium', true, 4),
+('Nachos', 'Comidas', 'Porções', 15, 22.00, 'Catálogo Snacks', false, 4);
+
+SELECT * FROM produtos WHERE usuario_id = 2;
+
+CREATE INDEX idx_usuario_id ON produtos (usuario_id);
+
 -- ===============================================================================
 
 -- ================================= Informações =================================

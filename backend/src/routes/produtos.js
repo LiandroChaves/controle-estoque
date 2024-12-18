@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
 
-router.get('/produtos', async (req, res) => {
+router.get(`/produtos/:usuario_id`, async (req, res) => {
+    const { usuario_id } = req.params; // Extrai o parametro da rota
     try {
-        const result = await pool.query('SELECT * FROM produtos');
+        const result = await pool.query('SELECT * FROM produtos WHERE usuario_id = $1', [usuario_id]);
         res.json(result.rows);
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -15,6 +16,7 @@ router.get('/produtos', async (req, res) => {
         });
     }
 });
+
 
 
 
