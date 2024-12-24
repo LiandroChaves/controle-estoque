@@ -57,16 +57,20 @@ export default function Produtos() {
             }
     
             const data = await response.json();
-            return data; // Retorna os dados do usuário (incluindo o `id`)
+            return data; 
         } catch (err: any) {
             console.error("Erro ao buscar informações do usuário:", err.message);
-            throw err; // Propaga o erro para o código que chamou a função
+            router.push("/login");
+            throw err; 
         }
     };
     
 
 
-
+    const funcaoSair = () => {
+        localStorage.removeItem("token");
+        router.push("/login");
+    };
 
 
     const carregarProdutos = async () => {
@@ -78,6 +82,7 @@ export default function Produtos() {
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
+
             const dados = await response.json();
             setProdutos(dados);
             setProdutosBuscados(dados);
@@ -243,6 +248,7 @@ export default function Produtos() {
                                         <p className="text-base font-medium text-gray-700">Nome: {item.nome}</p>
                                         <p className="text-base font-medium text-gray-500">Empresa: {item.empresa}</p>
                                     </div>
+                                    <p onClick={funcaoSair} className="relative flex left-20 text-red-600 cursor-pointer"><strong>Sair</strong></p>
                                 </div>
                             ))
                         ) : (
