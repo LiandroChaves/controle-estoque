@@ -40,16 +40,16 @@ router.post('/login', async (req, res) => {
 
 router.get('/login', async (req, res) => {
     try {
-        const token = req.headers['authorization']?.split(' ')[1]; // Obtém o token do header
-        console.log('Token recebido:', token);  // Log do token recebido
+        const token = req.headers['authorization']?.split(' ')[1];
+        console.log('Token recebido:', token);
 
         if (!token) {
             return res.status(401).json({ error: 'Token não fornecido' });
         }
 
-        // Verifique o token JWT
-        const decoded = jwt.verify(token, SECRET_KEY); // Decodifica e valida o token
-        console.log('Token decodificado:', decoded); // Log do token decodificado
+        // Verifica o token JWT
+        const decoded = jwt.verify(token, SECRET_KEY);
+        console.log('Token decodificado:', decoded);
 
         const login = decoded.login;
 
@@ -61,7 +61,7 @@ router.get('/login', async (req, res) => {
         }
 
         const usuario = result.rows[0];
-        res.json(usuario); // Retorna o usuário autenticado
+        res.json(usuario);
 
     } catch (error) {
         console.error('Erro ao verificar o token ou buscar os dados do usuário:', error.message);

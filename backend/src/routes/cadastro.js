@@ -24,4 +24,8 @@ router.post("/cadastro", async (req, res) => {
     }
 });
 
+// router.put("/cadastro", async (req, res) =>{
+//     const { login, senha, nome ,empresa } = req.body
+// });
+
 module.exports = router;
