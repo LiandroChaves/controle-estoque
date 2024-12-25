@@ -46,8 +46,6 @@ VALUES ('Gabriel', 'Categoria Teste', 'Subcategoria Teste', 10, 99.99, 'Catálog
 
 select * from produtos
 
-delete from produtos
-
 -- ========================= Fazendo produtos para cada usuário ==================
 
 ALTER TABLE produtos ADD COLUMN usuario_id INT;
@@ -59,7 +57,7 @@ ALTER TABLE produtos ADD CONSTRAINT fk_usuario
 -- Inserir produtos para o usuário 1
 INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
 VALUES 
-('Caipirinha', 'Drinks de Verão', 'Coquetéis', 15, 19.90, 'Catálogo Verão', false, 1),
+('Bomba de água', 'Peças', 'Carros', 28, 75, 'Catálogo Oficina', false, 1),
 ('Batida de Morango', 'Drinks de Verão', 'Coquetéis', 20, 24.90, 'Catálogo Verão', true, 1),
 ('Cerveja', 'Drinks de Verão', 'Coquetéis', 50, 9.99, 'Catálogo Bebidas', false, 1);
 
@@ -88,6 +86,16 @@ SELECT * FROM produtos WHERE usuario_id = 2;
 
 CREATE INDEX idx_usuario_id ON produtos (usuario_id);
 
+INSERT INTO produtos (nome, categoria, subcategoria, estoque, preco, catalogo, favorito, usuario_id)
+VALUES 
+('Maquina de cabelo', 'Materiais', 'Utilidades', 28, 75, 'Catálogo Barbearia', true, 5)
+
+
+UPDATE produtos
+SET nome = 'Novo nome' WHERE id = 14;
+
+DELETE from produtos WHERE id = 14;
+
 -- ===============================================================================
 
 -- ================================= Informações =================================
@@ -110,8 +118,6 @@ SELECT senha FROM informacoesLogin WHERE login = 'aki04';
 
 select * from informacoesLogin
 
-delete from informacoesLogin
-
 ALTER SEQUENCE informacoesLogin_id_seq RESTART WITH 1;
 
 -- ===============================================================================
@@ -128,38 +134,6 @@ CREATE TABLE IF NOT EXISTS logsProdutos (
 select * from logsProdutos;
 
 --  ============== Função Trigger ================================================
-
-CREATE OR REPLACE FUNCTION log_produtos_acao()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO logsProdutos (cod_produtos, acao)
-    VALUES (NEW.id, TG_OP);
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- ===============================================================================
-
---  ===================== Trigger ================================================
-
-CREATE TRIGGER trigger_log_produtos
-AFTER INSERT ON produtos
-FOR EACH ROW
-EXECUTE FUNCTION log_produtos_acao();
-
-
--- ===============================================================================
--- ===============================================================================
-
-
-
-
-
-
-
-
-
 
 CREATE OR REPLACE FUNCTION log_produtos_acao()
 RETURNS TRIGGER AS $$
@@ -184,12 +158,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ===============================================================================
 
-
-
-
+--  ===================== Trigger ================================================
 
 CREATE TRIGGER trg_log_produtos_acao
 AFTER INSERT OR UPDATE OR DELETE ON produtos
 FOR EACH ROW
 EXECUTE FUNCTION log_produtos_acao();
+
+-- ===============================================================================
+-- ===============================================================================
