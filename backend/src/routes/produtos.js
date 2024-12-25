@@ -100,4 +100,47 @@ router.put('/produtos/:id', async (req, res) => {
 });
 
 
+router.get('/categorias', async (req, res) => {
+    const { userId } = req.query; // Obtenha o ID do usuário da query string
+
+    if (!userId) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
+
+    try {
+        const result = await pool.query(
+            'SELECT DISTINCT categoria FROM produtos WHERE usuario_id = $1',
+            [userId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+        res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
+    }
+});
+
+
+
+
+router.get('/subcategorias', async (req, res) => {
+    const { userId } = req.query; // Obtenha o ID do usuário da query string
+
+    if (!userId) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
+
+    try {
+        const result = await pool.query(
+            'SELECT DISTINCT subcategoria FROM produtos WHERE usuario_id = $1',
+            [userId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+        res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
+    }
+});
+
+
+
 module.exports = router;

@@ -23,8 +23,63 @@ export default function Produtos() {
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
 
     // ================================ Categorias ============================
-    const categorias = ["Drinks de Verão", "Comidas"];
-    const subcategorias = ["Coquetéis", "Porções"];
+    const [categorias, setCategorias] = useState<string[]>([]);
+    const [subcategorias, setSubCategorias] = useState<string[]>([]);
+    
+    const fetchCategorias = async () => {
+        try {
+            const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
+            const userId = usuario?.id;
+    
+            if (!userId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+    
+            const response = await fetch(`http://localhost:5000/api/categorias?userId=${userId}`);
+            if (!response.ok) {
+                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
+            }
+    
+            const dados = await response.json();
+            const categorias = dados.map((item: { categoria: string }) => item.categoria);
+    
+            setCategorias(categorias);
+        } catch (error) {
+            console.error('Erro ao buscar categorias:', error);
+        }
+    };
+    
+    useEffect(() => {
+        fetchCategorias(); // Chama a função ao montar o componente
+    }, []);
+
+    const fetchSubcategorias = async () => {
+        try {
+            const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
+            const userId = usuario?.id;
+    
+            if (!userId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+    
+            const response = await fetch(`http://localhost:5000/api/subcategorias?userId=${userId}`);
+            if (!response.ok) {
+                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
+            }
+    
+            const dados = await response.json();
+            const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
+    
+            setSubCategorias(subcategorias);
+        } catch (error) {
+            console.error('Erro ao buscar categorias:', error);
+        }
+    };
+    
+    useEffect(() => {
+        fetchSubcategorias(); // Chama a função ao montar o componente
+    }, []);
+    
 
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
@@ -35,17 +90,16 @@ export default function Produtos() {
 
     // ========================== Função para carregar produtos ==================
 
-
     const fetchUsuario = async () => {
         try {
-            const token = localStorage.getItem("token");
+            const token = localStorage.getItem('token');
     
-            if (!token || token === "undefined") {
-                throw new Error("Usuário não autenticado. Faça login novamente.");
+            if (!token || token === 'undefined') {
+                throw new Error('Usuário não autenticado. Faça login novamente.');
             }
     
-            const response = await fetch("http://localhost:5000/api/login", {
-                method: "GET",
+            const response = await fetch('http://localhost:5000/api/login', {
+                method: 'GET',
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -53,17 +107,18 @@ export default function Produtos() {
     
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || "Erro ao buscar informações do usuário");
+                throw new Error(errorData.error || 'Erro ao buscar informações do usuário');
             }
     
             const data = await response.json();
-            return data; 
+            return data; // Retorna o objeto completo do usuário
         } catch (err: any) {
-            console.error("Erro ao buscar informações do usuário:", err.message);
-            router.push("/login");
-            throw err; 
+            console.error('Erro ao buscar informações do usuário:', err.message);
+            router.push('/login');
+            throw err;
         }
     };
+    
     
 
 
@@ -75,7 +130,7 @@ export default function Produtos() {
 
     const carregarProdutos = async () => {
         try {
-            const data = await fetchUsuario(); // Chama a função reutilizável
+            const data = await fetchUsuario();
             console.log(data)
 
             const response = await fetch(`http://localhost:5000/api/produtos/${data.id}`);
@@ -115,8 +170,7 @@ export default function Produtos() {
                 subcategoriaSelecionada === "" || produto.subcategoria === subcategoriaSelecionada;
             const correspondeBusca =
                 termo === "" ||
-                produto.nome.toLowerCase().includes(termo) ||
-                produto.id.toString().includes(termo);
+                produto.nome.toLowerCase().includes(termo)
 
             return correspondeCategoria && correspondeSubcategoria && correspondeBusca;
         });
@@ -288,7 +342,7 @@ export default function Produtos() {
                 <div className="ml-auto">
                     <input
                         type="text"
-                        placeholder="Pesquisar por nome ou ID"
+                        placeholder="Pesquisar por nome"
                         value={buscarTermo}
                         onChange={(e) => setBuscarTermo(e.target.value)}
                         className="bg-gray-700 text-white rounded-md px-4 py-2"
