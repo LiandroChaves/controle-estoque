@@ -189,7 +189,14 @@ export default function Produtos() {
 
     const salvarAlteracoes = async () => {
         if (!produtoSelecionado || !produtoSelecionado.id) return;
-
+    
+        // Verificar se os campos necessários existem
+        const { nome, categoria, subcategoria, estoque, preco } = produtoSelecionado;
+        if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
+            console.error('Faltam campos obrigatórios para atualização');
+            return;
+        }
+    
         try {
             const response = await fetch(
                 `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
@@ -201,20 +208,21 @@ export default function Produtos() {
                     body: JSON.stringify(produtoSelecionado),
                 }
             );
-
+    
             if (!response.ok) {
                 throw new Error("Erro ao salvar alterações");
             }
-
+    
             const data = await response.json();
             console.log("Produto atualizado:", data);
-
+    
             carregarProdutos();
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
     };
+    
 
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
@@ -256,17 +264,19 @@ export default function Produtos() {
     const deletarProduto = async (produto: any) => {
         if (confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
             if (!produto || !produto.id) return;
-
+    
+            console.log(`Deletando produto com ID: ${produto.id}`);
+    
             try {
                 const response = await fetch(
                     `http://localhost:5000/api/produtos/${produto.id}`,
                     { method: "DELETE" }
                 );
-
+    
                 if (!response.ok) {
                     throw new Error("Erro ao deletar produto!");
                 }
-
+    
                 console.log("Produto deletado com sucesso.");
                 carregarProdutos();
             } catch (error) {
@@ -274,6 +284,7 @@ export default function Produtos() {
             }
         }
     };
+    
 
     // ============================= Renderização ===============================
     return (

@@ -45,21 +45,60 @@ router.post('/produtos', async (req, res) => {
 
 
 router.delete('/produtos/:id', async (req, res) => {
-    const { id } = req.params; // Obtém o id da URL
+    const { id } = req.params;
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'ID inválido' });
+    }
+
     try {
+        console.log(`Excluindo produto com ID: ${id}`);
         const result = await pool.query('DELETE FROM produtos WHERE id = $1', [id]);
-        
-        // Verifica se algum produto foi excluído
+
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Produto não encontrado' });
         }
 
+        console.log('Produto excluído com sucesso');
         res.status(200).json({ message: 'Produto excluído com sucesso' });
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao excluir produto:', error);
         res.status(500).json({ error: 'Erro ao excluir produto' });
     }
 });
+
+router.put('/produtos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nome, categoria, subcategoria, estoque, preco } = req.body;
+
+    if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    if (isNaN(estoque) || isNaN(preco)) {
+        return res.status(400).json({ error: 'Estoque e preço devem ser numéricos.' });
+    }
+
+    try {
+        console.log(`Atualizando produto com ID: ${id}`);
+        console.log('Dados recebidos para atualização:', { nome, categoria, subcategoria, estoque, preco });
+
+        const result = await pool.query(
+            'UPDATE produtos SET nome = $1, categoria = $2, subcategoria = $3, estoque = $4, preco = $5 WHERE id = $6 RETURNING *',
+            [nome, categoria, subcategoria, estoque, preco, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+
+        console.log('Produto atualizado com sucesso:', result.rows[0]);
+        res.status(200).json({ message: 'Produto atualizado com sucesso', produto: result.rows[0] });
+    } catch (error) {
+        console.error('Erro ao atualizar produto:', error);
+        res.status(500).json({ error: 'Erro ao atualizar o produto no banco de dados.' });
+    }
+});
+
 
 
 
@@ -74,30 +113,7 @@ router.post('/produtos/reset-sequence', async (req, res) => {
 });
 
 
-router.put('/produtos/:id', async (req, res) => {
-    const { id } = req.params;
-    const { nome, categoria, subcategoria, estoque, preco } = req.body;
 
-    if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
-    }
-
-    try {
-        const result = await pool.query(
-            'UPDATE produtos SET nome = $1, categoria = $2, subcategoria = $3, estoque = $4, preco = $5 WHERE id = $6 RETURNING *',
-            [nome, categoria, subcategoria, estoque, preco, id]
-        );
-
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Produto não encontrado.' });
-        }
-
-        res.status(200).json({ message: 'Produto atualizado com sucesso', produto: result.rows[0] });
-    } catch (error) {
-        console.error('Erro ao atualizar produto:', error);
-        res.status(500).json({ error: 'Erro ao atualizar o produto no banco de dados.' });
-    }
-});
 
 
 router.get('/categorias', async (req, res) => {
