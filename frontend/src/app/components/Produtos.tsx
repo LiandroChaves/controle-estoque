@@ -362,6 +362,9 @@ export default function Produtos() {
             </nav>
 
             <main className="container mx-auto mt-6 p-4">
+                <div  className="justify-center flex mb-5">     
+                    <button className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px]">Adicionar produto</button>
+                </div>
                 <table className="w-full text-left border-collapse border border-gray-200">
                     <thead>
                         <tr className="bg-gray-100">
