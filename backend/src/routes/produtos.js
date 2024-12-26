@@ -18,6 +18,24 @@ router.get(`/produtos/:usuario_id`, async (req, res) => {
 });
 
 
+router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
+    const { usuario_id } = req.params; // Extrai o ID do usuário
+    try {
+        const result = await pool.query(
+            'SELECT * FROM produtos WHERE usuario_id = $1 AND favorito = true',
+            [usuario_id]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar produtos favoritos:', error);
+        res.status(500).json({
+            error: 'Erro ao consultar o banco de dados',
+            message: error.message,
+            stack: error.stack,
+        });
+    }
+});
+
 
 
 router.post('/produtos', async (req, res) => {

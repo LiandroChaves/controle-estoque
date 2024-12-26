@@ -20,7 +20,7 @@ export default function Produtos() {
         preco: number;
         catalogo: string;
         favorito: boolean;
-    };    
+    };
 
 
     // ================================ States ================================
@@ -34,6 +34,8 @@ export default function Produtos() {
     const [modalAberto, setModalAberto] = useState(false);
     const [modalAbertoin, setModalAbertoin] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
+    const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
+
 
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
@@ -139,7 +141,6 @@ export default function Produtos() {
 
     const handleProdutoAdicionado = (produto: Produto) => {
         console.log("Produto adicionado:", produto);
-        // Aqui você pode atualizar a lista de produtos na interface.
     };
 
 
@@ -149,12 +150,13 @@ export default function Produtos() {
     };
 
 
+
     const carregarProdutos = async () => {
         try {
             const data = await fetchUsuario();
-            console.log(data)
+            const endpoint = mostrarFavoritos ? `http://localhost:5000/api/produtos/favoritos/${data.id}` :  `http://localhost:5000/api/produtos/${data.id}`;
 
-            const response = await fetch(`http://localhost:5000/api/produtos/${data.id}`);
+            const response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
@@ -244,6 +246,29 @@ export default function Produtos() {
         }
     };
 
+    const alternarFavoritos = async () => {
+        setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
+    
+        try {
+            const data = await fetchUsuario();
+            const novoEstado = !mostrarFavoritos; // Calcula o novo estado manualmente
+            const endpoint = novoEstado
+                ? `http://localhost:5000/api/produtos/favoritos/${data.id}`
+                : `http://localhost:5000/api/produtos/${data.id}`;
+    
+            const response = await fetch(endpoint);
+            if (!response.ok) {
+                throw new Error("Erro ao buscar produtos");
+            }
+    
+            const dados = await response.json();
+            setProdutos(dados);
+            setProdutosBuscados(dados);
+        } catch (error) {
+            console.error("Erro ao buscar produtos:", error);
+        }
+    };
+    
 
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
@@ -371,6 +396,16 @@ export default function Produtos() {
                         ))}
                     </select>
                 </div>
+                <div
+                    className="ml-8 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer"
+                    onClick={alternarFavoritos}
+                >
+                    <button className="">
+                        {mostrarFavoritos ? "Mostrar Todos" : "Favoritos"}
+                    </button>
+                </div>
+
+
                 <div className="ml-auto">
                     <input
                         type="text"
@@ -384,7 +419,7 @@ export default function Produtos() {
 
             <main className="container mx-auto mt-6 p-4">
                 <div className="justify-center flex mb-5">
-                    <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px]">Adicionar produto</button>
+                    <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px] bg-blue-400 text-white">Adicionar produto</button>
                     {modalAbertoin && (
                         <AdicionarProdutoModal
                             onClose={handleFecharModal}
@@ -408,7 +443,12 @@ export default function Produtos() {
                     <tbody>
                         {produtosBuscados.map((produto, index) => (
                             <tr key={index} className="hover:bg-gray-50 transition duration-200">
-                                <td className="p-3 border border-gray-200 text-center">{produto.nome}</td>
+                                <td className="p-3 border border-gray-200 text-center">
+                                    {produto.favorito && (
+                                        <span className="text-yellow-500 mr-2" title="Favorito">★</span>
+                                    )}
+                                    {produto.nome}
+                                </td>
                                 <td className="p-3 border border-gray-200 text-center">{produto.categoria}</td>
                                 <td className="p-3 border border-gray-200 text-center">{produto.subcategoria}</td>
                                 <td className="p-3 border border-gray-200 text-center">{produto.estoque}</td>

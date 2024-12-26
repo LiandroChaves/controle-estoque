@@ -35,10 +35,8 @@ export default function Login() {
             const data = await response.json();
             console.log("Login bem-sucedido:", data);
 
-            // Salva o token no localStorage
             localStorage.setItem("token", data.token);
 
-            // Redireciona para a página de produtos
             router.push("/produtos");
         } catch (error) {
             setErro("Erro ao conectar ao servidor");
