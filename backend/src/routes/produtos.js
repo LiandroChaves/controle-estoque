@@ -43,6 +43,36 @@ router.post('/produtos', async (req, res) => {
 });
 
 
+router.post('/produtos/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+    const { nome, categoria, subcategoria, estoque, preco, catalogo, favorito } = req.body;
+
+    // Verifica se o ID do usuário e os dados obrigatórios foram fornecidos
+    if (!usuarioId || !nome || !categoria || !subcategoria || !estoque || !preco) {
+        return res.status(400).json({ error: 'Faltam dados obrigatórios ou ID do usuário' });
+    }
+
+    // Define um valor padrão para o campo "favorito" caso ele não seja enviado
+    const favoritoValue = favorito !== undefined ? favorito : false;
+
+    try {
+        // Insere o produto no banco de dados, associando ao ID do usuário
+        const result = await pool.query(
+            'INSERT INTO produtos (usuario_id, nome, categoria, subcategoria, estoque, preco, catalogo, favorito) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [usuarioId, nome, categoria, subcategoria, estoque, preco, catalogo, favoritoValue]
+        );
+
+        // Retorna uma resposta de sucesso com os dados do produto inserido
+        res.status(201).json({ message: 'Produto inserido com sucesso', produto: result.rows[0] });
+    } catch (error) {
+        console.error(error);
+        // Retorna uma resposta de erro genérica em caso de falha
+        res.status(500).json({ error: 'Erro ao inserir o produto no banco de dados' });
+    }
+});
+
+
+
 
 router.delete('/produtos/:id', async (req, res) => {
     const { id } = req.params;

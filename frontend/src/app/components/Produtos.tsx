@@ -8,8 +8,20 @@ import Modal from "./modalEditar";
 import logoEditar from '../../../public/assets/caneta.png'
 import logoDeletar from '../../../public/assets/excluir.png'
 import Footer from "./Footer";
+import AdicionarProdutoModal from "./modalAddProduto";
 
 export default function Produtos() {
+    type Produto = {
+        id?: number;
+        nome: string;
+        categoria: string;
+        subcategoria?: string;
+        estoque: number;
+        preco: number;
+        catalogo: string;
+        favorito: boolean;
+    };    
+
 
     // ================================ States ================================
     const [produtos, setProdutos] = useState<any[]>([]);
@@ -20,35 +32,36 @@ export default function Produtos() {
     const [infor, setInfor] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [modalAberto, setModalAberto] = useState(false);
+    const [modalAbertoin, setModalAbertoin] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
 
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
-    
+
     const fetchCategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
             const userId = usuario?.id;
-    
+
             if (!userId) {
                 throw new Error('ID do usuário não encontrado.');
             }
-    
+
             const response = await fetch(`http://localhost:5000/api/categorias?userId=${userId}`);
             if (!response.ok) {
                 throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
             }
-    
+
             const dados = await response.json();
             const categorias = dados.map((item: { categoria: string }) => item.categoria);
-    
+
             setCategorias(categorias);
         } catch (error) {
             console.error('Erro ao buscar categorias:', error);
         }
     };
-    
+
     useEffect(() => {
         fetchCategorias(); // Chama a função ao montar o componente
     }, []);
@@ -57,29 +70,29 @@ export default function Produtos() {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
             const userId = usuario?.id;
-    
+
             if (!userId) {
                 throw new Error('ID do usuário não encontrado.');
             }
-    
+
             const response = await fetch(`http://localhost:5000/api/subcategorias?userId=${userId}`);
             if (!response.ok) {
                 throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
             }
-    
+
             const dados = await response.json();
             const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
-    
+
             setSubCategorias(subcategorias);
         } catch (error) {
             console.error('Erro ao buscar categorias:', error);
         }
     };
-    
+
     useEffect(() => {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
-    
+
 
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
@@ -93,33 +106,41 @@ export default function Produtos() {
     const fetchUsuario = async () => {
         try {
             const token = localStorage.getItem('token');
-    
+
             if (!token || token === 'undefined') {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
-    
+
             const response = await fetch('http://localhost:5000/api/login', {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Erro ao buscar informações do usuário');
             }
-    
+
             const data = await response.json();
-            return data; // Retorna o objeto completo do usuário
+            return data;
         } catch (err: any) {
             console.error('Erro ao buscar informações do usuário:', err.message);
             router.push('/login');
             throw err;
         }
     };
-    
-    
+
+
+
+    const handleAbrirModal = () => setModalAbertoin(true);
+    const handleFecharModal = () => setModalAbertoin(false);
+
+    const handleProdutoAdicionado = (produto: Produto) => {
+        console.log("Produto adicionado:", produto);
+        // Aqui você pode atualizar a lista de produtos na interface.
+    };
 
 
     const funcaoSair = () => {
@@ -145,7 +166,7 @@ export default function Produtos() {
             console.error("Erro ao buscar produtos:", error);
         }
     };
-    
+
 
     useEffect(() => {
         carregarProdutos();
@@ -189,14 +210,14 @@ export default function Produtos() {
 
     const salvarAlteracoes = async () => {
         if (!produtoSelecionado || !produtoSelecionado.id) return;
-    
+
         // Verificar se os campos necessários existem
         const { nome, categoria, subcategoria, estoque, preco } = produtoSelecionado;
         if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
             console.error('Faltam campos obrigatórios para atualização');
             return;
         }
-    
+
         try {
             const response = await fetch(
                 `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
@@ -208,21 +229,21 @@ export default function Produtos() {
                     body: JSON.stringify(produtoSelecionado),
                 }
             );
-    
+
             if (!response.ok) {
                 throw new Error("Erro ao salvar alterações");
             }
-    
+
             const data = await response.json();
             console.log("Produto atualizado:", data);
-    
+
             carregarProdutos();
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
     };
-    
+
 
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
@@ -264,19 +285,19 @@ export default function Produtos() {
     const deletarProduto = async (produto: any) => {
         if (confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
             if (!produto || !produto.id) return;
-    
+
             console.log(`Deletando produto com ID: ${produto.id}`);
-    
+
             try {
                 const response = await fetch(
                     `http://localhost:5000/api/produtos/${produto.id}`,
                     { method: "DELETE" }
                 );
-    
+
                 if (!response.ok) {
                     throw new Error("Erro ao deletar produto!");
                 }
-    
+
                 console.log("Produto deletado com sucesso.");
                 carregarProdutos();
             } catch (error) {
@@ -284,7 +305,7 @@ export default function Produtos() {
             }
         }
     };
-    
+
 
     // ============================= Renderização ===============================
     return (
@@ -362,8 +383,14 @@ export default function Produtos() {
             </nav>
 
             <main className="container mx-auto mt-6 p-4">
-                <div  className="justify-center flex mb-5">     
-                    <button className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px]">Adicionar produto</button>
+                <div className="justify-center flex mb-5">
+                    <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px]">Adicionar produto</button>
+                    {modalAbertoin && (
+                        <AdicionarProdutoModal
+                            onClose={handleFecharModal}
+                            onProdutoAdicionado={handleProdutoAdicionado}
+                        />
+                    )}
                 </div>
                 <table className="w-full text-left border-collapse border border-gray-200">
                     <thead>
