@@ -154,7 +154,7 @@ export default function Produtos() {
     const carregarProdutos = async () => {
         try {
             const data = await fetchUsuario();
-            const endpoint = mostrarFavoritos ? `http://localhost:5000/api/produtos/favoritos/${data.id}` :  `http://localhost:5000/api/produtos/${data.id}`;
+            const endpoint = mostrarFavoritos ? `http://localhost:5000/api/produtos/favoritos/${data.id}` : `http://localhost:5000/api/produtos/${data.id}`;
 
             const response = await fetch(endpoint);
             if (!response.ok) {
@@ -248,19 +248,19 @@ export default function Produtos() {
 
     const alternarFavoritos = async () => {
         setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
-    
+
         try {
             const data = await fetchUsuario();
             const novoEstado = !mostrarFavoritos; // Calcula o novo estado manualmente
             const endpoint = novoEstado
                 ? `http://localhost:5000/api/produtos/favoritos/${data.id}`
                 : `http://localhost:5000/api/produtos/${data.id}`;
-    
+
             const response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
-    
+
             const dados = await response.json();
             setProdutos(dados);
             setProdutosBuscados(dados);
@@ -268,7 +268,7 @@ export default function Produtos() {
             console.error("Erro ao buscar produtos:", error);
         }
     };
-    
+
 
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
@@ -405,19 +405,27 @@ export default function Produtos() {
                     </button>
                 </div>
 
-
+                
                 <div className="ml-auto">
-                    <input
-                        type="text"
-                        placeholder="Pesquisar por nome"
-                        value={buscarTermo}
-                        onChange={(e) => setBuscarTermo(e.target.value)}
-                        className="bg-gray-700 text-white rounded-md px-4 py-2"
-                    />
+                    <div className="flex flex-row">
+                        {produtosBuscados.length === 0 && (
+                            <p className="text-white mr-5 mt-2">Nenhum produto encontrado</p>
+                        )}
+                        <input
+                            type="text"
+                            placeholder="Pesquisar por nome"
+                            value={buscarTermo}
+                            onChange={(e) => setBuscarTermo(e.target.value)}
+                            className="bg-gray-700 text-white rounded-md px-4 py-2"
+                        />
+                    </div>
                 </div>
             </nav>
 
             <main className="container mx-auto mt-6 p-4">
+                    {produtosBuscados.length === 0 && (
+                            <p className="text-gray-500 mr-5 mt-2">Nenhum produto encontrado</p>
+                        )}
                 <div className="justify-center flex mb-5">
                     <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px] bg-blue-400 text-white">Adicionar produto</button>
                     {modalAbertoin && (
@@ -435,9 +443,8 @@ export default function Produtos() {
                             <th className="p-3 border border-gray-200 text-center">Subcategoria</th>
                             <th className="p-3 border border-gray-200 text-center">Estoque</th>
                             <th className="p-3 border border-gray-200 text-center">Preço</th>
-                            <th className="p-3 border border-gray-200 text-center">Ações</th>
-                            <th className="p-3 border border-gray-200 text-center">Ações</th>
-
+                            <th className="p-3 border border-gray-200 text-center">Editar produto</th>
+                            <th className="p-3 border border-gray-200 text-center">Deletar produto</th>
                         </tr>
                     </thead>
                     <tbody>
