@@ -2,8 +2,10 @@ const express = require('express');
 const produtosRouter = require('./src/routes/produtos');
 const loginRouter = require("./src/routes/login");
 const cadastroRouter = require("./src/routes/cadastro")
+const vendasRouter = require("./src/routes/vendas");
 const cors = require('cors');
 const pool = require('./src/database/db');
+
 
 const app = express();
 
@@ -29,6 +31,7 @@ testDatabaseConnection();
 app.use('/api', produtosRouter);
 app.use("/api", loginRouter);
 app.use("/api", cadastroRouter);
+app.use("/api", vendasRouter);
 
 const PORT = process.env.PORT || 5000;
 
