@@ -169,3 +169,38 @@ EXECUTE FUNCTION log_produtos_acao();
 
 -- ===============================================================================
 -- ===============================================================================
+
+
+
+
+--  ===================== Vendas =================================================
+
+CREATE TABLE vendas (
+  id SERIAL PRIMARY KEY,
+  cod_produto INT NOT NULL,
+  quantidade INT NOT NULL,
+  preco DECIMAL(10, 2) NOT NULL,
+  data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  usuario_id INT,
+  CONSTRAINT fk_cod_produto FOREIGN KEY (cod_produto) REFERENCES produtos(id),
+  CONSTRAINT fk_usuario FOREIGN KEY (usuario_id) REFERENCES informacoesLogin(id)
+);
+
+
+INSERT INTO vendas (cod_produto, quantidade, preco, usuario_id)
+VALUES
+  (1, 10, 500.00, 1),  -- Venda do Produto A (10 unidades) para o Usuário 1
+  (2, 5, 150.00, 2),   -- Venda do Produto B (5 unidades) para o Usuário 2
+  (3, 3, 225.00, 1); 
+
+
+SELECT * FROM vendas WHERE usuario_id = 1
+
+SELECT * FROM vendas;
+
+SELECT vendas.id, vendas.quantidade, vendas.preco, produtos.nome AS produto, produtos.categoria
+FROM vendas
+JOIN produtos ON vendas.cod_produto = produtos.id
+WHERE vendas.usuario_id = 1
+
+-- ===============================================================================

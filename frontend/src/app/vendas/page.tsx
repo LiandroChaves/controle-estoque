@@ -1,5 +1,5 @@
-import Vendas from "../components/Vendas";
+import Vendas from "../components/Vendas"
 
 export default function PageVendas() {
-    return <Vendas />
+    return <Vendas/>
 }

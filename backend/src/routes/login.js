@@ -1,9 +1,31 @@
 const express = require('express');
 const pool = require('../database/db');
-const router = express.Router();
 const jwt = require('jsonwebtoken');
+const router = express.Router();
 const SECRET_KEY = 'sua_chave_secreta';
 
+// Middleware de autenticação
+const autenticarUsuario = (req, res, next) => {
+    // Extrai o token do cabeçalho Authorization (espera o formato "Bearer <token>")
+    const token = req.headers['authorization']?.split(' ')[1]; 
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token de autenticação não fornecido' });
+    }
+
+    try {
+        // Verifica o token e decodifica
+        const decoded = jwt.verify(token, SECRET_KEY); 
+        req.usuario = decoded; // Armazena os dados do usuário no req.usuario
+        next(); // Chama a próxima função/middleware
+    } catch (error) {
+        console.error('Erro ao verificar token:', error.message);
+        return res.status(401).json({ error: 'Token inválido ou expirado' });
+    }
+};
+
+
+// Rota de login
 router.post('/login', async (req, res) => {
     const { login, senha } = req.body;
 
@@ -17,7 +39,6 @@ router.post('/login', async (req, res) => {
         const usuario = result.rows[0];
 
         if (senha !== usuario.senha) {
-            console.log("Senhas não são iguais!");
             return res.status(401).json({ error: "Senha inválida" });
         }
 
@@ -38,6 +59,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Rota de verificação do login
 router.get('/login', async (req, res) => {
     try {
         const token = req.headers['authorization']?.split(' ')[1];
@@ -47,13 +69,11 @@ router.get('/login', async (req, res) => {
             return res.status(401).json({ error: 'Token não fornecido' });
         }
 
-        // Verifica o token JWT
         const decoded = jwt.verify(token, SECRET_KEY);
         console.log('Token decodificado:', decoded);
 
         const login = decoded.login;
 
-        // Busca os dados do usuário no banco
         const result = await pool.query('SELECT * FROM informacoesLogin WHERE login = $1', [login]);
 
         if (result.rows.length === 0) {
@@ -72,12 +92,4 @@ router.get('/login', async (req, res) => {
     }
 });
 
-
-
-
-
-
-module.exports = router;
-
-
-
+module.exports = { router, autenticarUsuario }; 
