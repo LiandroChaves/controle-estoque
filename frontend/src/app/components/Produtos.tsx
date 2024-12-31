@@ -404,8 +404,9 @@ export default function Produtos() {
                         {mostrarFavoritos ? "Mostrar Todos" : "Favoritos"}
                     </button>
                 </div>
-
-                
+                <button className="ml-8 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer" onClick={()=>{
+                    router.push("/vendas")
+                }}>Vendas</button>
                 <div className="ml-auto">
                     <div className="flex flex-row">
                         {produtosBuscados.length === 0 && (

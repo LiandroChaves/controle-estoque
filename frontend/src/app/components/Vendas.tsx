@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import logoEditar from '../../../public/assets/caneta.png';
+import logoDeletar from '../../../public/assets/excluir.png';
+import Image from "next/image";
+
 
 export default function Vendas() {
     const router = useRouter();
@@ -127,24 +131,37 @@ export default function Vendas() {
                 <div className="overflow-x-auto bg-white rounded shadow-md">
                     <table className="min-w-full border-collapse">
                         <thead>
-                            <tr className="bg-gray-200 text-left text-gray-600 uppercase text-sm">
-                                <th className="py-3 px-4">Produto</th>
-                                <th className="py-3 px-4">Categoria</th>
-                                <th className="py-3 px-4">Quantidade</th>
-                                <th className="py-3 px-4">Preço</th>
-                                <th className="py-3 px-4">Ações</th>
+                            <tr className="bg-gray-200 text-gray-600 uppercase text-sm text-center">
+                                <th className="py-3 px-4 text-center">Produto</th>
+                                <th className="py-3 px-4 text-center">Categoria</th>
+                                <th className="py-3 px-4 text-center">Quantidade</th>
+                                <th className="py-3 px-4 text-center">Preço</th>
+                                <th className="py-3 px-4 text-center">Editar</th>
+                                <th className="py-3 px-4 text-center">Deletar</th>
                             </tr>
                         </thead>
                         <tbody>
                             {vendas.map((venda) => (
                                 <tr key={venda.id} className="border-b hover:bg-gray-100">
-                                    <td className="py-3 px-4">{venda.produto}</td>
-                                    <td className="py-3 px-4">{venda.categoria}</td>
-                                    <td className="py-3 px-4">{venda.quantidade}</td>
-                                    <td className="py-3 px-4">R$ {venda.preco}</td>
-                                    <td className="py-3 px-4 flex space-x-2">
-                                        <button className="text-blue-500 hover:text-blue-600">Editar</button>
-                                        <button className="text-red-500 hover:text-red-600">Deletar</button>
+                                    <td className="py-3 px-4 text-center">{venda.produto}</td>
+                                    <td className="py-3 px-4 text-center">{venda.categoria}</td>
+                                    <td className="py-3 px-4 text-center">{venda.quantidade}</td>
+                                    <td className="py-3 px-4 text-center">R$ {venda.preco}</td>
+                                    <td className="py-3 px-4 text-center">
+                                        <button
+                                            // onClick={() => abrirModal(produto)}
+                                            className=" text-white py-2"
+                                        >
+                                            <Image src={logoEditar} alt="editar" width={40} height={40}></Image>
+                                        </button>
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        <button
+                                            // onClick={() => deletarProduto(produto)}
+                                            className=" text-white py-2"
+                                        >
+                                            <Image src={logoDeletar} alt="deletar" width={40} height={40}></Image>
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -162,3 +179,5 @@ export default function Vendas() {
         </div>
     );
 }
+
+
