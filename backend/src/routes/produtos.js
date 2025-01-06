@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../database/db');
 
 router.get(`/produtos/:usuario_id`, async (req, res) => {
-    const { usuario_id } = req.params; // Extrai o parametro da rota
+    const { usuario_id } = req.params;
     try {
         const result = await pool.query('SELECT * FROM produtos WHERE usuario_id = $1', [usuario_id]);
         res.json(result.rows);
@@ -19,7 +19,7 @@ router.get(`/produtos/:usuario_id`, async (req, res) => {
 
 
 router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
-    const { usuario_id } = req.params; // Extrai o ID do usuário
+    const { usuario_id } = req.params; 
     try {
         const result = await pool.query(
             'SELECT * FROM produtos WHERE usuario_id = $1 AND favorito = true',
@@ -165,7 +165,7 @@ router.post('/produtos/reset-sequence', async (req, res) => {
 
 
 router.get('/categorias', async (req, res) => {
-    const { userId } = req.query; // Obtenha o ID do usuário da query string
+    const { userId } = req.query; // ID do usuário da query string
 
     if (!userId) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório' });
@@ -187,7 +187,7 @@ router.get('/categorias', async (req, res) => {
 
 
 router.get('/subcategorias', async (req, res) => {
-    const { userId } = req.query; // Obtenha o ID do usuário da query string
+    const { userId } = req.query; // ID do usuário da query string
 
     if (!userId) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório' });
