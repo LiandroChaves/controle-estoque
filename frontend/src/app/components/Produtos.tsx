@@ -324,6 +324,7 @@ export default function Produtos() {
                 }
 
                 console.log("Produto deletado com sucesso.");
+                window.location.reload();
                 carregarProdutos();
             } catch (error) {
                 console.error("Erro ao deletar produto:", error);
