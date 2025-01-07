@@ -90,8 +90,6 @@ router.post('/produtos/:usuarioId', async (req, res) => {
 });
 
 
-
-
 router.delete('/produtos/:id', async (req, res) => {
     const { id } = req.params;
     if (isNaN(id)) {
