@@ -1,7 +1,7 @@
 select * from produtos;
 SELECT * FROM informacoeslogin;
 SELECT * FROM vendas;
-
+select * from logsprodutos;
 
 CREATE TABLE vendas (
   id SERIAL PRIMARY KEY,
@@ -56,14 +56,12 @@ VALUES
 
 -- ======================= Logs produtos =========================================
 
-CREATE TABLE IF NOT EXISTS logsProdutos (
+CREATE TABLE IF NOT EXISTS logsprodutos (
     id SERIAL PRIMARY KEY,
     cod_produtos INT NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     acao VARCHAR(50) NOT NULL
 );
-
-select * from logsProdutos;
 
 --  ============== Função Trigger ================================================
 
@@ -101,6 +99,3 @@ EXECUTE FUNCTION log_produtos_acao();
 
 -- ===============================================================================
 -- ===============================================================================
-
-
-

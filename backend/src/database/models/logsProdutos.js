@@ -13,7 +13,7 @@ const logsProdutos = sequelize.define('logsprodutos', {
   },
   data_criacao: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
   },
   acao: {
     type: DataTypes.STRING,

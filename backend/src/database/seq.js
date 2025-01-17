@@ -8,6 +8,7 @@ const sequelize = new Sequelize('controle_estoque', 'controle_estoque', 'masterk
     define: {
         timestamps: false, // Remove os campos `createdAt` e `updatedAt` de todos os modelos
     },
+    timezone: '+00:00',
 });
 
 // Testa a conexão do Sequelize com o banco

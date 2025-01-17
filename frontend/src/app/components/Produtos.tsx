@@ -578,7 +578,7 @@ export default function Produtos() {
                         <label htmlFor="preco" className="w-32 text-gray-700">Preço:</label>
                         <input
                             id="preco"
-                            type="text"
+                            type="number"
                             value={produtoSelecionado?.preco || ""}
                             onChange={(e) =>
                                 setProdutoSelecionado({
