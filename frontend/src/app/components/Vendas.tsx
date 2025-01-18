@@ -94,7 +94,7 @@ export default function Vendas() {
             {/* Header */}
             <header className="bg-white shadow-md">
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-800">EasyControl - Vendas</h1>
+                    <h1 className="text-3xl font-bold text-gray-800">EasyControl<p className="text-lg ml-12">Carrinho</p></h1>
                     <button className="text-red-500 font-semibold">Sair</button>
                 </div>
             </header>

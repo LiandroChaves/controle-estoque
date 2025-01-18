@@ -274,7 +274,7 @@ export default function Compras() {
         <>
             <header className="bg-gray-100 shadow-md py-4">
                 <div className="container mx-auto flex justify-between items-center px-4">
-                    <h1 className="text-3xl font-bold text-gray-800">EasyControl <p className="text-sm ml-14">(Compras)</p></h1>
+                    <h1 className="text-3xl font-bold text-gray-800">EasyControl <p className="text-lg ml-12">Compras</p></h1>
                     {prodsCadastrados.map((item, index) => (
                         <div key={index} className="flex items-center gap-2 text-gray-600">
                             <h1 className="text-xl font-semibold">Produtos:</h1>
@@ -342,8 +342,11 @@ export default function Compras() {
                     </button>
                 </div>
                 <button className="ml-8 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer" onClick={()=>{
+                    router.push("/produtos")
+                }}>Estoque</button>
+                <button className="ml-3 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer" onClick={()=>{
                     router.push("/vendas")
-                }}>Vendas</button>
+                }}>Carrinho</button>
                 <div className="ml-auto">
                     <div className="flex flex-row">
                         {produtosBuscados.length === 0 && (

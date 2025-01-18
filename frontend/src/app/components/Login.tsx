@@ -37,7 +37,7 @@ export default function Login() {
 
             localStorage.setItem("token", data.token);
 
-            router.push("/produtos");
+            router.push("/compras");
         } catch (error) {
             setErro("Erro ao conectar ao servidor");
             console.error("Erro:", error);
