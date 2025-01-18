@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
 import { useRouter } from "next/navigation";
-import Modal from "./modalEditar";
-import logoEditar from '../../../public/assets/caneta.png'
-import logoDeletar from '../../../public/assets/excluir.png'
+import logoCarrinho from '../../../public/assets/carrinho-de-compras.png';
 import Footer from "./Footer";
-import AdicionarProdutoModal from "./modalAddProduto";
+import ObterProdutoModal from "./modalCarrinho";
 
-export default function Produtos() {
+
+export default function Compras() {
     type Produto = {
         id?: number;
         nome: string;
@@ -31,8 +30,6 @@ export default function Produtos() {
     const [produtosBuscados, setProdutosBuscados] = useState(produtos);
     const [infor, setInfor] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [modalAberto, setModalAberto] = useState(false);
-    const [modalAbertoin, setModalAbertoin] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
 
@@ -40,6 +37,7 @@ export default function Produtos() {
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
+    
 
     const fetchCategorias = async () => {
         try {
@@ -135,21 +133,10 @@ export default function Produtos() {
     };
 
 
-
-    const handleAbrirModal = () => setModalAbertoin(true);
-    const handleFecharModal = () => setModalAbertoin(false);
-
-    const handleProdutoAdicionado = (produto: Produto) => {
-        console.log("Produto adicionado:", produto);
-    };
-
-
     const funcaoSair = () => {
         localStorage.removeItem("token");
         router.push("/login");
     };
-
-
 
     const carregarProdutos = async () => {
         try {
@@ -207,44 +194,19 @@ export default function Produtos() {
     // ======================== Funções do Modal ================================
     const abrirModal = (produto: any) => {
         setProdutoSelecionado(produto);
-        setModalAberto(true);
     };
 
-    const salvarAlteracoes = async () => {
-        if (!produtoSelecionado || !produtoSelecionado.id) return;
 
-        // Verificar se os campos necessários existem
-        const { nome, categoria, subcategoria, estoque, preco } = produtoSelecionado;
-        if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
-            console.error('Faltam campos obrigatórios para atualização');
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(produtoSelecionado),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Erro ao salvar alterações");
-            }
-
-            const data = await response.json();
-            console.log("Produto atualizado:", data);
-
-            carregarProdutos();
-            setModalAberto(false);
-        } catch (error) {
-            console.error("Erro ao salvar alterações:", error);
-        }
+    const fecharModal = () => {
+        setProdutoSelecionado(null);
     };
+
+    const handleAdicionarCarrinho = (produtoComQuantidade : any) => {
+        console.log("Produto adicionado ao carrinho:", produtoComQuantidade);
+        alert("Produto adicionado ao carrinho!");
+    };
+
+
 
     const alternarFavoritos = async () => {
         setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
@@ -307,38 +269,12 @@ export default function Produtos() {
         fetchInformacoes();
     }, [router]);
 
-    const deletarProduto = async (produto: any) => {
-        if (confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
-            if (!produto || !produto.id) return;
-
-            console.log(`Deletando produto com ID: ${produto.id}`);
-
-            try {
-                const response = await fetch(
-                    `http://localhost:5000/api/produtos/${produto.id}`,
-                    { method: "DELETE" }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Erro ao deletar produto!");
-                }
-
-                console.log("Produto deletado com sucesso.");
-                window.location.reload();
-                carregarProdutos();
-            } catch (error) {
-                console.error("Erro ao deletar produto:", error);
-            }
-        }
-    };
-
-
     // ============================= Renderização ===============================
     return (
         <>
             <header className="bg-gray-100 shadow-md py-4">
                 <div className="container mx-auto flex justify-between items-center px-4">
-                    <h1 className="text-3xl font-bold text-gray-800">EasyControl <p className="text-sm ml-14">(Estoque)</p></h1>
+                    <h1 className="text-3xl font-bold text-gray-800">EasyControl <p className="text-sm ml-14">(Compras)</p></h1>
                     {prodsCadastrados.map((item, index) => (
                         <div key={index} className="flex items-center gap-2 text-gray-600">
                             <h1 className="text-xl font-semibold">Produtos:</h1>
@@ -428,25 +364,16 @@ export default function Produtos() {
                     {produtosBuscados.length === 0 && (
                             <p className="text-gray-500 mr-5 mt-2">Nenhum produto encontrado</p>
                         )}
-                <div className="justify-center flex mb-5">
-                    <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px] bg-blue-400 text-white">Adicionar produto</button>
-                    {modalAbertoin && (
-                        <AdicionarProdutoModal
-                            onClose={handleFecharModal}
-                            onProdutoAdicionado={handleProdutoAdicionado}
-                        />
-                    )}
-                </div>
+                
                 <table className="w-full text-left border-collapse border border-gray-200">
                     <thead>
                         <tr className="bg-gray-100">
                             <th className="p-3 border border-gray-200 text-center">Produto</th>
                             <th className="p-3 border border-gray-200 text-center">Categoria</th>
                             <th className="p-3 border border-gray-200 text-center">Subcategoria</th>
-                            <th className="p-3 border border-gray-200 text-center">Estoque</th>
+                            <th className="p-3 border border-gray-200 text-center">Quant. Estoque</th>
                             <th className="p-3 border border-gray-200 text-center">Preço</th>
-                            <th className="p-3 border border-gray-200 text-center">Editar produto</th>
-                            <th className="p-3 border border-gray-200 text-center">Deletar produto</th>
+                            <th className="p-3 border border-gray-200 text-center">Obter no carrinho</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -467,131 +394,21 @@ export default function Produtos() {
                                         onClick={() => abrirModal(produto)}
                                         className=" text-white py-2"
                                     >
-                                        <Image src={logoEditar} alt="editar" width={40} height={40}></Image>
-                                    </button>
-                                </td>
-                                <td className="p-3 border border-gray-200 text-center">
-                                    <button
-                                        onClick={() => deletarProduto(produto)}
-                                        className=" text-white py-2"
-                                    >
-                                        <Image src={logoDeletar} alt="deletar" width={40} height={40}></Image>
+                                        <Image src={logoCarrinho} alt="editar" width={40} height={40}></Image>
                                     </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                {produtoSelecionado && (
+                <ObterProdutoModal
+                    produto={produtoSelecionado}
+                    onClose={fecharModal}
+                    onAdicionarCarrinho={handleAdicionarCarrinho}
+                />
+                )}
             </main>
-
-            <Modal
-                isOpen={modalAberto}
-                onClose={() => setModalAberto(false)}
-                title="Editar Produto"
-                onSave={salvarAlteracoes}
-                saveButtonText="Salvar Alterações"
-            >
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                        <label htmlFor="nome" className="w-32 text-gray-700">Produto:</label>
-                        <input
-                            id="nome"
-                            type="text"
-                            value={produtoSelecionado?.nome || ""}
-                            onChange={(e) =>
-                                setProdutoSelecionado({
-                                    ...produtoSelecionado,
-                                    nome: e.target.value,
-                                })
-                            }
-                            className="border p-2 rounded-md w-full"
-                            placeholder="Nome do Produto"
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <label htmlFor="categoria" className="w-32 text-gray-700">Categoria:</label>
-                        <select
-                            id="categoria"
-                            value={produtoSelecionado?.categoria || ""}
-                            onChange={(e) =>
-                                setProdutoSelecionado({
-                                    ...produtoSelecionado,
-                                    categoria: e.target.value,
-                                })
-                            }
-                            className="border p-2 rounded-md w-full"
-                        >
-                            <option value="" disabled>
-                                Selecione uma Categoria
-                            </option>
-                            {categorias.map((categoria, index) => (
-                                <option key={index} value={categoria}>
-                                    {categoria}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <label htmlFor="subcategoria" className="w-32 text-gray-700">Subcategoria:</label>
-                        <select
-                            id="subcategoria"
-                            value={produtoSelecionado?.subcategoria || ""}
-                            onChange={(e) =>
-                                setProdutoSelecionado({
-                                    ...produtoSelecionado,
-                                    subcategoria: e.target.value,
-                                })
-                            }
-                            className="border p-2 rounded-md w-full"
-                        >
-                            <option value="" disabled>
-                                Selecione uma Subcategoria
-                            </option>
-                            {subcategorias.map((subcategoria, index) => (
-                                <option key={index} value={subcategoria}>
-                                    {subcategoria}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <label htmlFor="estoque" className="w-32 text-gray-700">Estoque:</label>
-                        <input
-                            id="estoque"
-                            type="number"
-                            value={produtoSelecionado?.estoque || ""}
-                            onChange={(e) =>
-                                setProdutoSelecionado({
-                                    ...produtoSelecionado,
-                                    estoque: parseInt(e.target.value),
-                                })
-                            }
-                            className="border p-2 rounded-md w-full"
-                            placeholder="Estoque"
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <label htmlFor="preco" className="w-32 text-gray-700">Preço:</label>
-                        <input
-                            id="preco"
-                            type="number"
-                            value={produtoSelecionado?.preco || ""}
-                            onChange={(e) =>
-                                setProdutoSelecionado({
-                                    ...produtoSelecionado,
-                                    preco: parseFloat(e.target.value),
-                                })
-                            }
-                            className="border p-2 rounded-md w-full"
-                            placeholder="Preço"
-                        />
-                    </div>
-                </div>
-            </Modal>
             <Footer />
         </>
     );

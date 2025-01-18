@@ -3,6 +3,7 @@ const produtosRouter = require('./src/routes/produtos');
 const { router: loginRouter } = require('./src/routes/login');
 const cadastroRouter = require("./src/routes/cadastro")
 const vendasRouter = require("./src/routes/vendas");
+const comprasRouter = require("./src/routes/compras")
 const cors = require('cors');
 const pool = require('./src/database/db');
 
@@ -32,6 +33,7 @@ app.use('/api', produtosRouter);
 app.use("/api", loginRouter);
 app.use("/api", cadastroRouter);
 app.use(vendasRouter);
+app.use(comprasRouter);
 
 const PORT = process.env.PORT || 5000;
 
