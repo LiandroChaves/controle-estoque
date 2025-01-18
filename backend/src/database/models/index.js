@@ -1,11 +1,15 @@
 const sequelize = require('../config/database');
-const produto = require('./produtos');
-const informacoeslogin = require('./informacoesLogin');
-const venda = require('./venda');
+const Produto = require('./produtos');
+const InformacoesLogin = require('./informacoeslogin');
+const Venda = require('./venda');
+const Compra = require('./compras');
 
-// Relações
-produto.belongsTo(informacoeslogin, { foreignKey: 'usuario_id' });
-venda.belongsTo(produto, { foreignKey: 'cod_produto' });
-venda.belongsTo(informacoeslogin, { foreignKey: 'usuario_id' });
+// Relacionamentos
+Produto.belongsTo(InformacoesLogin, { foreignKey: 'usuario_id' }); // Produto pertence a um usuário
+Venda.belongsTo(Produto, { foreignKey: 'cod_produto' }); // Venda está associada a um produto
+Venda.belongsTo(InformacoesLogin, { foreignKey: 'usuario_id' }); // Venda está associada a um usuário
+Compra.belongsTo(Produto, { foreignKey: 'cod_produto' }); // Compra está associada a um produto
+Compra.belongsTo(InformacoesLogin, { foreignKey: 'usuario_id' }); // Compra está associada a um usuário
 
-module.exports = { sequelize, produto, informacoeslogin, venda };
+// Exportação dos modelos e do sequelize
+module.exports = { sequelize, Produto, InformacoesLogin, Venda, Compra };

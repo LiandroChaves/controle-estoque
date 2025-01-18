@@ -135,4 +135,3 @@ SELECT * FROM informacoeslogin;
 SELECT * FROM vendas;
 SELECT * FROM compras;
 SELECT * FROM logsprodutos;
-
