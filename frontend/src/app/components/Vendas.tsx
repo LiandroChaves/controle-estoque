@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import logoEditar from '../../../public/assets/caneta.png';
 import logoDeletar from '../../../public/assets/excluir.png';
 import Image from "next/image";
 
@@ -89,17 +88,43 @@ export default function Vendas() {
         return <div>Erro: {erro}</div>;
     }
 
+    const deletarProduto = async (venda: any) => {
+        if (confirm(`Tem certeza que deseja excluir a venda do produto "${venda.produto} com o valor de ${venda.preco}"?`)) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Usuário não autenticado.');
+                }
+
+                const response = await fetch(`http://localhost:5000/api/vendas/${venda.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(errorData || 'Erro ao deletar venda!');
+                }
+
+                alert('Venda excluída com sucesso!');
+                setVendas((prevVendas) => prevVendas.filter((item) => item.id !== venda.id));
+            } catch (error) {
+                console.error('Erro ao deletar venda:', error);
+                alert('Erro ao excluir a venda.');
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
-            {/* Header */}
             <header className="bg-white shadow-md">
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-gray-800">EasyControl<p className="text-lg ml-12">Carrinho</p></h1>
                     <button className="text-red-500 font-semibold">Sair</button>
                 </div>
             </header>
-
-            {/* Filtros e Ações */}
             <div className="container mx-auto px-4 py-6">
                 <div className="flex flex-wrap items-center justify-between mb-6">
                     <div className="flex space-x-4">
@@ -115,19 +140,47 @@ export default function Vendas() {
                             <option value="subcategoria2">Subcategoria 2</option>
                         </select>
                     </div>
-
                     <input
                         type="text"
                         placeholder="Pesquisar por nome"
                         className="border border-gray-300 rounded px-4 py-2 bg-white text-gray-700"
                     />
+                    <button
+                        onClick={async () => {
+                            if (confirm('Tem certeza que deseja esvaziar o carrinho?')) {
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    if (!token || token === 'undefined') {
+                                        throw new Error('Usuário não autenticado. Faça login novamente.');
+                                    }
 
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                        Adicionar venda
+                                    // Faz a chamada para o backend para excluir todas as vendas e restaurar o estoque
+                                    const response = await fetch(`http://localhost:5000/api/vendas/usuario/${usuario.id}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                    });
+
+                                    if (!response.ok) {
+                                        const errorData = await response.json();
+                                        throw new Error(errorData.error || 'Erro ao esvaziar o carrinho');
+                                    }
+
+                                    alert('Carrinho esvaziado com sucesso!');
+                                    window.location.reload(); // Atualiza a página para refletir o carrinho vazio
+                                } catch (error:any) {
+                                    console.error('Erro ao esvaziar o carrinho:', error.message);
+                                    alert(error.message);
+                                }
+                            }
+                        }}
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    >
+                        Esvaziar o carrinho
                     </button>
                 </div>
 
-                {/* Tabela de Vendas */}
                 <div className="overflow-x-auto bg-white rounded shadow-md">
                     <table className="min-w-full border-collapse">
                         <thead>
@@ -136,7 +189,6 @@ export default function Vendas() {
                                 <th className="py-3 px-4 text-center">Categoria</th>
                                 <th className="py-3 px-4 text-center">Quantidade</th>
                                 <th className="py-3 px-4 text-center">Preço</th>
-                                <th className="py-3 px-4 text-center">Editar</th>
                                 <th className="py-3 px-4 text-center">Deletar</th>
                             </tr>
                         </thead>
@@ -149,15 +201,7 @@ export default function Vendas() {
                                     <td className="py-3 px-4 text-center">R$ {venda.preco}</td>
                                     <td className="py-3 px-4 text-center">
                                         <button
-                                            // onClick={() => abrirModal(produto)}
-                                            className=" text-white py-2"
-                                        >
-                                            <Image src={logoEditar} alt="editar" width={40} height={40}></Image>
-                                        </button>
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        <button
-                                            // onClick={() => deletarProduto(produto)}
+                                            onClick={() => deletarProduto(venda)}
                                             className=" text-white py-2"
                                         >
                                             <Image src={logoDeletar} alt="deletar" width={40} height={40}></Image>
@@ -169,8 +213,6 @@ export default function Vendas() {
                     </table>
                 </div>
             </div>
-
-            {/* Footer */}
             <footer className="bg-gray-800 text-white py-4">
                 <div className="container mx-auto px-4 text-center">
                     &copy; 2024 EasyControl. Todos os direitos reservados.

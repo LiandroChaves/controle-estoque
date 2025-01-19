@@ -105,6 +105,23 @@ AFTER INSERT ON compras
 FOR EACH ROW
 EXECUTE FUNCTION inserir_em_vendas_e_atualizar_estoque();
 
+CREATE OR REPLACE FUNCTION restaurar_estoque_ao_deletar_venda()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Atualizar o estoque do produto na tabela 'produtos'
+    UPDATE produtos
+    SET estoque = estoque + OLD.quantidade
+    WHERE id = OLD.cod_produto;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_restaurar_estoque
+AFTER DELETE ON vendas
+FOR EACH ROW
+EXECUTE FUNCTION restaurar_estoque_ao_deletar_venda();
+
 
 -- ================= Inserts ===================================================
 
