@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import imgFundo from "../../../public/assets/comprar-online.png"; // Fundo personalizado
 
 type Produto = {
     nome: string;
@@ -53,22 +54,22 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
             alert("A quantidade deve ser maior que zero.");
             return;
         }
-    
+
         if (!produto.id) { // Agora verificamos 'id'
             alert("O ID do produto é obrigatório.");
             return;
         }
-    
+
         try {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
-    
+
             const token = localStorage.getItem("token");
             if (!token) {
                 alert("Você precisa estar autenticado para realizar a compra.");
                 return;
             }
-    
+
             const resposta = await fetch(`http://localhost:5000/api/compras/${usuarioId}`, {
                 method: "POST",
                 headers: {
@@ -80,9 +81,9 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                     id: produto.id, // Altere 'cod_produto' para 'id'
                 }),                
             });
-    
+
             const dados = await resposta.json();
-    
+
             if (resposta.ok) {
                 alert("Compra realizada com sucesso!");
                 onAdicionarCarrinho({ ...produto, quantidade });
@@ -94,16 +95,32 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
             console.error("Erro ao realizar a compra:", err);
             alert("Erro ao realizar a compra");
         }
-    
+
         onClose();
     };    
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg p-6 w-1/3">
-                <h2 className="text-xl font-bold mb-4">Adicionar ao Carrinho</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 animate__animated animate__fadeIn animate__faster">
+            <div
+                className="bg-gray-800 p-8 rounded-lg shadow-2xl w-full max-w-xl animate__animated animate__zoomIn animate__faster"
+                style={{
+                    backgroundImage: `url(${imgFundo.src})`,
+                    backgroundSize: "540px",
+                    backgroundPosition: "top",
+                }}
+            >
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-semibold text-white">{`Adicionar ao Carrinho`}</h2>
+                    <button
+                        onClick={onClose}
+                        className="text-white font-bold bg-red-600 w-6 hover:text-white focus:outline-none transition-all duration-200 ease-in-out transform hover:scale-110"
+                    >
+                        ✕
+                    </button>
+                </div>
+
                 <div className="mb-3">
-                    <label className="block mb-1">Nome do Produto</label>
+                    <label className="block mb-1 text-white">Nome do Produto</label>
                     <input
                         type="text"
                         value={produto.nome}
@@ -112,7 +129,7 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1">Preço</label>
+                    <label className="block mb-1 text-white">Preço</label>
                     <input
                         type="text"
                         value={produto.preco}
@@ -121,7 +138,7 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1">Quantidade</label>
+                    <label className="block mb-1 text-white">Quantidade</label>
                     <input
                         type="number"
                         min="1"
@@ -130,16 +147,18 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                         className="border p-2 rounded w-full"
                     />
                 </div>
-                <div className="flex justify-end">
+
+                {/* Botões de ação */}
+                <div className="flex justify-between gap-4 mt-6">
                     <button
                         onClick={onClose}
-                        className="border p-2 rounded-lg mr-2 bg-gray-200 hover:bg-gray-300"
+                        className="p-2 rounded-lg mr-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all duration-300 ease-in-out transform hover:scale-105"
                     >
                         Cancelar
                     </button>
                     <button
                         onClick={handleAdicionar}
-                        className="border p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                        className="p-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-all duration-300 ease-in-out transform hover:scale-105"
                     >
                         Adicionar
                     </button>

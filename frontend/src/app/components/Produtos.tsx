@@ -432,7 +432,7 @@ export default function Produtos() {
                             <p className="text-gray-500 mr-5 mt-2">Nenhum produto encontrado</p>
                         )}
                 <div className="justify-center flex mb-5">
-                    <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px] bg-blue-400 text-white">Adicionar produto</button>
+                    <button onClick={handleAbrirModal} className="border p-2 rounded-lg hover:translate-y-[0.8px] hover:text-[17px] bg-teal-600 text-white">Adicionar produto</button>
                     {modalAbertoin && (
                         <AdicionarProdutoModal
                             onClose={handleFecharModal}
@@ -496,7 +496,7 @@ export default function Produtos() {
             >
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                        <label htmlFor="nome" className="w-32 text-gray-700">Produto:</label>
+                        <label htmlFor="nome" className="w-32 text-white">Produto:</label>
                         <input
                             id="nome"
                             type="text"
@@ -513,7 +513,7 @@ export default function Produtos() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <label htmlFor="categoria" className="w-32 text-gray-700">Categoria:</label>
+                        <label htmlFor="categoria" className="w-32 text-white">Categoria:</label>
                         <select
                             id="categoria"
                             value={produtoSelecionado?.categoria || ""}
@@ -537,7 +537,7 @@ export default function Produtos() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <label htmlFor="subcategoria" className="w-32 text-gray-700">Subcategoria:</label>
+                        <label htmlFor="subcategoria" className="w-32 text-white">Subcategoria:</label>
                         <select
                             id="subcategoria"
                             value={produtoSelecionado?.subcategoria || ""}
@@ -561,7 +561,7 @@ export default function Produtos() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <label htmlFor="estoque" className="w-32 text-gray-700">Estoque:</label>
+                        <label htmlFor="estoque" className="w-32 text-white">Estoque:</label>
                         <input
                             id="estoque"
                             type="number"
@@ -578,7 +578,7 @@ export default function Produtos() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <label htmlFor="preco" className="w-32 text-gray-700">Preço:</label>
+                        <label htmlFor="preco" className="w-32 text-white">Preço:</label>
                         <input
                             id="preco"
                             type="number"
