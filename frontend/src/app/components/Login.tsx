@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CadastroModal from "./modalCadastro";
 
-
 export default function Login() {
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [login, setLogin] = useState("");
@@ -69,19 +68,21 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">Login</h1>
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-800">
+            <div className="relative w-full max-w-md p-6 bg-gray-800 bg-opacity-90 rounded-2xl shadow-2xl">
+                <h1 className="text-3xl font-extrabold text-teal-400 text-center mb-6">
+                    Bem-vindo!
+                </h1>
 
                 {erro && (
-                    <div className="mb-4 text-sm text-red-600 bg-red-100 p-3 rounded-md">
+                    <div className="mb-4 text-sm text-red-600 bg-red-200 p-3 rounded-md shadow-md">
                         {erro}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label htmlFor="login" className="block text-sm font-medium text-gray-700">
+                    <div className="mb-6">
+                        <label htmlFor="login" className="block text-sm font-medium text-gray-300 mb-2">
                             Login
                         </label>
                         <input
@@ -89,14 +90,14 @@ export default function Login() {
                             id="login"
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}
-                            className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg shadow-lg focus:ring-teal-500 focus:border-teal-500 border-none placeholder-gray-400"
                             placeholder="Digite seu login"
                             required
                         />
                     </div>
 
-                    <div className="mb-4">
-                        <label htmlFor="senha" className="block text-sm font-medium text-gray-700">
+                    <div className="mb-6">
+                        <label htmlFor="senha" className="block text-sm font-medium text-gray-300 mb-2">
                             Senha
                         </label>
                         <div className="relative">
@@ -105,14 +106,14 @@ export default function Login() {
                                 id="senha"
                                 value={senha}
                                 onChange={(e) => setSenha(e.target.value)}
-                                className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg shadow-lg focus:ring-teal-500 focus:border-teal-500 border-none placeholder-gray-400"
                                 placeholder="Digite sua senha"
                                 required
                             />
                             <button
                                 type="button"
                                 onClick={() => setMostrarSenha((prev) => !prev)}
-                                className="absolute right-3 top-4 text-sm text-blue-600 hover:underline"
+                                className="absolute right-3 top-2.5 text-teal-400 hover:underline"
                             >
                                 {mostrarSenha ? "Ocultar" : "Mostrar"}
                             </button>
@@ -121,7 +122,7 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-bold rounded-lg shadow-lg hover:from-teal-600 hover:to-teal-700 transform transition-all duration-300 hover:scale-105"
                     >
                         Entrar
                     </button>
@@ -129,11 +130,10 @@ export default function Login() {
 
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="mt-4 w-full px-4 py-2 text-blue-600 hover:scale-105 transition-transform duration-200"
+                    className="mt-4 w-full py-3 text-teal-400 hover:text-teal-300 transition-all duration-300 hover:underline"
                 >
                     Cadastrar-se
                 </button>
-
             </div>
 
             <CadastroModal

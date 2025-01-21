@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import imgFundo from "../../../public/assets/comprar-online.png"; // Fundo personalizado
+import imgFundo from "../../../public/assets/comprar-online.png";
+
 
 type Produto = {
     nome: string;
@@ -125,7 +126,7 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                         type="text"
                         value={produto.nome}
                         disabled
-                        className="border p-2 rounded w-full bg-gray-100"
+                        className="border p-2 rounded w-full bg-gray-100 text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -134,7 +135,7 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                         type="text"
                         value={produto.preco}
                         disabled
-                        className="border p-2 rounded w-full bg-gray-100"
+                        className="border p-2 rounded w-full bg-gray-100 text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -144,7 +145,7 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                         min="1"
                         value={quantidade}
                         onChange={(e) => setQuantidade(parseInt(e.target.value))}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
 

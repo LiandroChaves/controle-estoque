@@ -37,7 +37,7 @@ export default function Compras() {
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
-    
+
 
     const fetchCategorias = async () => {
         try {
@@ -201,7 +201,7 @@ export default function Compras() {
         setProdutoSelecionado(null);
     };
 
-    const handleAdicionarCarrinho = (produtoComQuantidade : any) => {
+    const handleAdicionarCarrinho = (produtoComQuantidade: any) => {
         console.log("Produto adicionado ao carrinho:", produtoComQuantidade);
         alert("Produto adicionado ao carrinho!");
     };
@@ -272,132 +272,154 @@ export default function Compras() {
     // ============================= Renderização ===============================
     return (
         <>
-            <header className="bg-gray-100 shadow-md py-4">
-                <div className="container mx-auto flex justify-between items-center px-4">
-                    <h1 className="text-3xl font-bold text-gray-800">EasyControl <p className="text-lg ml-12">Compras</p></h1>
-                    {prodsCadastrados.map((item, index) => (
-                        <div key={index} className="flex items-center gap-2 text-gray-600">
-                            <h1 className="text-xl font-semibold">Produtos:</h1>
-                            <p className="text-base">{item.quantProd}</p>
-                        </div>
-                    ))}
+            <header className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 shadow-lg py-6">
+                <div className="container mx-auto flex justify-between items-center px-6">
+                    <h1 className="text-4xl font-bold text-teal-400 flex items-center gap-4">
+                        EasyControl
+                        <span className="text-lg font-medium bg-teal-500 text-gray-900 px-3 py-1 rounded-full shadow-md">
+                            Compras
+                        </span>
+                    </h1>
+                    <div className="flex items-center gap-8">
+                        {prodsCadastrados.map((item, index) => (
+                            <div key={index} className="flex items-center gap-2 text-teal-400 bg-gray-700 px-4 py-2 rounded-lg shadow-md">
+                                <h1 className="text-lg font-semibold">Produtos:</h1>
+                                <p className="text-xl font-bold">{item.quantProd}</p>
+                            </div>
+                        ))}
+                    </div>
                     <div className="flex items-center gap-4">
                         {infor.length > 0 ? (
                             infor.map((item, index) => (
-                                <div key={index} className="flex items-center gap-4">
+                                <div key={index} className="flex items-center gap-4 bg-gray-700 rounded-lg shadow-lg px-4 py-2">
                                     <Image
                                         src={ftPerfil}
                                         alt="perfil"
                                         width={50}
                                         height={50}
-                                        className="rounded-full border border-gray-300"
+                                        className="rounded-full border border-teal-500"
                                     />
                                     <div className="flex flex-col">
-                                        <p className="text-base font-medium text-gray-700">Nome: {item.nome}</p>
-                                        <p className="text-base font-medium text-gray-500">Empresa: {item.empresa}</p>
+                                        <p className="text-teal-400 font-bold">Nome: {item.nome}</p>
+                                        <p className="text-gray-400 font-medium">Empresa: {item.empresa}</p>
                                     </div>
-                                    <p onClick={funcaoSair} className="relative flex left-20 text-red-600 cursor-pointer"><strong>Sair</strong></p>
+                                    <p
+                                        onClick={funcaoSair}
+                                        className="ml-4 text-red-500 font-bold cursor-pointer hover:underline"
+                                    >
+                                        <strong>Sair</strong>
+                                    </p>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-500">Nenhuma informação disponível.</p>
+                            <p className="text-gray-400">Nenhuma informação disponível.</p>
                         )}
                     </div>
                 </div>
             </header>
 
-            <nav className="bg-gray-800 h-12 flex items-center px-4">
-                <div className="flex items-center gap-4">
-                    <select
-                        value={categoriaSelecionada}
-                        onChange={(e) => setCategoriaSelecionada(e.target.value)}
-                        className="bg-gray-700 text-white rounded-md px-4 py-2"
-                    >
-                        <option value="">Selecione uma categoria</option>
-                        {categorias.map((categoria, index) => (
-                            <option key={index} value={categoria}>
-                                {categoria}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        value={subcategoriaSelecionada}
-                        onChange={(e) => setSubcategoriaSelecionada(e.target.value)}
-                        className="bg-gray-700 text-white rounded-md px-4 py-2"
-                    >
-                        <option value="">Selecione uma subcategoria</option>
-                        {subcategorias.map((subcategoria, index) => (
-                            <option key={index} value={subcategoria}>
-                                {subcategoria}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div
-                    className="ml-8 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer"
-                    onClick={alternarFavoritos}
-                >
-                    <button className="">
-                        {mostrarFavoritos ? "Mostrar Todos" : "Favoritos"}
-                    </button>
-                </div>
-                <button className="ml-8 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer" onClick={()=>{
-                    router.push("/produtos")
-                }}>Estoque</button>
-                <button className="ml-3 bg-gray-700 text-white rounded-md px-4 py-2 hover:translate-y-[0.8px] hover:text-[17px] cursor-pointer" onClick={()=>{
-                    router.push("/vendas")
-                }}>Carrinho</button>
-                <div className="ml-auto">
-                    <div className="flex flex-row">
-                        {produtosBuscados.length === 0 && (
-                            <p className="text-white mr-5 mt-2">Nenhum produto encontrado</p>
-                        )}
-                        <input
-                            type="text"
-                            placeholder="Pesquisar por nome"
-                            value={buscarTermo}
-                            onChange={(e) => setBuscarTermo(e.target.value)}
-                            className="bg-gray-700 text-white rounded-md px-4 py-2"
-                        />
+            <nav className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 shadow-md py-4">
+                <div className="container mx-auto flex items-center justify-between gap-8 px-6">
+                    <div className="flex items-center gap-4">
+                        <select
+                            value={categoriaSelecionada}
+                            onChange={(e) => setCategoriaSelecionada(e.target.value)}
+                            className="bg-gray-600 text-gray-300 rounded-lg px-4 py-2 shadow-md focus:ring-teal-500"
+                        >
+                            <option value="">Selecione uma categoria</option>
+                            {categorias.map((categoria, index) => (
+                                <option key={index} value={categoria}>
+                                    {categoria}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={subcategoriaSelecionada}
+                            onChange={(e) => setSubcategoriaSelecionada(e.target.value)}
+                            className="bg-gray-600 text-gray-300 rounded-lg px-4 py-2 shadow-md focus:ring-teal-500"
+                        >
+                            <option value="">Selecione uma subcategoria</option>
+                            {subcategorias.map((subcategoria, index) => (
+                                <option key={index} value={subcategoria}>
+                                    {subcategoria}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={alternarFavoritos}
+                            className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
+                        >
+                            {mostrarFavoritos ? "Mostrar Todos" : "Favoritos"}
+                        </button>
+
+                        <button
+                            onClick={() => router.push("/produtos")}
+                            className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
+                        >
+                            Estoque
+                        </button>
+
+                        <button
+                            onClick={() => router.push("/vendas")}
+                            className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
+                        >
+                            Carrinho
+                        </button>
+
+                        <div className="flex items-center gap-4 ml-auto">
+                            {produtosBuscados.length === 0 && (
+                                <p className="text-white mr-5 mt-2">Nenhum produto encontrado</p>
+                            )}
+                            <input
+                                type="text"
+                                placeholder="Pesquisar por nome"
+                                value={buscarTermo}
+                                onChange={(e) => setBuscarTermo(e.target.value)}
+                                className="bg-gray-700 text-white rounded-md px-4 py-2"
+                            />
+                        </div>
                     </div>
                 </div>
             </nav>
-
-            <main className="container mx-auto mt-6 p-4">
-                    {produtosBuscados.length === 0 && (
-                            <p className="text-gray-500 mr-5 mt-2">Nenhum produto encontrado</p>
-                        )}
-                
-                <table className="w-full text-left border-collapse border border-gray-200">
+            <main className="bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 min-h-screen px-6 py-12 text-gray-300">
+                {produtosBuscados.length === 0 && (
+                    <p className="text-gray-500 mr-5 mt-2">Nenhum produto encontrado</p>
+                )}
+                <table className="w-full text-left border-collapse shadow-lg bg-gray-700 rounded-lg">
                     <thead>
-                        <tr className="bg-gray-100">
-                            <th className="p-3 border border-gray-200 text-center">Produto</th>
-                            <th className="p-3 border border-gray-200 text-center">Categoria</th>
-                            <th className="p-3 border border-gray-200 text-center">Subcategoria</th>
-                            <th className="p-3 border border-gray-200 text-center">Quant. Estoque</th>
-                            <th className="p-3 border border-gray-200 text-center">Preço</th>
-                            <th className="p-3 border border-gray-200 text-center">Obter no carrinho</th>
+                        <tr className="bg-gray-800 text-teal-400">
+                            <th className="p-4 border-b border-gray-600 text-center">Produto</th>
+                            <th className="p-4 border-b border-gray-600 text-center">Categoria</th>
+                            <th className="p-4 border-b border-gray-600 text-center">Subcategoria</th>
+                            <th className="p-4 border-b border-gray-600 text-center">Quant. Estoque</th>
+                            <th className="p-4 border-b border-gray-600 text-center">Preço</th>
+                            <th className="p-4 border-b border-gray-600 text-center">Obter no Carrinho</th>
                         </tr>
                     </thead>
                     <tbody>
                         {produtosBuscados.map((produto, index) => (
-                            <tr key={index} className="hover:bg-gray-50 transition duration-200">
-                                <td className="p-3 border border-gray-200 text-center">
+                            <tr key={index} className="hover:bg-gray-600 transition-all duration-200">
+                                <td className="p-4 border-b border-gray-600 text-center">
                                     {produto.favorito && (
-                                        <span className="text-yellow-500 mr-2" title="Favorito">★</span>
+                                        <span className="text-yellow-400 mr-2" title="Favorito">
+                                            ★
+                                        </span>
                                     )}
                                     {produto.nome}
                                 </td>
-                                <td className="p-3 border border-gray-200 text-center">{produto.categoria}</td>
-                                <td className="p-3 border border-gray-200 text-center">{produto.subcategoria}</td>
-                                <td className="p-3 border border-gray-200 text-center">{produto.estoque}</td>
-                                <td className="p-3 border border-gray-200 text-center">{produto.preco} R$</td>
-                                <td className="p-3 border border-gray-200 text-center">
+                                <td className="p-4 border-b border-gray-600 text-center">{produto.categoria}</td>
+                                <td className="p-4 border-b border-gray-600 text-center">{produto.subcategoria}</td>
+                                <td className="p-4 border-b border-gray-600 text-center">{produto.estoque}</td>
+                                <td className="p-4 border-b border-gray-600 text-center">{produto.preco} R$</td>
+                                <td className="p-4 border-b border-gray-600 text-center">
                                     <button
                                         onClick={() => abrirModal(produto)}
-                                        className=" text-white py-2"
+                                        className=" text-white py-2 rounded-md invert"
                                     >
-                                        <Image src={logoCarrinho} alt="editar" width={40} height={40}></Image>
+                                        <Image src={logoCarrinho} alt="Logo-Carrinho" width={40} height={40}></Image>
                                     </button>
                                 </td>
                             </tr>
@@ -405,14 +427,15 @@ export default function Compras() {
                     </tbody>
                 </table>
                 {produtoSelecionado && (
-                <ObterProdutoModal
-                    produto={produtoSelecionado}
-                    onClose={fecharModal}
-                    onAdicionarCarrinho={handleAdicionarCarrinho}
-                />
+                    <ObterProdutoModal
+                        produto={produtoSelecionado}
+                        onClose={fecharModal}
+                        onAdicionarCarrinho={handleAdicionarCarrinho}
+                    />
                 )}
             </main>
             <Footer />
+
         </>
     );
 }

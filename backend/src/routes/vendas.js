@@ -31,6 +31,7 @@ router.get('/api/vendas/:usuario_id', autenticarUsuario, async (req, res) => {
 });
 
 // Rota para excluir uma venda pelo ID
+// Rota para excluir uma venda pelo ID
 router.delete('/api/vendas/:id', autenticarUsuario, async (req, res) => {
     const { id } = req.params;
 
@@ -47,14 +48,6 @@ router.delete('/api/vendas/:id', autenticarUsuario, async (req, res) => {
             return res.status(403).json({ error: 'Acesso negado para excluir esta venda' });
         }
 
-        // Restaura o estoque do produto antes de excluir a venda
-        const produto = await Produto.findByPk(venda.cod_produto);
-        if (produto) {
-            await produto.update({
-                estoque: produto.estoque + venda.quantidade, // Restaura o estoque
-            });
-        }
-
         // Exclui a venda
         await venda.destroy();
 
@@ -64,6 +57,7 @@ router.delete('/api/vendas/:id', autenticarUsuario, async (req, res) => {
         res.status(500).json({ error: 'Erro ao excluir venda' });
     }
 });
+
 
 // Rota para esvaziar o carrinho do usuário
 router.delete('/api/vendas/usuario/:usuario_id', autenticarUsuario, async (req, res) => {

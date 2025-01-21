@@ -90,7 +90,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
 
             if (response.ok) {
                 const data = await response.json();
-                alert("Produto adicionado com sucesso!");
+                alert(`Produto: ${produto.nome} adicionado com sucesso!`);
                 onProdutoAdicionado(data.produto);
                 onClose();
                 window.location.reload();
@@ -131,7 +131,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="nome"
                         value={produto.nome}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -141,7 +141,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="categoria"
                         value={produto.categoria}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -151,7 +151,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="subcategoria"
                         value={produto.subcategoria}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -161,7 +161,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="estoque"
                         value={produto.estoque}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -172,7 +172,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="preco"
                         value={produto.preco}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
@@ -182,7 +182,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="catalogo"
                         value={produto.catalogo}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full"
+                        className="border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3 flex items-center">
@@ -192,7 +192,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                         name="favorito"
                         checked={produto.favorito}
                         onChange={handleChange}
-                        className="h-5 w-5"
+                        className="h-5 w-5 text-black"
                     />
                 </div>
 

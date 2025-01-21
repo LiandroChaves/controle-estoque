@@ -19,7 +19,7 @@ router.get(`/produtos/:usuario_id`, async (req, res) => {
 
 
 router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
-    const { usuario_id } = req.params; 
+    const { usuario_id } = req.params;
     try {
         const result = await pool.query(
             'SELECT * FROM produtos WHERE usuario_id = $1 AND favorito = true',
@@ -35,7 +35,6 @@ router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
         });
     }
 });
-
 
 
 router.post('/produtos', async (req, res) => {
@@ -59,99 +58,6 @@ router.post('/produtos', async (req, res) => {
         res.status(500).json({ error: 'Erro ao inserir o produto no banco de dados' });
     }
 });
-
-
-// router.post('/produtos/:usuarioId', async (req, res) => {
-//     const { usuarioId } = req.params;
-//     const { nome, categoria, subcategoria, estoque, preco, catalogo, favorito } = req.body;
-
-//     // Verifica se o ID do usuário e os dados obrigatórios foram fornecidos
-//     if (!usuarioId || !nome || !categoria || !subcategoria || !estoque || !preco) {
-//         return res.status(400).json({ error: 'Faltam dados obrigatórios ou ID do usuário' });
-//     }
-
-//     // Define um valor padrão para o campo "favorito" caso ele não seja enviado
-//     const favoritoValue = favorito !== undefined ? favorito : false;
-
-//     try {
-//         // Insere o produto no banco de dados, associando ao ID do usuário
-//         const result = await pool.query(
-//             'INSERT INTO produtos (usuario_id, nome, categoria, subcategoria, estoque, preco, catalogo, favorito) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-//             [usuarioId, nome, categoria, subcategoria, estoque, preco, catalogo, favoritoValue]
-//         );
-
-//         // Retorna uma resposta de sucesso com os dados do produto inserido
-//         res.status(201).json({ message: 'Produto inserido com sucesso', produto: result.rows[0] });
-//     } catch (error) {
-//         console.error(error);
-//         // Retorna uma resposta de erro genérica em caso de falha
-//         res.status(500).json({ error: 'Erro ao inserir o produto no banco de dados' });
-//     }
-// });
-
-
-// router.delete('/produtos/:id', async (req, res) => {
-//     const { id } = req.params;
-//     if (isNaN(id)) {
-//         return res.status(400).json({ error: 'ID inválido' });
-//     }
-
-//     try {
-//         console.log(`Excluindo produto com ID: ${id}`);
-//         const result = await pool.query('DELETE FROM produtos WHERE id = $1', [id]);
-
-//         if (result.rowCount === 0) {
-//             return res.status(404).json({ error: 'Produto não encontrado' });
-//         }
-
-//         console.log('Produto excluído com sucesso');
-//         res.status(200).json({ message: 'Produto excluído com sucesso' });
-//     } catch (error) {
-//         console.error('Erro ao excluir produto:', error);
-//         res.status(500).json({ error: 'Erro ao excluir produto' });
-//     }
-// });
-
-// router.put('/produtos/:id', async (req, res) => {
-//     const { id } = req.params;
-//     const { nome, categoria, subcategoria, estoque, preco } = req.body;
-
-//     if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
-//         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
-//     }
-
-//     if (isNaN(estoque) || isNaN(preco)) {
-//         return res.status(400).json({ error: 'Estoque e preço devem ser numéricos.' });
-//     }
-
-//     try {
-//         console.log(`Atualizando produto com ID: ${id}`);
-//         console.log('Dados recebidos para atualização:', { nome, categoria, subcategoria, estoque, preco });
-
-//         const result = await pool.query(
-//             'UPDATE produtos SET nome = $1, categoria = $2, subcategoria = $3, estoque = $4, preco = $5 WHERE id = $6 RETURNING *',
-//             [nome, categoria, subcategoria, estoque, preco, id]
-//         );
-
-//         if (result.rowCount === 0) {
-//             return res.status(404).json({ error: 'Produto não encontrado.' });
-//         }
-
-//         console.log('Produto atualizado com sucesso:', result.rows[0]);
-//         res.status(200).json({ message: 'Produto atualizado com sucesso', produto: result.rows[0] });
-//     } catch (error) {
-//         console.error('Erro ao atualizar produto:', error);
-//         res.status(500).json({ error: 'Erro ao atualizar o produto no banco de dados.' });
-//     }
-// });
-
-
-
-
-
-
-
-
 
 
 router.post('/produtos/:usuarioId', async (req, res) => {
@@ -187,13 +93,23 @@ router.post('/produtos/:usuarioId', async (req, res) => {
 
 router.delete('/produtos/:id', async (req, res) => {
     const { id } = req.params;
+    const { confirmar } = req.query; // Acessando o parâmetro da query string
     if (isNaN(id)) {
         return res.status(400).json({ error: 'ID inválido' });
     }
 
     try {
-        console.log(`Excluindo produto com ID: ${id}`);
-        const result = await pool.query('DELETE FROM produtos WHERE id = $1 RETURNING *', [id]);
+        console.log(`Forçando exclusão do produto com ID: ${id}`);
+
+        // Exclui registros na tabela 'compras' que fazem referência ao produto
+        await pool.query('DELETE FROM compras WHERE cod_produto = $1', [id]);
+        // Exclui as vendas associadas ao produto
+        await pool.query('DELETE FROM vendas WHERE cod_produto = $1', [id]);
+
+        // Agora, exclui o produto
+        const result = await pool.query(
+            'DELETE FROM produtos WHERE id = $1 RETURNING *', [id]
+        );
 
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Produto não encontrado' });
@@ -214,6 +130,8 @@ router.delete('/produtos/:id', async (req, res) => {
         res.status(500).json({ error: 'Erro ao excluir produto' });
     }
 });
+
+
 
 router.put('/produtos/:id', async (req, res) => {
     const { id } = req.params;
