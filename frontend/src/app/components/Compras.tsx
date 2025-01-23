@@ -33,6 +33,8 @@ export default function Compras() {
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
 
+    const [showModal, setShowModal] = useState(false);
+    const [senha, setSenha] = useState("");
 
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
@@ -92,6 +94,44 @@ export default function Compras() {
     useEffect(() => {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
+
+    const handleConfirmSenha = async () => {
+        try {
+            const token = localStorage.getItem("token"); // Obtém o token armazenado no localStorage
+            console.log("Token recuperado:", token);
+
+            if (!token) {
+                throw new Error("Token de autenticação não encontrado.");
+            }
+
+            const response = await fetch("http://localhost:5000/api/compras/verificarsenha", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Adiciona o token no cabeçalho
+                },
+                body: JSON.stringify({ senha }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Erro da API:", errorData);
+                setError(errorData.error || "Erro ao validar a senha.");
+                return;
+            }
+
+            const data = await response.json();
+            console.log("Resposta da API:", data);
+
+            setError(""); // Limpa o erro
+            setShowModal(false); // Fecha o modal
+            window.location.href = "/produtos"; // Redireciona para a página de estoque
+        } catch (error:any) {
+            console.error("Erro ao validar a senha:", error.message);
+            setError("Erro ao conectar ao servidor.");
+        }
+    };
+
 
 
     // ============================== Dados Contadores ========================
@@ -378,12 +418,40 @@ export default function Compras() {
                         </button>
 
                         <button
-                            onClick={() => router.push("/produtos")}
+                            onClick={() => setShowModal(true)}
                             className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
                         >
                             Estoque
                         </button>
-
+                        {showModal && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                <div className="bg-gray-800 p-6 rounded-lg shadow-lg animate__animated animate__zoomIn">
+                                    <h2 className="text-xl text-white font-bold mb-4">Confirme sua senha</h2>
+                                    <input
+                                        type="password"
+                                        placeholder="Digite sua senha"
+                                        value={senha}
+                                        onChange={(e) => setSenha(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+                                    />
+                                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                                    <div className="mt-4 flex justify-end">
+                                        <button
+                                            onClick={() => setShowModal(false)}
+                                            className="p-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 hover:underline mr-4"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            onClick={handleConfirmSenha}
+                                            className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600"
+                                        >
+                                            Confirmar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <button
                             onClick={() => router.push("/vendas")}
                             className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
@@ -423,8 +491,8 @@ export default function Compras() {
                     </thead>
                     <tbody>
                         {produtosBuscados.map((produto, index) => (
-                            <tr key={index} 
-                            className="group hover:bg-gray-600 transition-all duration-200 relative">
+                            <tr key={index}
+                                className="group hover:bg-gray-600 transition-all duration-200 relative">
                                 <td className="p-4 border-b border-gray-600 text-center">
                                     {produto.favorito && (
                                         <span className="text-yellow-400 mr-2" title="Favorito">
