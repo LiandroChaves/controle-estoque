@@ -3,8 +3,9 @@ const { autenticarUsuario } = require('./login');
 const Produto = require('../database/models/produtos'); // Importando o modelo Produto
 const Compra = require('../database/models/compras');  // Importando o modelo Compra
 const pool = require('../database/db');
-
 const router = express.Router();
+
+const loginAttempts = {}; // Objeto para armazenar as tentativas (use um banco de dados para produção)
 
 router.post("/api/compras/verificarsenha", autenticarUsuario, async (req, res) => {
     console.log("Dados do token:", req.usuario); // Loga o usuário autenticado
@@ -24,6 +25,11 @@ router.post("/api/compras/verificarsenha", autenticarUsuario, async (req, res) =
             return res.status(401).json({ error: "Usuário não autenticado." });
         }
 
+        // Inicializa ou incrementa as tentativas de login
+        if (!loginAttempts[login]) {
+            loginAttempts[login] = 0;
+        }
+
         const result = await pool.query(
             "SELECT senha FROM informacoeslogin WHERE login = $1",
             [login]
@@ -38,15 +44,32 @@ router.post("/api/compras/verificarsenha", autenticarUsuario, async (req, res) =
         const senhaBD = result.rows[0].senha;
 
         if (senha !== senhaBD) {
-            return res.status(401).json({ error: "Senha incorreta." });
+            loginAttempts[login] += 1; // Incrementa as tentativas
+            console.log(`Tentativas de login inválido para ${login}: ${loginAttempts[login]}`);
+
+            if (loginAttempts[login] >= 3) {
+                delete loginAttempts[login]; // Reseta tentativas após bloqueio
+                return res.status(403).json({
+                    error: "Muitas tentativas inválidas. Faça login novamente.",
+                    block: true, // Indica que o cliente deve remover o token
+                });
+            }
+
+            return res.status(401).json({
+                error: "Senha incorreta.",
+                attemptsLeft: 3 - loginAttempts[login]
+            });
         }
 
+        // Login bem-sucedido: reseta tentativas
+        delete loginAttempts[login];
         res.status(200).json({ message: "Senha válida." });
     } catch (error) {
         console.error("Erro ao verificar senha:", error);
         res.status(500).json({ error: "Erro interno do servidor." });
     }
 });
+
 
 
 router.post('/api/compras/:usuario_id', autenticarUsuario, async (req, res) => {

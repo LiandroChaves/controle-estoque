@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import logoDeletar from '../../../public/assets/excluir.png';
 import Image from "next/image";
 import Footer from './Footer';
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Vendas() {
     const router = useRouter();
@@ -109,12 +110,18 @@ export default function Vendas() {
                     throw new Error(errorData || 'Erro ao deletar venda!');
                 }
 
-                alert('Venda excluída com sucesso!');
+                toast.success('Venda excluída com sucesso!',{
+                    position: 'bottom-right',
+                    autoClose: 3000
+                });
                 setVendas((prevVendas) => prevVendas.filter((item) => item.id !== venda.id));
             } catch (error) {
                 console.error('Erro ao deletar venda:', error);
-                alert('Erro ao excluir a venda.');
-            }  
+                toast.error('Erro ao excluir a venda.',{
+                    position: 'bottom-right',
+                    autoClose: 3000
+                });
+            }
         }
     };
 
@@ -178,8 +185,13 @@ export default function Vendas() {
                                             throw new Error(errorData.error || 'Erro ao esvaziar o carrinho');
                                         }
 
-                                        alert('Carrinho esvaziado com sucesso!');
-                                        window.location.reload();
+                                        toast.success('Carrinho esvaziado com sucesso!',{
+                                            position: 'bottom-right',
+                                            autoClose: 3000
+                                        });
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 2000);
                                     } catch (error: any) {
                                         console.error('Erro ao esvaziar o carrinho:', error.message);
                                         alert(error.message);
@@ -218,7 +230,7 @@ export default function Vendas() {
                                             onClick={() => deletarProduto(venda)}
                                             className="text-white py-2 rounded-md hover:text-red-500 transition-all"
                                         >
-                                            <Image src={logoDeletar} alt="deletar" width={40} height={40} className='invert'/>
+                                            <Image src={logoDeletar} alt="deletar" width={40} height={40} className='invert' />
                                         </button>
                                     </td>
                                 </tr>
@@ -227,6 +239,7 @@ export default function Vendas() {
                     </table>
                 </div>
             </main>
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} aria-live="polite" />
             <Footer />
         </div>
     );

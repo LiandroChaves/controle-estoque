@@ -9,6 +9,8 @@ import logoEditar from '../../../public/assets/caneta.png'
 import logoDeletar from '../../../public/assets/excluir.png'
 import Footer from "./Footer";
 import AdicionarProdutoModal from "./modalAddProduto";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Produtos() {
     type Produto = {
@@ -324,7 +326,13 @@ export default function Produtos() {
                 }
 
                 console.log("Produto deletado com sucesso.");
-                window.location.reload();
+                toast.success("Produto deletado com sucesso.",{
+                    position: "bottom-right",
+                    autoClose: 2000
+                });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
                 carregarProdutos();
             } catch (error) {
                 console.error("Erro ao deletar produto:", error);
@@ -344,14 +352,22 @@ export default function Produtos() {
                 throw new Error("Erro ao favoritar produto.");
             }
 
-            alert(
+            toast.success(
                 `${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"
-                } com sucesso!`
+                } com sucesso!`, {
+                position: "bottom-right",
+                autoClose: 2000,
+            }
             );
-            window.location.reload(); // Ou atualize o estado local para refletir a mudança
+            setTimeout(() => {
+                window.location.reload(); // Ou atualize o estado local para refletir a mudança
+            }, 3000);
         } catch (error) {
             console.error("Erro ao favoritar produto:", error);
-            alert("Erro ao favoritar produto.");
+            toast.error("Erro ao favoritar produto.", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
         }
     };
 
@@ -660,6 +676,7 @@ export default function Produtos() {
                     </div>
                 </div>
             </Modal>
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} aria-live="polite" />
             <Footer />
         </>
     );

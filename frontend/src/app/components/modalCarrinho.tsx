@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import imgFundo from "../../../public/assets/comprar-online.png";
-
+import "react-toastify/dist/ReactToastify.css";
 
 type Produto = {
     nome: string;
@@ -86,9 +86,7 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
             const dados = await resposta.json();
 
             if (resposta.ok) {
-                alert("Compra realizada com sucesso!");
                 onAdicionarCarrinho({ ...produto, quantidade });
-                window.location.reload()
             } else {
                 alert(dados.error || "Erro ao realizar a compra");
             }

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import imgEstoque from "../../../public/assets/estoque.png";
 import imgFundo from "../../../public/assets/crescer.png"; // Novo caminho da imagem de fundo
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type AdicionarProdutoModalProps = {
     onClose: () => void;
@@ -90,10 +92,15 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
 
             if (response.ok) {
                 const data = await response.json();
-                alert(`Produto: ${produto.nome} adicionado com sucesso!`);
                 onProdutoAdicionado(data.produto);
                 onClose();
-                window.location.reload();
+                toast.success(`Produto: ${produto.nome} adicionado com sucesso!`, {
+                    position: "bottom-right",
+                    autoClose: 3000
+                });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
                 const errorData = await response.json();
                 alert(`Erro: ${errorData.error}`);

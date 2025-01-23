@@ -2,6 +2,8 @@ import React, { ReactNode } from "react";
 import Image from "next/image";
 import imgEstoque from "../../../public/assets/estoque.png";
 import imgFundo from "../../../public/assets/crescer.png"; // Novo caminho da imagem de fundo
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ModalProps {
     isOpen: boolean;
@@ -22,6 +24,17 @@ export default function Modal({
     saveButtonText = "Salvar",
     showSaveButton = true,
 }: ModalProps) {
+
+    const handleSave = async () => {
+        if (onSave) {
+            await onSave();
+            toast.success("Alterações salvas com sucesso!", {
+                position: "bottom-right", // Posição do toast
+                autoClose: 3000, // Duração do toast em milissegundos
+            });
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -62,10 +75,9 @@ export default function Modal({
                     >
                         Cancelar
                     </button>
-
                     {showSaveButton && (
                         <button
-                            onClick={onSave}
+                            onClick={handleSave} // Agora chama a função handleSave
                             className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-all duration-300 ease-in-out transform hover:scale-105"
                         >
                             {saveButtonText}

@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import logoCarrinho from '../../../public/assets/carrinho-de-compras.png';
 import Footer from "./Footer";
 import ObterProdutoModal from "./modalCarrinho";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 export default function Compras() {
@@ -68,6 +70,7 @@ export default function Compras() {
         fetchCategorias(); // Chama a função ao montar o componente
     }, []);
 
+    
     const fetchSubcategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
@@ -81,16 +84,16 @@ export default function Compras() {
             if (!response.ok) {
                 throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
             }
-
+            
             const dados = await response.json();
             const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
-
+            
             setSubCategorias(subcategorias);
         } catch (error) {
             console.error('Erro ao buscar categorias:', error);
         }
     };
-
+    
     useEffect(() => {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
@@ -98,8 +101,7 @@ export default function Compras() {
     const handleConfirmSenha = async () => {
         try {
             const token = localStorage.getItem("token"); // Obtém o token armazenado no localStorage
-            console.log("Token recuperado:", token);
-
+            
             if (!token) {
                 throw new Error("Token de autenticação não encontrado.");
             }
@@ -112,28 +114,35 @@ export default function Compras() {
                 },
                 body: JSON.stringify({ senha }),
             });
-
+            
+            const data = await response.json();
+            
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Erro da API:", errorData);
-                setError(errorData.error || "Erro ao validar a senha.");
+                if (data.block) {
+                    alert("Muitas tentativas mal sucedidas!\nPor questão de segurança, você será redirecionado para a página de login novamente.");
+                    localStorage.removeItem("token");
+                    router.push("/login");
+                    return;
+                }
+
+                // Exibe a quantidade de tentativas restantes
+                if (data.attemptsLeft !== undefined) {
+                    setError(`Senha incorreta. Você tem ${data.attemptsLeft} tentativas restantes.`);
+                } else {
+                    setError(data.error || "Erro ao validar a senha.");
+                }
                 return;
             }
 
-            const data = await response.json();
-            console.log("Resposta da API:", data);
-
-            setError(""); // Limpa o erro
-            setShowModal(false); // Fecha o modal
-            window.location.href = "/produtos"; // Redireciona para a página de estoque
-        } catch (error:any) {
+            setError("");
+            setShowModal(false);
+            window.location.href = "/produtos";
+        } catch (error: any) {
             console.error("Erro ao validar a senha:", error.message);
             setError("Erro ao conectar ao servidor.");
         }
     };
-
-
-
+    
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
         {
@@ -242,11 +251,19 @@ export default function Compras() {
     };
 
     const handleAdicionarCarrinho = (produtoComQuantidade: any) => {
+        toast.success("Compra realizada com sucesso!", {
+            position: "bottom-right",
+            autoClose: 3000,
+        });
         console.log("Produto adicionado ao carrinho:", produtoComQuantidade);
-        alert("Produto adicionado ao carrinho!");
+        toast.success("Produto adicionado ao carrinho!",{
+            position: "bottom-right",
+            autoClose: 3000,
+        });
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);        
     };
-
-
 
     const alternarFavoritos = async () => {
         setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
@@ -321,14 +338,19 @@ export default function Compras() {
                 throw new Error("Erro ao favoritar produto.");
             }
 
-            alert(
-                `${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"
-                } com sucesso!`
-            );
-            window.location.reload(); // Ou atualize o estado local para refletir a mudança
+            toast.success(`${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"} com sucesso!`,{
+                    position: "bottom-right",
+                    autoClose: 3000,
+                })
+            setTimeout(()=>{
+                window.location.reload();
+            },2000)
         } catch (error) {
             console.error("Erro ao favoritar produto:", error);
-            alert("Erro ao favoritar produto.");
+            toast.error("Erro ao favoritar produto.",{
+                position: "bottom-right",
+                autoClose: 3000,
+            });
         }
     };
     // ============================= Renderização ===============================
@@ -434,7 +456,11 @@ export default function Compras() {
                                         onChange={(e) => setSenha(e.target.value)}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
                                     />
-                                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                                    {error && (
+                                        <p className="text-red-500 text-sm mt-2 animate-pulse">
+                                            {error}
+                                        </p>
+                                    )}
                                     <div className="mt-4 flex justify-end">
                                         <button
                                             onClick={() => setShowModal(false)}
@@ -532,8 +558,10 @@ export default function Compras() {
                         produto={produtoSelecionado}
                         onClose={fecharModal}
                         onAdicionarCarrinho={handleAdicionarCarrinho}
+                        
                     />
                 )}
+                <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} />
             </main>
             <Footer />
 
