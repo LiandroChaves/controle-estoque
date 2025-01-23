@@ -37,4 +37,29 @@ router.post('/api/compras/:usuario_id', autenticarUsuario, async (req, res) => {
     }
 });
 
+router.put('/produtos/:id/favorito', async (req, res) => {
+    const { id } = req.params;
+    const { favorito } = req.body;
+
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'ID inválido.' });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE produtos SET favorito = $1 WHERE id = $2 RETURNING *',
+            [favorito, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Status de favorito atualizado.', produto: result.rows[0] });
+    } catch (error) {
+        console.error('Erro ao atualizar status de favorito:', error);
+        res.status(500).json({ error: 'Erro ao atualizar status de favorito.' });
+    }
+});
+
 module.exports = router;

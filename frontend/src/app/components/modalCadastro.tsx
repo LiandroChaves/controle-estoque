@@ -33,7 +33,7 @@ const CadastroModal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
             <div
                 className="bg-gray-800 p-8 rounded-lg shadow-2xl w-full max-w-xl border-t-4 border-teal-500 animate__animated animate__zoomIn animate__faster"
                 style={{
-                    backgroundImage: `url(${imgFundo.src})`,
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${imgFundo.src})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                 }}

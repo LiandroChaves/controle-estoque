@@ -332,6 +332,28 @@ export default function Produtos() {
         }
     };
 
+    const favoritarProduto = async (produto: any) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/produtos/${produto.id}/favorito`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ favorito: !produto.favorito }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Erro ao favoritar produto.");
+            }
+
+            alert(
+                `${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"
+                } com sucesso!`
+            );
+            window.location.reload(); // Ou atualize o estado local para refletir a mudança
+        } catch (error) {
+            console.error("Erro ao favoritar produto:", error);
+            alert("Erro ao favoritar produto.");
+        }
+    };
 
     // ============================= Renderização ===============================
     return (
@@ -475,7 +497,7 @@ export default function Produtos() {
                         {produtosBuscados.map((produto, index) => (
                             <tr
                                 key={index}
-                                className="hover:bg-gray-600 transition-all duration-200"
+                                className="group hover:bg-gray-600 transition-all duration-200 relative"
                             >
                                 <td className="p-4 border-b border-gray-600 text-center">
                                     {produto.favorito && (
@@ -511,8 +533,20 @@ export default function Produtos() {
                                         />
                                     </button>
                                 </td>
+                                {/* Botão de coração visível apenas no hover */}
+                                <td
+                                    className="absolute left-[190px] top-[55px] transform -translate-x-1/2 opacity-0 group-hover:opacity-100 -bottom-8 group-hover:bottom-2 transition-all duration-300"
+                                >
+                                    <button
+                                        className="bg-gray-700 hover:bg-teal-500 text-white px-4 py-2 rounded-lg shadow-lg"
+                                        onClick={() => favoritarProduto(produto)}
+                                    >
+                                        {produto.favorito ? "💔 Desfavoritar produto" : "❤️ Favoritar Produto"}
+                                    </button>
+                                </td>
                             </tr>
                         ))}
+
                     </tbody>
                 </table>
             </main>
