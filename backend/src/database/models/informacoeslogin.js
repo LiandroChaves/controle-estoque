@@ -19,6 +19,10 @@ const informacoeslogin = sequelize.define('informacoeslogin', {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    imagem: {
+       type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     timestamps: false,
     tableName: 'informacoeslogin',  // Nome da tabela em minúsculas

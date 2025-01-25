@@ -37,7 +37,7 @@ export default function Produtos() {
     const [modalAbertoin, setModalAbertoin] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
-
+    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
 
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
@@ -97,6 +97,81 @@ export default function Produtos() {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
 
+
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                const imagePath = await uploadImagem(file);
+                const imageUrl = `http://localhost:5000${imagePath}`;
+                setImagemUsuario(imageUrl); // Atualiza a imagem com o caminho recebido
+
+                // Salva a URL no localStorage com a chave sendo o userId
+                const userId = localStorage.getItem('userId'); // Aqui você pega o userId
+                if (userId) {
+                    localStorage.setItem(`imagemUsuario_${userId}`, imageUrl);
+                }
+            } catch (error) {
+                alert('Erro ao fazer upload da imagem.');
+            }
+        }
+    };
+
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await fetchUsuario();
+                const userId = userData.id; // Assumindo que o ID do usuário vem da resposta do fetch
+
+                // Salvar o userId no localStorage
+                localStorage.setItem('userId', userId);
+
+                // Recupera a imagem do usuário baseado no userId
+                const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
+                if (imagemSalva) {
+                    setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
+                } else {
+                    // Se não encontrar, você pode definir uma imagem padrão ou carregar uma imagem do servidor
+                    setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
+                }
+            } catch (err: any) {
+                console.error('Erro ao buscar dados do usuário:', err.message);
+                // Redireciona para login ou outro comportamento desejado
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    const uploadImagem = async (file: File): Promise<string> => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Usuário não autenticado.');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch('http://localhost:5000/api/upload', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text(); // Recebe o erro como texto
+                throw new Error(`Erro ao fazer upload: ${errorText}`);
+            }
+
+            const data = await response.json();
+            return data.imagePath; // Caminho da imagem salva
+        } catch (error: any) {
+            console.error('Erro ao fazer upload da imagem:', error.message);
+            throw error;
+        }
+    };
 
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
@@ -272,6 +347,8 @@ export default function Produtos() {
     };
 
 
+
+
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
 
@@ -326,7 +403,7 @@ export default function Produtos() {
                 }
 
                 console.log("Produto deletado com sucesso.");
-                toast.success("Produto deletado com sucesso.",{
+                toast.success("Produto deletado com sucesso.", {
                     position: "bottom-right",
                     autoClose: 2000
                 });
@@ -396,11 +473,21 @@ export default function Produtos() {
                             infor.map((item, index) => (
                                 <div key={index} className="flex items-center gap-4 bg-gray-700 rounded-lg shadow-lg px-4 py-2">
                                     <Image
-                                        src={ftPerfil}
-                                        alt="perfil"
-                                        width={50}
-                                        height={50}
-                                        className="rounded-full border border-teal-500"
+                                        src={imagemUsuario}
+                                        alt="Imagem do perfil"
+                                        width={100}
+                                        height={100}
+                                        className="w-16 h-16 rounded-full border-2 border-teal-500"
+                                    />
+                                    <label htmlFor="file-input" className="mt-4 p-2 bg-teal-500 text-white rounded-lg cursor-pointer">
+                                        Alterar Imagem
+                                    </label>
+                                    <input
+                                        id="file-input"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageChange}
                                     />
                                     <div className="flex flex-col">
                                         <p className="text-teal-400 font-bold">Nome: {item.nome}</p>

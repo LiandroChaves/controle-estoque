@@ -37,7 +37,7 @@ export default function Compras() {
 
     const [showModal, setShowModal] = useState(false);
     const [senha, setSenha] = useState("");
-
+    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
@@ -70,7 +70,7 @@ export default function Compras() {
         fetchCategorias(); // Chama a função ao montar o componente
     }, []);
 
-    
+
     const fetchSubcategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
@@ -84,16 +84,16 @@ export default function Compras() {
             if (!response.ok) {
                 throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
             }
-            
+
             const dados = await response.json();
             const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
-            
+
             setSubCategorias(subcategorias);
         } catch (error) {
             console.error('Erro ao buscar categorias:', error);
         }
     };
-    
+
     useEffect(() => {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
@@ -101,7 +101,7 @@ export default function Compras() {
     const handleConfirmSenha = async () => {
         try {
             const token = localStorage.getItem("token"); // Obtém o token armazenado no localStorage
-            
+
             if (!token) {
                 throw new Error("Token de autenticação não encontrado.");
             }
@@ -114,9 +114,9 @@ export default function Compras() {
                 },
                 body: JSON.stringify({ senha }),
             });
-            
+
             const data = await response.json();
-            
+
             if (!response.ok) {
                 if (data.block) {
                     alert("Muitas tentativas mal sucedidas!\nPor questão de segurança, você será redirecionado para a página de login novamente.");
@@ -142,7 +142,89 @@ export default function Compras() {
             setError("Erro ao conectar ao servidor.");
         }
     };
+
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                const imagePath = await uploadImagem(file);
+                const imageUrl = `http://localhost:5000${imagePath}`;
+                setImagemUsuario(imageUrl); // Atualiza a imagem com o caminho recebido
     
+                // Salva a URL no localStorage com a chave sendo o userId
+                const userId = localStorage.getItem('userId'); // Aqui você pega o userId
+                if (userId) {
+                    localStorage.setItem(`imagemUsuario_${userId}`, imageUrl);
+                }
+            } catch (error) {
+                alert('Erro ao fazer upload da imagem.');
+            }
+        }
+    };
+    
+    
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await fetchUsuario();
+                const userId = userData.id; // Assumindo que o ID do usuário vem da resposta do fetch
+    
+                // Salvar o userId no localStorage
+                localStorage.setItem('userId', userId);
+    
+                // Recupera a imagem do usuário baseado no userId
+                const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
+                if (imagemSalva) {
+                    setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
+                } else {
+                    // Se não encontrar, você pode definir uma imagem padrão ou carregar uma imagem do servidor
+                    setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
+                }
+            } catch (err:any) {
+                console.error('Erro ao buscar dados do usuário:', err.message);
+                // Redireciona para login ou outro comportamento desejado
+            }
+        };
+    
+        fetchUserData();
+    }, []); // Quando o componente é montado, chama o fetchUserData
+    
+
+    const uploadImagem = async (file: File): Promise<string> => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Usuário não autenticado.');
+    
+            const formData = new FormData();
+            formData.append('image', file);
+    
+            const response = await fetch('http://localhost:5000/api/upload', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+    
+            if (!response.ok) {
+                const errorText = await response.text(); // Recebe o erro como texto
+                throw new Error(`Erro ao fazer upload: ${errorText}`);
+            }
+    
+            const data = await response.json();
+            return data.imagePath; // Caminho da imagem salva
+        } catch (error: any) {
+            console.error('Erro ao fazer upload da imagem:', error.message);
+            throw error;
+        }
+    };
+    
+
+
+
+
+
+
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
         {
@@ -256,13 +338,13 @@ export default function Compras() {
             autoClose: 3000,
         });
         console.log("Produto adicionado ao carrinho:", produtoComQuantidade);
-        toast.success("Produto adicionado ao carrinho!",{
+        toast.success("Produto adicionado ao carrinho!", {
             position: "bottom-right",
             autoClose: 3000,
         });
         setTimeout(() => {
             window.location.reload();
-        }, 2000);        
+        }, 2000);
     };
 
     const alternarFavoritos = async () => {
@@ -338,16 +420,16 @@ export default function Compras() {
                 throw new Error("Erro ao favoritar produto.");
             }
 
-            toast.success(`${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"} com sucesso!`,{
-                    position: "bottom-right",
-                    autoClose: 3000,
-                })
-            setTimeout(()=>{
+            toast.success(`${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"} com sucesso!`, {
+                position: "bottom-right",
+                autoClose: 3000,
+            })
+            setTimeout(() => {
                 window.location.reload();
-            },2000)
+            }, 2000)
         } catch (error) {
             console.error("Erro ao favoritar produto:", error);
-            toast.error("Erro ao favoritar produto.",{
+            toast.error("Erro ao favoritar produto.", {
                 position: "bottom-right",
                 autoClose: 3000,
             });
@@ -377,11 +459,21 @@ export default function Compras() {
                             infor.map((item, index) => (
                                 <div key={index} className="flex items-center gap-4 bg-gray-700 rounded-lg shadow-lg px-4 py-2">
                                     <Image
-                                        src={ftPerfil}
-                                        alt="perfil"
-                                        width={50}
-                                        height={50}
-                                        className="rounded-full border border-teal-500"
+                                        src={imagemUsuario}
+                                        alt="Imagem do perfil"
+                                        width={100}
+                                        height={100}
+                                        className="w-16 h-16 rounded-full border-2 border-teal-500"
+                                    />
+                                    <label htmlFor="file-input" className="mt-4 p-2 bg-teal-500 text-white rounded-lg cursor-pointer">
+                                        Alterar Imagem
+                                    </label>
+                                    <input
+                                        id="file-input"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageChange}
                                     />
                                     <div className="flex flex-col">
                                         <p className="text-teal-400 font-bold">Nome: {item.nome}</p>
@@ -558,7 +650,7 @@ export default function Compras() {
                         produto={produtoSelecionado}
                         onClose={fecharModal}
                         onAdicionarCarrinho={handleAdicionarCarrinho}
-                        
+
                     />
                 )}
                 <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} />

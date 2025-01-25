@@ -1,18 +1,19 @@
 const express = require('express');
 const produtosRouter = require('./src/routes/produtos');
 const { router: loginRouter } = require('./src/routes/login');
-const cadastroRouter = require("./src/routes/cadastro")
+const cadastroRouter = require("./src/routes/cadastro");
 const vendasRouter = require("./src/routes/vendas");
-const comprasRouter = require("./src/routes/compras")
+const comprasRouter = require("./src/routes/compras");
+const uploadRouter = require("./src/routes/upload");
 const cors = require('cors');
 const pool = require('./src/database/db');
-
+const path = require('path');
 
 const app = express();
 
 app.use(cors({
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST','PUT','DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -29,9 +30,13 @@ const testDatabaseConnection = async () => {
 
 testDatabaseConnection();
 
+// Servir arquivos estáticos da pasta 'uploads'
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api', produtosRouter);
 app.use("/api", loginRouter);
 app.use("/api", cadastroRouter);
+app.use("/api", uploadRouter);
 app.use(vendasRouter);
 app.use(comprasRouter);
 
