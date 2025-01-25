@@ -30,9 +30,7 @@ const testDatabaseConnection = async () => {
 
 testDatabaseConnection();
 
-// Servir arquivos estáticos da pasta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.use('/api', produtosRouter);
 app.use("/api", loginRouter);
 app.use("/api", cadastroRouter);

@@ -38,7 +38,7 @@ export default function Produtos() {
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
-
+    const [isVisible, setIsVisible] = useState(false);
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
@@ -143,6 +143,50 @@ export default function Produtos() {
 
         fetchUserData();
     }, []);
+
+    const deletarImg = async () => {
+        try {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                // Remove a imagem do localStorage
+                localStorage.removeItem(`imagemUsuario_${userId}`);
+
+                // Define uma imagem padrão (se necessário)
+                setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
+
+                const token = localStorage.getItem('token');
+                if (!token) throw new Error('Usuário não autenticado.');
+
+                const response = await fetch(`http://localhost:5000/api/upload/delete-image/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao deletar imagem: ${errorText}`);
+                }
+
+                toast.success('Imagem deletada com sucesso.', {
+                    position: "bottom-right",
+                    autoClose: 3000,
+                });
+                setTimeout(() => {
+                    window.location.reload()
+                }, 2000);
+            } else {
+                throw new Error('Usuário não identificado.');
+            }
+        } catch (error: any) {
+            console.error('Erro ao deletar imagem:', error.message);
+            toast.error('Erro ao deletar imagem.', {
+                position: "bottom-right",
+                autoClose: 3000,
+            });
+        }
+    };
 
     const uploadImagem = async (file: File): Promise<string> => {
         try {
@@ -479,9 +523,28 @@ export default function Produtos() {
                                         height={100}
                                         className="w-16 h-16 rounded-full border-2 border-teal-500"
                                     />
-                                    <label htmlFor="file-input" className="mt-4 p-2 bg-teal-500 text-white rounded-lg cursor-pointer">
-                                        Alterar Imagem
-                                    </label>
+                                    <div className="flex flex-col gap-2">
+                                        <button
+                                            onClick={() => setIsVisible(!isVisible)}
+                                            className={`text-sm mt-1 p-2 ${isVisible ? "bg-red-500 hover:bg-red-600 w-9 relative" : "bg-teal-500 hover:bg-teal-600"} text-white rounded-lg cursor-pointer`}
+                                        >
+                                            {isVisible ? "X" : "☰"}
+                                        </button>
+                                        <label
+                                            htmlFor="file-input"
+                                            className={`${isVisible ? "flex" : "hidden"} text-sm mt-1 p-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-600`}
+                                        >
+                                            <Image src={logoEditar} alt="alterarimg" width={22} height={22} className="invert ">
+                                            </Image>
+                                        </label>
+                                        <button
+                                            onClick={deletarImg}
+                                            className={`${isVisible ? "flex" : "hidden"} text-sm mt-1 p-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-600 self-center`}
+                                        >
+                                            <Image src={logoDeletar} alt="deleatrimg" width={22} height={22} className="invert ">
+                                            </Image>
+                                        </button>
+                                    </div>
                                     <input
                                         id="file-input"
                                         type="file"

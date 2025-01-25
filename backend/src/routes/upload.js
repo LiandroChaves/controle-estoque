@@ -69,6 +69,53 @@ router.post('/upload', autenticarUsuario, upload.single('image'), async (req, re
     }
 });
 
+router.delete('/upload/delete-image/:userId', autenticarUsuario, async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Verifica no banco de dados o caminho da imagem associada ao usuário
+        const querySelect = `SELECT imagem FROM informacoeslogin WHERE id = $1`;
+        const result = await pool.query(querySelect, [userId]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado.' });
+        }
+
+        const imagePath = result.rows[0].imagem;
+
+        // Remove o arquivo do servidor
+        if (imagePath) {
+            // Corrige o caminho relativo
+            const fullPath = path.join(__dirname, '../../', imagePath);
+            console.log('Caminho completo da imagem para exclusão:', fullPath);
+        
+            // Verifica se o arquivo existe antes de tentar deletar
+            if (fs.existsSync(fullPath)) {
+                try {
+                    fs.unlinkSync(fullPath);
+                    console.log('Imagem deletada do servidor:', fullPath);
+                } catch (err) {
+                    console.error('Erro ao remover o arquivo:', err.message);
+                    throw new Error('Erro ao remover o arquivo do servidor.');
+                }
+            } else {
+                console.warn('Arquivo já não existe:', fullPath);
+            }
+        }
+        
+
+        // Atualiza o banco de dados para remover a referência da imagem
+        const queryUpdate = `UPDATE informacoeslogin SET imagem = NULL WHERE id = $1`;
+        await pool.query(queryUpdate, [userId]);
+
+        res.status(200).json({ message: 'Imagem deletada com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao deletar imagem:', error.message);
+        res.status(500).json({ error: 'Erro interno ao deletar a imagem.' });
+    }
+});
+
+
 
 // Exportar o router
 module.exports = router;

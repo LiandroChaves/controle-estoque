@@ -117,6 +117,7 @@ router.post('/produtos/:usuarioId', async (req, res) => {
     }
 });
 
+
 router.delete('/produtos/:id', async (req, res) => {
     const { id } = req.params;
     const { confirmar } = req.query; // Acessando o parâmetro da query string
@@ -156,7 +157,6 @@ router.delete('/produtos/:id', async (req, res) => {
         res.status(500).json({ error: 'Erro ao excluir produto' });
     }
 });
-
 
 
 router.put('/produtos/:id', async (req, res) => {
@@ -201,22 +201,6 @@ router.put('/produtos/:id', async (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 router.post('/produtos/reset-sequence', async (req, res) => {
     try {
         await pool.query('ALTER SEQUENCE produtos_id_seq RESTART WITH 1');
@@ -226,9 +210,6 @@ router.post('/produtos/reset-sequence', async (req, res) => {
         res.status(500).json({ error: 'Erro ao reiniciar a sequência' });
     }
 });
-
-
-
 
 
 router.get('/categorias', async (req, res) => {
@@ -251,8 +232,6 @@ router.get('/categorias', async (req, res) => {
 });
 
 
-
-
 router.get('/subcategorias', async (req, res) => {
     const { userId } = req.query; // ID do usuário da query string
 
@@ -271,7 +250,6 @@ router.get('/subcategorias', async (req, res) => {
         res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
     }
 });
-
 
 
 module.exports = router;
