@@ -18,8 +18,22 @@ CREATE TABLE IF NOT EXISTS produtos (
     preco DECIMAL(10, 2) NOT NULL,
     catalogo VARCHAR(255),
     favorito BOOLEAN DEFAULT FALSE,
-    usuario_id INT
+    usuario_id INT,
+	descricao TEXT,
+	imagem VARCHAR(255),
 );
+
+ALTER TABLE produtos
+ADD COLUMN imagem VARCHAR(255),
+ADD COLUMN descricao TEXT;
+
+update produtos set descricao =  'A Caixa de Som Alexa Echo é a combinação perfeita de tecnologia, elegância e praticidade. Com um design moderno que se adapta a qualquer ambiente, ela oferece um som poderoso e claro, ideal para transformar sua experiência de áudio em casa. Além de ser uma caixa de som de alta qualidade, a Alexa Echo é sua assistente pessoal, permitindo que você controle músicas, obtenha informações em tempo real, automatize dispositivos inteligentes e mantenha sua rotina organizada apenas com a sua voz. É mais do que um dispositivo; é a conexão perfeita entre inovação e comodidade no seu dia a dia.'
+where id = 13;
+
+update produtos set imagem =  '/uploads/alexa.jpg'
+where id = 13;
+
+SELECT * FROM produtos where id = 13;
 
 -- ======================= Tabela de Vendas ====================================
 CREATE TABLE IF NOT EXISTS vendas (

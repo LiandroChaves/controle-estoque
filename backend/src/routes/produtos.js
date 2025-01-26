@@ -6,7 +6,14 @@ router.get(`/produtos/:usuario_id`, async (req, res) => {
     const { usuario_id } = req.params;
     try {
         const result = await pool.query('SELECT * FROM produtos WHERE usuario_id = $1', [usuario_id]);
-        res.json(result.rows);
+
+        // Atualiza cada produto para incluir a URL absoluta da imagem
+        const produtos = result.rows.map((produto) => ({
+            ...produto,
+            imagem: produto.imagem ? `http://localhost:5000${produto.imagem}` : null,
+        }));
+
+        res.json(produtos);
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         res.status(500).json({
@@ -16,6 +23,7 @@ router.get(`/produtos/:usuario_id`, async (req, res) => {
         });
     }
 });
+
 
 
 router.get('/produtos/favoritos/:usuario_id', async (req, res) => {

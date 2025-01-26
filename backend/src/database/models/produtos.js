@@ -23,6 +23,14 @@ const Produto = sequelize.define('produtos', {
       key: 'id',
     },
   },
+  descricao: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  imagem: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  }
 }, {
   timestamps: false,
   tableName: 'produtos',

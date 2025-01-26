@@ -46,6 +46,12 @@ export default function Compras() {
     const [isVisible, setIsVisible] = useState(false);
 
 
+    const [produtoDetalhado, setProdutoDetalhado] = useState<any | null>(null);
+    const [isDetalheModalAberto, setIsDetalheModalAberto] = useState(false);
+
+
+
+
     const fetchCategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
@@ -370,6 +376,21 @@ export default function Compras() {
     };
 
 
+
+
+
+    useEffect(() => {
+        if (produtoDetalhado?.imagem) {
+            console.log('Imagem do produto detalhado:', produtoDetalhado.imagem);
+        }
+    }, [produtoDetalhado]);
+
+
+
+
+
+
+
     const fecharModal = () => {
         setProdutoSelecionado(null);
     };
@@ -412,6 +433,17 @@ export default function Compras() {
         }
     };
 
+    // Função para abrir o modal
+    const abrirDetalheModal = (produto: any) => {
+        setProdutoDetalhado(produto);
+        setIsDetalheModalAberto(true);
+    };
+
+    // Função para fechar o modal
+    const fecharDetalheModal = () => {
+        setProdutoDetalhado(null);
+        setIsDetalheModalAberto(false);
+    };
 
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
@@ -507,7 +539,7 @@ export default function Compras() {
                                         height={100}
                                         className="w-16 h-16 rounded-full border-2 border-teal-500"
                                     />
-                                                                        <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-2">
                                         <button
                                             onClick={() => setIsVisible(!isVisible)}
                                             className={`text-sm mt-1 p-2 ${isVisible ? "bg-red-500 hover:bg-red-600 w-9 relative" : "bg-teal-500 hover:bg-teal-600"} text-white rounded-lg cursor-pointer`}
@@ -666,6 +698,7 @@ export default function Compras() {
                             <th className="p-4 border-b border-gray-600 text-center">Quant. Estoque</th>
                             <th className="p-4 border-b border-gray-600 text-center">Preço</th>
                             <th className="p-4 border-b border-gray-600 text-center">Obter no Carrinho</th>
+                            <th className="p-4 border-b border-gray-600 text-center">Detalhes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -692,6 +725,14 @@ export default function Compras() {
                                         <Image src={logoCarrinho} alt="Logo-Carrinho" width={40} height={40}></Image>
                                     </button>
                                 </td>
+                                <td className="p-4 border-b border-gray-600 text-center">
+                                    <button
+                                        onClick={() => abrirDetalheModal(produto)}
+                                        className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-md shadow-md"
+                                    >
+                                        Ver Detalhes
+                                    </button>
+                                </td>
                                 <td
                                     className="absolute left-[190px] top-[55px] transform -translate-x-1/2 opacity-0 group-hover:opacity-100 -bottom-8 group-hover:bottom-2 transition-all duration-300"
                                 >
@@ -706,6 +747,38 @@ export default function Compras() {
                         ))}
                     </tbody>
                 </table>
+                    {/* Modal de detalhes */}
+                    {isDetalheModalAberto && produtoDetalhado && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div className="bg-gray-600 rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                                <button
+                                    onClick={fecharDetalheModal}
+                                    className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white rounded-full p-2"
+                                >
+                                    X
+                                </button>
+                                <h2 className="text-xl font-bold mb-4">{produtoDetalhado.nome}</h2>
+                                {produtoDetalhado.imagem && (
+                                    <div className="mt-4">
+                                        <Image
+                                            src={produtoDetalhado.imagem}
+                                            alt={produtoDetalhado.nome}
+                                            width={250}
+                                            height={250}
+                                            className="max-w-full h-auto rounded-md shadow mb-8 relative left-[22%]"
+                                        />
+                                    </div>  
+                                )}
+                                <p><strong>Categoria:</strong> {produtoDetalhado.categoria}</p>
+                                <p><strong>Subcategoria:</strong> {produtoDetalhado.subcategoria}</p>
+                                <p><strong>Estoque:</strong> {produtoDetalhado.estoque}</p>
+                                <p><strong>Preço:</strong> {produtoDetalhado.preco} R$</p>
+                                {produtoDetalhado.descricao && (
+                                    <p className="mt-4"><strong>Descrição:</strong> {produtoDetalhado.descricao}</p>
+                                )}
+                            </div>
+                        </div>
+                    )};
                 {produtoSelecionado && (
                     <ObterProdutoModal
                         produto={produtoSelecionado}
@@ -713,7 +786,7 @@ export default function Compras() {
                         onAdicionarCarrinho={handleAdicionarCarrinho}
 
                     />
-                )}
+                )};
                 <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} />
             </main>
             <Footer />
