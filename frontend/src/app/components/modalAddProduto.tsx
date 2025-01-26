@@ -13,11 +13,13 @@ type AdicionarProdutoModalProps = {
 const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, onProdutoAdicionado }) => {
     const [produto, setProduto] = useState({
         nome: "",
+        descricao: "",
         categoria: "",
         subcategoria: "",
         estoque: "",
         preco: "",
         catalogo: "",
+        imagem: "",
         favorito: false,
     });
 
@@ -68,6 +70,40 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
 
         obterUsuarioId();
     }, []);
+
+    const uploadImagem = async (file: File): Promise<string> => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Usuário não autenticado.');
+    
+            // Obtém o ID do usuário
+            const produtoId = await fetchUsuario(); // Agora você já possui o produtoId
+    
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('produtoId', produtoId); // Adiciona o produtoId ao formData
+    
+            const response = await fetch('http://localhost:5000/api/produto/upload', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+    
+            if (!response.ok) {
+                const errorText = await response.text(); // Recebe o erro como texto
+                throw new Error(`Erro ao fazer upload: ${errorText}`);
+            }
+    
+            const data = await response.json();
+            return data.imagePath; // Caminho da imagem salva
+        } catch (error: any) {
+            console.error('Erro ao fazer upload da imagem:', error.message);
+            throw error;
+        }
+    };
+    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
@@ -132,67 +168,100 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                 </div>
 
                 <div className="mb-3">
-                    <label className="block mb-1 text-white">Nome</label>
+                    <label className="h-2 block mb-1 text-white">Nome</label>
                     <input
                         type="text"
                         name="nome"
                         value={produto.nome}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full text-black"
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1 text-white">Categoria</label>
+                    <label className="h-2 block mb-1 text-white">Descrição:</label>
+                    <input
+                        type="text"
+                        name="descricao"
+                        value={produto.descricao}
+                        onChange={handleChange}
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
+                    />
+                </div>
+                <div className="mb-3">
+                    <label className="h-2 block mb-1 text-white">Categoria</label>
                     <input
                         type="text"
                         name="categoria"
                         value={produto.categoria}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full text-black"
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1 text-white">Subcategoria</label>
+                    <label className="h-2 block mb-1 text-white">Subcategoria</label>
                     <input
                         type="text"
                         name="subcategoria"
                         value={produto.subcategoria}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full text-black"
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1 text-white">Estoque</label>
+                    <label className="h-2 block mb-1 text-white">Estoque</label>
                     <input
                         type="number"
                         name="estoque"
                         value={produto.estoque}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full text-black"
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1 text-white">Preço</label>
+                    <label className="h-2 block mb-1 text-white">Preço</label>
                     <input
                         type="number"
                         step="0.01"
                         name="preco"
                         value={produto.preco}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full text-black"
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="block mb-1 text-white">Catálogo</label>
+                    <label className="h-2 block mb-1 text-white">Catálogo</label>
                     <input
                         type="text"
                         name="catalogo"
                         value={produto.catalogo}
                         onChange={handleChange}
-                        className="border p-2 rounded w-full text-black"
+                        className="h-8 relative top-3 border p-2 rounded w-full text-black"
                     />
                 </div>
-                <div className="mb-3 flex items-center">
+                <div className="mb-3">
+                    <label className="h-2 block mb-1 text-white">Imagem</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                                try {
+                                    const imagePath = await uploadImagem(file); // Faz o upload da imagem e obtém o caminho
+                                    setProduto((prevProduto) => ({
+                                        ...prevProduto,
+                                        imagem: imagePath, // Define o caminho da imagem no produto
+                                    }));
+                                } catch (error) {
+                                    console.error("Erro ao fazer upload da imagem:", error);
+                                }
+                            }
+                        }}
+                        className="h-11 relative top-3 border p-2 rounded w-auto text-white"
+                    />
+                </div>
+
+                <div className="mb-3 relative top-2 flex items-center">
                     <label className="mr-2 text-white">Favorito</label>
                     <input
                         type="checkbox"

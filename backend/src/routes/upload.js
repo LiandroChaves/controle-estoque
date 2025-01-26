@@ -115,6 +115,40 @@ router.delete('/upload/delete-image/:userId', autenticarUsuario, async (req, res
     }
 });
 
+router.post('/produto/upload', autenticarUsuario, upload.single('image'), async (req, res) => {
+    try {
+        const { produtoId } = req.body;
+        
+        if (!produtoId) {
+            return res.status(400).json({ error: 'Produto ID não fornecido.' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`; // Caminho relativo para o diretório de uploads
+        console.log('Caminho da imagem:', imagePath);
+
+        const query = `
+            UPDATE produtos
+            SET imagem = $1
+            WHERE id = $2
+        `;
+        const values = [imagePath, produtoId];
+        const result = await pool.query(query, values);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Imagem salva com sucesso.', imagePath });
+    } catch (error) {
+        console.error('Erro ao salvar a imagem:', error.message);
+        res.status(500).json({ error: 'Erro interno ao salvar a imagem.' });
+    }
+});
+
 
 
 // Exportar o router

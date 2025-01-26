@@ -742,6 +742,22 @@ export default function Produtos() {
                             placeholder="Nome do Produto"
                         />
                     </div>
+                    <div className="flex items-center gap-2">
+                        <label htmlFor="descricao" className="w-32 text-white">Descrição:</label>
+                        <textarea
+                            id="descricao"
+                            value={produtoSelecionado?.descricao || ""}
+                            onChange={(e) =>
+                                setProdutoSelecionado({
+                                    ...produtoSelecionado,
+                                    descricao: e.target.value, // Atualiza a descrição
+                                })
+                            }
+                            className="border p-2 rounded-md w-full resize-none" // Adicione 'resize-none' para desabilitar o redimensionamento
+                            placeholder="Descrição do Produto"
+                            rows={4} // Define o número de linhas iniciais
+                        />
+                    </div>
 
                     <div className="flex items-center gap-2">
                         <label htmlFor="categoria" className="w-32 text-white">Categoria:</label>

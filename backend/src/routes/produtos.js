@@ -96,7 +96,7 @@ router.post('/produtos', async (req, res) => {
 
 router.post('/produtos/:usuarioId', async (req, res) => {
     const { usuarioId } = req.params;
-    const { nome, categoria, subcategoria, estoque, preco, catalogo, favorito } = req.body;
+    const { nome, descricao, categoria, subcategoria, estoque, preco, catalogo, imagem, favorito } = req.body;
 
     if (!usuarioId || !nome || !categoria || !subcategoria || !estoque || !preco) {
         return res.status(400).json({ error: 'Faltam dados obrigatórios ou ID do usuário' });
@@ -106,8 +106,8 @@ router.post('/produtos/:usuarioId', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'INSERT INTO produtos (usuario_id, nome, categoria, subcategoria, estoque, preco, catalogo, favorito) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [usuarioId, nome, categoria, subcategoria, estoque, preco, catalogo, favoritoValue]
+            'INSERT INTO produtos (usuario_id, nome, descricao, categoria, subcategoria, estoque, preco, catalogo, imagem, favorito) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+            [usuarioId, nome, descricao, categoria, subcategoria, estoque, preco, catalogo, imagem, favoritoValue]
         );
 
         const produtoInserido = result.rows[0];
@@ -169,9 +169,9 @@ router.delete('/produtos/:id', async (req, res) => {
 
 router.put('/produtos/:id', async (req, res) => {
     const { id } = req.params;
-    const { nome, categoria, subcategoria, estoque, preco } = req.body;
+    const { nome, descricao, categoria, subcategoria, estoque, preco } = req.body;
 
-    if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
+    if (!nome || !descricao || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
@@ -181,11 +181,11 @@ router.put('/produtos/:id', async (req, res) => {
 
     try {
         console.log(`Atualizando produto com ID: ${id}`);
-        console.log('Dados recebidos para atualização:', { nome, categoria, subcategoria, estoque, preco });
+        console.log('Dados recebidos para atualização:', { nome, descricao, categoria, subcategoria, estoque, preco });
 
         const result = await pool.query(
-            'UPDATE produtos SET nome = $1, categoria = $2, subcategoria = $3, estoque = $4, preco = $5 WHERE id = $6 RETURNING *',
-            [nome, categoria, subcategoria, estoque, preco, id]
+            'UPDATE produtos SET nome = $1, descricao = $2, categoria = $3, subcategoria = $4, estoque = $5, preco = $6 WHERE id = $7 RETURNING *',
+            [nome, descricao, categoria, subcategoria, estoque, preco, id]
         );
 
         if (result.rowCount === 0) {
