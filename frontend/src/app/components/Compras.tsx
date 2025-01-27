@@ -376,19 +376,11 @@ export default function Compras() {
     };
 
 
-
-
-
     useEffect(() => {
         if (produtoDetalhado?.imagem) {
             console.log('Imagem do produto detalhado:', produtoDetalhado.imagem);
         }
     }, [produtoDetalhado]);
-
-
-
-
-
 
 
     const fecharModal = () => {
@@ -646,7 +638,7 @@ export default function Compras() {
                                             {error}
                                         </p>
                                     )}
-                                    <div className="mt-4 flex justify-end">
+                                    <div className="mt-4 flex justify-between">
                                         <button
                                             onClick={() => setShowModal(false)}
                                             className="p-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 hover:underline mr-4"

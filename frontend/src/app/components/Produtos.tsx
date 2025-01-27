@@ -38,6 +38,7 @@ export default function Produtos() {
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
+    const [imagemUsuarioProd, setImagemUsuarioProd] = useState<string | any>(); // Estado para armazenar a imagem do usuário
     const [isVisible, setIsVisible] = useState(false);
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
@@ -217,6 +218,61 @@ export default function Produtos() {
         }
     };
 
+    const uploadImagemProd = async (file: File, userId: string): Promise<string> => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Usuário não autenticado.');
+    
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('userId', userId); // Adicionar userId no FormData
+    
+            const response = await fetch('http://localhost:5000/api/upload/imgprod', {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+    
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro ao fazer upload: ${errorText}`);
+            }
+    
+            const data = await response.json();
+            return data.imagePath; // Caminho da imagem salva
+        } catch (error: any) {
+            console.error('Erro ao fazer upload da imagem:', error.message);
+            throw error;
+        }
+    };
+    
+    
+
+    const handleImageChangeProd = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                // Obtém o userId do localStorage
+                const userId = localStorage.getItem('userId');
+                if (!userId) {
+                    throw new Error('ID do usuário não encontrado.');
+                }
+    
+                // Chama a função de upload passando o arquivo e o userId
+                const imagePath = await uploadImagemProd(file, userId);
+                const imageUrl = `http://localhost:5000${imagePath}`;
+                setImagemUsuarioProd(imageUrl); // Atualiza a imagem com o caminho recebido
+    
+                } catch (error: any) {
+                console.error('Erro ao fazer upload da imagem:', error.message);
+                alert('Erro ao fazer upload da imagem.');
+            }
+        }
+    };
+    
+
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
         {
@@ -333,15 +389,23 @@ export default function Produtos() {
 
     const salvarAlteracoes = async () => {
         if (!produtoSelecionado || !produtoSelecionado.id) return;
-
+    
         // Verificar se os campos necessários existem
         const { nome, categoria, subcategoria, estoque, preco } = produtoSelecionado;
         if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
             console.error('Faltam campos obrigatórios para atualização');
             return;
         }
-
+    
         try {
+            // Remove "http://localhost:5000" da imagem, se existir
+            const imagemCorrigida = imagemUsuarioProd?.replace('http://localhost:5000', '');
+    
+            const produtoAtualizado = {
+                ...produtoSelecionado,
+                imagem: imagemCorrigida, // Garante que a imagem está no formato correto
+            };
+    
             const response = await fetch(
                 `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
                 {
@@ -349,23 +413,28 @@ export default function Produtos() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(produtoSelecionado),
+                    body: JSON.stringify(produtoAtualizado),
                 }
             );
-
+    
             if (!response.ok) {
                 throw new Error("Erro ao salvar alterações");
             }
-
+    
             const data = await response.json();
             console.log("Produto atualizado:", data);
-
+    
             carregarProdutos();
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
     };
+    
+    
+    
+    
+    
 
     const alternarFavoritos = async () => {
         setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
@@ -726,7 +795,7 @@ export default function Produtos() {
                 saveButtonText="Salvar Alterações"
             >
                 <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 h-10">
                         <label htmlFor="nome" className="w-32 text-white">Produto:</label>
                         <input
                             id="nome"
@@ -742,7 +811,7 @@ export default function Produtos() {
                             placeholder="Nome do Produto"
                         />
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 h-18">
                         <label htmlFor="descricao" className="w-32 text-white">Descrição:</label>
                         <textarea
                             id="descricao"
@@ -759,7 +828,7 @@ export default function Produtos() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 h-10">
                         <label htmlFor="categoria" className="w-32 text-white">Categoria:</label>
                         <select
                             id="categoria"
@@ -783,7 +852,7 @@ export default function Produtos() {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 h-10">
                         <label htmlFor="subcategoria" className="w-32 text-white">Subcategoria:</label>
                         <select
                             id="subcategoria"
@@ -807,7 +876,7 @@ export default function Produtos() {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 h-10">
                         <label htmlFor="estoque" className="w-32 text-white">Estoque:</label>
                         <input
                             id="estoque"
@@ -824,7 +893,7 @@ export default function Produtos() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 h-10">
                         <label htmlFor="preco" className="w-32 text-white">Preço:</label>
                         <input
                             id="preco"
@@ -838,6 +907,16 @@ export default function Produtos() {
                             }
                             className="border p-2 rounded-md w-full"
                             placeholder="Preço"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 h-10">
+                        <label htmlFor="imagem" className="w-32 text-white">Imagem:</label>
+                        <input
+                            id="file-input-img"
+                            type="file"
+                            accept="image/*"
+                            className="border p-2 rounded-md w-full text-white"
+                            onChange={handleImageChangeProd}
                         />
                     </div>
                 </div>
