@@ -742,34 +742,35 @@ export default function Compras() {
                     {/* Modal de detalhes */}
                     {isDetalheModalAberto && produtoDetalhado && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                            <div className="bg-gray-600 rounded-lg shadow-lg p-6 max-w-lg w-full relative">
-                                <button
-                                    onClick={fecharDetalheModal}
-                                    className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white rounded-full p-2"
-                                >
-                                    X
-                                </button>
-                                <h2 className="text-xl font-bold mb-4">{produtoDetalhado.nome}</h2>
-                                {produtoDetalhado.imagem && (
-                                    <div className="mt-4">
-                                        <Image
-                                            src={produtoDetalhado.imagem}
-                                            alt={produtoDetalhado.nome}
-                                            width={250}
-                                            height={250}
-                                            className="max-w-full h-auto rounded-md shadow mb-8 relative left-[22%]"
-                                        />
-                                    </div>  
-                                )}
-                                <p><strong>Categoria:</strong> {produtoDetalhado.categoria}</p>
-                                <p><strong>Subcategoria:</strong> {produtoDetalhado.subcategoria}</p>
-                                <p><strong>Estoque:</strong> {produtoDetalhado.estoque}</p>
-                                <p><strong>Preço:</strong> {produtoDetalhado.preco} R$</p>
-                                {produtoDetalhado.descricao && (
-                                    <p className="mt-4"><strong>Descrição:</strong> {produtoDetalhado.descricao}</p>
-                                )}
-                            </div>
+                        <div className="bg-gray-600 rounded-lg shadow-lg p-6 max-w-lg w-full relative max-h-[80vh] overflow-y-auto">
+                            <button
+                                onClick={fecharDetalheModal}
+                                className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 z-10 w-10"
+                            >
+                                X
+                            </button>
+                            <h2 className="text-xl font-bold mb-4">{produtoDetalhado.nome}</h2>
+                            {produtoDetalhado.imagem && (
+                                <div className="mt-4">
+                                    <Image
+                                        src={produtoDetalhado.imagem}
+                                        alt={produtoDetalhado.nome}
+                                        width={250}
+                                        height={250}
+                                        className="max-w-full h-auto rounded-md shadow mb-8 relative left-[22%]"
+                                    />
+                                </div>  
+                            )}
+                            <p><strong>Categoria:</strong> {produtoDetalhado.categoria}</p>
+                            <p><strong>Subcategoria:</strong> {produtoDetalhado.subcategoria}</p>
+                            <p><strong>Estoque:</strong> {produtoDetalhado.estoque}</p>
+                            <p><strong>Preço:</strong> {produtoDetalhado.preco} R$</p>
+                            {produtoDetalhado.descricao && (
+                                <p className="mt-4"><strong>Descrição:</strong> {produtoDetalhado.descricao}</p>
+                            )}
                         </div>
+                    </div>
+                    
                     )};
                 {produtoSelecionado && (
                     <ObterProdutoModal
