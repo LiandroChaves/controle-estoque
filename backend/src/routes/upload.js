@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const { autenticarUsuario } = require('./login');
 const pool = require('../database/db');
-
 const router = express.Router();
 
 // Configurar o multer para salvar imagens localmente
@@ -22,11 +21,12 @@ const storage = multer.diskStorage({
     },
 });
 
+
 const upload = multer({
     storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5 MB
     fileFilter: (req, file, cb) => {
-        const fileTypes = /jpeg|jpg|png/;
+        const fileTypes = /jpeg|jpg|png|webp/;
         const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
         const mimeType = fileTypes.test(file.mimetype);
 
@@ -69,17 +69,19 @@ router.post('/upload', autenticarUsuario, upload.single('image'), async (req, re
     }
 });
 
+
 router.put('/upload/imgprod', autenticarUsuario, upload.single('image'), async (req, res) => {
     try {
-        const { userId } = req.body; // userId enviado pelo frontend
+        const { produtoId } = req.body; // Pega o produtoId enviado pelo frontend
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
         }
 
-        if (!userId) {
-            return res.status(400).json({ error: 'ID do usuário não fornecido.' });
+        if (!produtoId) {
+            console.error('Erro: Produto ID não fornecido no body da requisição.');
+            return res.status(400).json({ error: 'ID do produto não fornecido.' });
         }
-
+        
         const imagePath = `/uploads/${req.file.filename}`;
         console.log('Caminho da imagem:', imagePath);
 
@@ -89,7 +91,7 @@ router.put('/upload/imgprod', autenticarUsuario, upload.single('image'), async (
             SET imagem = $1
             WHERE id = $2
         `;
-        const values = [imagePath, userId]; // Utilize o userId aqui se ele for necessário
+        const values = [imagePath, produtoId]; // Usa o produtoId enviado pelo frontend
         const result = await pool.query(query, values);
 
         if (result.rowCount === 0) {
@@ -150,6 +152,7 @@ router.delete('/upload/delete-image/:userId', autenticarUsuario, async (req, res
     }
 });
 
+
 router.post('/produto/upload', autenticarUsuario, upload.single('image'), async (req, res) => {
     try {
         const { produtoId } = req.body;
@@ -183,8 +186,6 @@ router.post('/produto/upload', autenticarUsuario, upload.single('image'), async 
         res.status(500).json({ error: 'Erro interno ao salvar a imagem.' });
     }
 });
-
-
 
 // Exportar o router
 module.exports = router;

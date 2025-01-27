@@ -43,6 +43,8 @@ export default function Produtos() {
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
+    const handleAbrirModal = () => setModalAbertoin(true);
+    const handleFecharModal = () => setModalAbertoin(false);
 
     const fetchCategorias = async () => {
         try {
@@ -218,15 +220,15 @@ export default function Produtos() {
         }
     };
 
-    const uploadImagemProd = async (file: File, userId: string): Promise<string> => {
+    const uploadImagemProd = async (file: File, produtoId: string): Promise<string> => {
         try {
             const token = localStorage.getItem('token');
             if (!token) throw new Error('Usuário não autenticado.');
-    
+
             const formData = new FormData();
             formData.append('image', file);
-            formData.append('userId', userId); // Adicionar userId no FormData
-    
+            formData.append('produtoId', produtoId); // Enviar o produtoId no FormData
+
             const response = await fetch('http://localhost:5000/api/upload/imgprod', {
                 method: 'PUT',
                 headers: {
@@ -234,12 +236,12 @@ export default function Produtos() {
                 },
                 body: formData,
             });
-    
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Erro ao fazer upload: ${errorText}`);
             }
-    
+
             const data = await response.json();
             return data.imagePath; // Caminho da imagem salva
         } catch (error: any) {
@@ -247,31 +249,29 @@ export default function Produtos() {
             throw error;
         }
     };
-    
-    
+
 
     const handleImageChangeProd = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             try {
-                // Obtém o userId do localStorage
-                const userId = localStorage.getItem('userId');
-                if (!userId) {
-                    throw new Error('ID do usuário não encontrado.');
+                // Obtém o produtoId do produto selecionado
+                const produtoId = produtoSelecionado?.id;
+                if (!produtoId) {
+                    throw new Error('ID do produto não encontrado.');
                 }
-    
-                // Chama a função de upload passando o arquivo e o userId
-                const imagePath = await uploadImagemProd(file, userId);
+
+                // Chama a função de upload passando o arquivo e o produtoId
+                const imagePath = await uploadImagemProd(file, produtoId);
                 const imageUrl = `http://localhost:5000${imagePath}`;
                 setImagemUsuarioProd(imageUrl); // Atualiza a imagem com o caminho recebido
-    
-                } catch (error: any) {
+
+            } catch (error: any) {
                 console.error('Erro ao fazer upload da imagem:', error.message);
                 alert('Erro ao fazer upload da imagem.');
             }
         }
     };
-    
 
     // ============================== Dados Contadores ========================
     const prodsCadastrados = [
@@ -312,10 +312,6 @@ export default function Produtos() {
     };
 
 
-
-    const handleAbrirModal = () => setModalAbertoin(true);
-    const handleFecharModal = () => setModalAbertoin(false);
-
     const handleProdutoAdicionado = (produto: Produto) => {
         console.log("Produto adicionado:", produto);
     };
@@ -325,7 +321,6 @@ export default function Produtos() {
         localStorage.removeItem("token");
         router.push("/login");
     };
-
 
 
     const carregarProdutos = async () => {
@@ -377,6 +372,7 @@ export default function Produtos() {
         setProdutosBuscados(filtrado);
     };
 
+
     useEffect(() => {
         aplicarFiltros();
     }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
@@ -387,25 +383,26 @@ export default function Produtos() {
         setModalAberto(true);
     };
 
+
     const salvarAlteracoes = async () => {
         if (!produtoSelecionado || !produtoSelecionado.id) return;
-    
+
         // Verificar se os campos necessários existem
         const { nome, categoria, subcategoria, estoque, preco } = produtoSelecionado;
         if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
             console.error('Faltam campos obrigatórios para atualização');
             return;
         }
-    
+
         try {
             // Remove "http://localhost:5000" da imagem, se existir
             const imagemCorrigida = imagemUsuarioProd?.replace('http://localhost:5000', '');
-    
+
             const produtoAtualizado = {
                 ...produtoSelecionado,
                 imagem: imagemCorrigida, // Garante que a imagem está no formato correto
             };
-    
+
             const response = await fetch(
                 `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
                 {
@@ -416,25 +413,21 @@ export default function Produtos() {
                     body: JSON.stringify(produtoAtualizado),
                 }
             );
-    
+
             if (!response.ok) {
                 throw new Error("Erro ao salvar alterações");
             }
-    
+
             const data = await response.json();
             console.log("Produto atualizado:", data);
-    
+
             carregarProdutos();
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
     };
-    
-    
-    
-    
-    
+
 
     const alternarFavoritos = async () => {
         setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
@@ -458,9 +451,6 @@ export default function Produtos() {
             console.error("Erro ao buscar produtos:", error);
         }
     };
-
-
-
 
     // ==================== Informações do Usuário ==============================
     const router = useRouter();
@@ -561,6 +551,72 @@ export default function Produtos() {
         }
     };
 
+    const ordenarProdutosAtoZ = async () => {
+        try {
+            console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
+             
+            const usuario = await fetchUsuario();
+            const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
+            if (!usuarioId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+    
+            console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
+             
+            const response = await fetch(`http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao buscar produtos ordenados');
+            }
+    
+            const produtosOrdenados = await response.json();
+            console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
+            setProdutos(produtosOrdenados);
+            setProdutosBuscados(produtosOrdenados)
+        } catch (error:any) {
+            console.error('Erro ao ordenar produtos:', error.message);
+            alert('Erro ao ordenar produtos.');
+        }
+    };
+
+    const ordenarProdutosZtoA = async () => {
+        try {
+            console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
+             
+            const usuario = await fetchUsuario();
+            const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
+            if (!usuarioId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+    
+            console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
+             
+            const response = await fetch(`http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao buscar produtos ordenados');
+            }
+    
+            const produtosOrdenados = await response.json();
+            console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
+            setProdutos(produtosOrdenados);
+            setProdutosBuscados(produtosOrdenados)
+        } catch (error:any) {
+            console.error('Erro ao ordenar produtos:', error.message);
+            alert('Erro ao ordenar produtos.');
+        }
+    };
+    
     // ============================= Renderização ===============================
     return (
         <>
@@ -702,12 +758,24 @@ export default function Produtos() {
             <main
                 className="bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 min-h-screen px-6 py-12 text-gray-300"
             >
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center gap-8 mb-6">
+                    <button
+                        onClick={ordenarProdutosAtoZ}
+                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                    >
+                        Ordenar de A - Z
+                    </button>
                     <button
                         onClick={handleAbrirModal}
                         className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
                     >
                         Adicionar Produto
+                    </button>
+                    <button
+                        onClick={ordenarProdutosZtoA}
+                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                    >
+                        Ordenar de Z - A
                     </button>
                     {modalAbertoin && (
                         <AdicionarProdutoModal

@@ -25,7 +25,6 @@ router.get(`/produtos/:usuario_id`, async (req, res) => {
 });
 
 
-
 router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
     const { usuario_id } = req.params;
     try {
@@ -43,6 +42,7 @@ router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
         });
     }
 });
+
 
 router.put('/produtos/:id/favorito', async (req, res) => {
     const { id } = req.params;
@@ -68,7 +68,6 @@ router.put('/produtos/:id/favorito', async (req, res) => {
         res.status(500).json({ error: 'Erro ao atualizar status de favorito.' });
     }
 });
-
 
 
 router.post('/produtos', async (req, res) => {
@@ -210,7 +209,6 @@ router.put('/produtos/:id', async (req, res) => {
 });
 
 
-
 router.post('/produtos/reset-sequence', async (req, res) => {
     try {
         await pool.query('ALTER SEQUENCE produtos_id_seq RESTART WITH 1');
@@ -258,6 +256,66 @@ router.get('/subcategorias', async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar categorias:', error);
         res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
+    }
+});
+
+
+router.get('/produtos/ordenarAtoZ/:id', async (req, res) => {
+    try {
+        const usuarioId = req.params.id;  // Mudança para obter o valor do parâmetro de rota
+
+        if (!usuarioId) {
+            return res.status(400).json({ error: 'usuario_id é necessário.' });
+        }
+
+        // Aqui, adicionando o log da query para verificar o valor passado
+        const result = await pool.query(`
+            SELECT 
+                nome,
+                categoria,
+                subcategoria,
+                estoque,
+                preco,
+                favorito
+            FROM produtos
+            WHERE usuario_id = $1
+            ORDER BY nome ASC
+        `, [usuarioId]);
+
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Erro ao ordenar produtos:', error.message, error.stack);
+        res.status(500).json({ error: 'Erro ao obter produtos ordenados.' });
+    }
+});
+
+
+router.get('/produtos/ordenarZtoA/:id', async (req, res) => {
+    try {
+        const usuarioId = req.params.id;  // Mudança para obter o valor do parâmetro de rota
+
+        if (!usuarioId) {
+            return res.status(400).json({ error: 'usuario_id é necessário.' });
+        }
+
+        // Aqui, adicionando o log da query para verificar o valor passado
+        const result = await pool.query(`
+            SELECT 
+                nome,
+                categoria,
+                subcategoria,
+                estoque,
+                preco,
+                favorito
+            FROM produtos
+            WHERE usuario_id = $1
+            ORDER BY nome DESC
+        `, [usuarioId]);
+
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Erro ao ordenar produtos:', error.message, error.stack);
+        res.status(500).json({ error: 'Erro ao obter produtos ordenados.' });
     }
 });
 
