@@ -752,13 +752,13 @@ export default function Compras() {
                 )}
                 <button
                         onClick={ordenarProdutosAtoZ}
-                        className="mb-6 mr-6 -mt-4 bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                        className="mb-6 mr-6 mt-5 bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
                     >
                         Ordenar de A - Z
                     </button>
                     <button
                         onClick={ordenarProdutosZtoA}
-                        className="mb-6 -mt-4 bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                        className="mb-6 mt-5 bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
                     >
                         Ordenar de Z - A
                     </button>
