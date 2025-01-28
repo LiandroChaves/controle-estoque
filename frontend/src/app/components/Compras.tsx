@@ -11,6 +11,8 @@ import logoEditar from '../../../public/assets/caneta.png'
 import logoDeletar from '../../../public/assets/excluir.png'
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import imgFundo from "../../../public/assets/comprar-online.png";
+import logoDetalhes from "../../../public/assets/detalhes-do-produto.png";
 
 
 export default function Compras() {
@@ -810,7 +812,7 @@ export default function Compras() {
                             <th className="p-4 border-b border-gray-600 text-center">Quant. Estoque</th>
                             <th className="p-4 border-b border-gray-600 text-center">Preço</th>
                             <th className="p-4 border-b border-gray-600 text-center">Obter no Carrinho</th>
-                            <th className="p-4 border-b border-gray-600 text-center">Detalhes</th>
+                            <th className="p-4 border-b border-gray-600 text-center text-wrap w-40">Produto detalhado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -840,9 +842,9 @@ export default function Compras() {
                                 <td className="p-4 border-b border-gray-600 text-center">
                                     <button
                                         onClick={() => abrirDetalheModal(produto)}
-                                        className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-md shadow-md"
+                                        className=" text-white py-2 rounded-md invert"
                                     >
-                                        Ver Detalhes
+                                        <Image src={logoDetalhes} alt="Detalhes" width={50} height={50} />
                                     </button>
                                 </td>
                                 <td
@@ -862,7 +864,12 @@ export default function Compras() {
                     {/* Modal de detalhes */}
                     {isDetalheModalAberto && produtoDetalhado && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                        <div className="bg-gray-600 rounded-lg shadow-lg p-6 max-w-lg w-full relative max-h-[80vh] overflow-y-auto">
+                        <div className="bg-gray-800 rounded-lg shadow-2xl p-6 max-w-lg w-full animate__animated animate__zoomIn animate__faster relative max-h-[80vh] overflow-y-auto"
+                            style={{
+                                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${imgFundo.src})`,
+                                backgroundSize: "575px",
+                                backgroundPosition: "center",
+                            }}>
                             <button
                                 onClick={fecharDetalheModal}
                                 className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 z-10 w-10"

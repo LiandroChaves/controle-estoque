@@ -40,6 +40,8 @@ export default function Produtos() {
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
     const [imagemUsuarioProd, setImagemUsuarioProd] = useState<string | any>(); // Estado para armazenar a imagem do usuário
     const [isVisible, setIsVisible] = useState(false);
+    const [menuVisivel, setMenuVisivel] = useState(false);
+    const toggleMenu = () => setMenuVisivel((prev) => !prev);
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
@@ -552,15 +554,15 @@ export default function Produtos() {
     const ordenarProdutosAtoZ = async () => {
         try {
             console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
-             
+
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
             if (!usuarioId) {
                 throw new Error('ID do usuário não encontrado.');
             }
-    
+
             console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
-             
+
             const response = await fetch(`http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`, {
                 method: 'GET',
                 headers: {
@@ -571,12 +573,12 @@ export default function Produtos() {
             if (!response.ok) {
                 throw new Error('Erro ao buscar produtos ordenados');
             }
-    
+
             const produtosOrdenados = await response.json();
             console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados)
-        } catch (error:any) {
+        } catch (error: any) {
             console.error('Erro ao ordenar produtos:', error.message);
             alert('Erro ao ordenar produtos.');
         }
@@ -585,15 +587,15 @@ export default function Produtos() {
     const ordenarProdutosZtoA = async () => {
         try {
             console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
-             
+
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
             if (!usuarioId) {
                 throw new Error('ID do usuário não encontrado.');
             }
-    
+
             console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
-             
+
             const response = await fetch(`http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`, {
                 method: 'GET',
                 headers: {
@@ -604,29 +606,29 @@ export default function Produtos() {
             if (!response.ok) {
                 throw new Error('Erro ao buscar produtos ordenados');
             }
-    
+
             const produtosOrdenados = await response.json();
             console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados)
-        } catch (error:any) {
+        } catch (error: any) {
             console.error('Erro ao ordenar produtos:', error.message);
             alert('Erro ao ordenar produtos.');
         }
     };
-    
+
     const ordenarProdutosToNormal = async () => {
         try {
             console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
-             
+
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
             if (!usuarioId) {
                 throw new Error('ID do usuário não encontrado.');
             }
-    
+
             console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
-             
+
             const response = await fetch(`http://localhost:5000/api/produtos/ordenarToNormal/${usuarioId}`, {
                 method: 'GET',
                 headers: {
@@ -637,12 +639,12 @@ export default function Produtos() {
             if (!response.ok) {
                 throw new Error('Erro ao buscar produtos ordenados');
             }
-    
+
             const produtosOrdenados = await response.json();
             console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados)
-        } catch (error:any) {
+        } catch (error: any) {
             console.error('Erro ao ordenar produtos:', error.message);
             alert('Erro ao ordenar produtos.');
         }
@@ -789,30 +791,40 @@ export default function Produtos() {
             <main
                 className="bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 min-h-screen px-6 py-12 text-gray-300"
             >
-                <div className="flex justify-center gap-8 mb-6">
+                <div className="flex justify-center gap-2 mb-6">
                     <button
-                        onClick={ordenarProdutosAtoZ}
-                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                        onClick={toggleMenu}
+                        className={`${menuVisivel ? "bg-red-600 hover:bg-red-500" : "bg-teal-600 hover:bg-teal-500"} transform hover:scale-105 transition-all text-white px-6 py-2 rounded-lg shadow-md font-bold`}
                     >
-                        Ordenar de A - Z
+                        {menuVisivel ? "X" : "☰"}
                     </button>
+                    {menuVisivel && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={ordenarProdutosAtoZ}
+                                className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                            >
+                                Ordenar de A - Z
+                            </button>
+                            <button
+                                onClick={ordenarProdutosZtoA}
+                                className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                            >
+                                Ordenar de Z - A
+                            </button>
+                            <button
+                                onClick={ordenarProdutosToNormal}
+                                className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                            >
+                                Remover ordem
+                            </button>
+                        </div>
+                    )}
                     <button
                         onClick={handleAbrirModal}
                         className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
                     >
                         Adicionar Produto
-                    </button>
-                    <button
-                        onClick={ordenarProdutosZtoA}
-                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
-                    >
-                        Ordenar de Z - A
-                    </button>
-                    <button
-                        onClick={ordenarProdutosToNormal}
-                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
-                    >
-                        Remover ordem
                     </button>
                     {modalAbertoin && (
                         <AdicionarProdutoModal
