@@ -395,7 +395,6 @@ export default function Produtos() {
         }
 
         try {
-            // Remove "http://localhost:5000" da imagem, se existir
             const imagemCorrigida = imagemUsuarioProd?.replace('http://localhost:5000', '');
 
             const produtoAtualizado = {
@@ -421,7 +420,6 @@ export default function Produtos() {
             const data = await response.json();
             console.log("Produto atualizado:", data);
 
-            carregarProdutos();
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
@@ -617,6 +615,39 @@ export default function Produtos() {
         }
     };
     
+    const ordenarProdutosToNormal = async () => {
+        try {
+            console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
+             
+            const usuario = await fetchUsuario();
+            const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
+            if (!usuarioId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+    
+            console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
+             
+            const response = await fetch(`http://localhost:5000/api/produtos/ordenarToNormal/${usuarioId}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao buscar produtos ordenados');
+            }
+    
+            const produtosOrdenados = await response.json();
+            console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
+            setProdutos(produtosOrdenados);
+            setProdutosBuscados(produtosOrdenados)
+        } catch (error:any) {
+            console.error('Erro ao ordenar produtos:', error.message);
+            alert('Erro ao ordenar produtos.');
+        }
+    };
+
     // ============================= Renderização ===============================
     return (
         <>
@@ -776,6 +807,12 @@ export default function Produtos() {
                         className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
                     >
                         Ordenar de Z - A
+                    </button>
+                    <button
+                        onClick={ordenarProdutosToNormal}
+                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                    >
+                        Remover ordem
                     </button>
                     {modalAbertoin && (
                         <AdicionarProdutoModal

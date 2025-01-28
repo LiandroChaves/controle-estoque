@@ -32,6 +32,9 @@ export default function Modal({
                 position: "bottom-right", // Posição do toast
                 autoClose: 3000, // Duração do toast em milissegundos
             });
+            setTimeout(() => {
+                window.location.reload()
+            }, 2000);
         }
     };
 

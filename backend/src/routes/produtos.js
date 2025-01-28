@@ -276,7 +276,10 @@ router.get('/produtos/ordenarAtoZ/:id', async (req, res) => {
                 subcategoria,
                 estoque,
                 preco,
-                favorito
+                favorito,
+                imagem,
+                descricao,
+                catalogo
             FROM produtos
             WHERE usuario_id = $1
             ORDER BY nome ASC
@@ -306,7 +309,10 @@ router.get('/produtos/ordenarZtoA/:id', async (req, res) => {
                 subcategoria,
                 estoque,
                 preco,
-                favorito
+                favorito,
+                imagem,
+                descricao,
+                catalogo
             FROM produtos
             WHERE usuario_id = $1
             ORDER BY nome DESC
@@ -319,5 +325,27 @@ router.get('/produtos/ordenarZtoA/:id', async (req, res) => {
     }
 });
 
+
+router.get('/produtos/ordenarToNormal/:id', async (req, res) => {
+    try {
+        const usuarioId = req.params.id;  // Mudança para obter o valor do parâmetro de rota
+
+        if (!usuarioId) {
+            return res.status(400).json({ error: 'usuario_id é necessário.' });
+        }
+
+        const result = await pool.query(`
+            SELECT 
+                *
+            FROM produtos
+            WHERE usuario_id = $1
+        `, [usuarioId]);
+
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Erro ao remover ordem de produtos:', error.message, error.stack);
+        res.status(500).json({ error: 'Erro ao obter produtos ordenados.' });
+    }
+});
 
 module.exports = router;
