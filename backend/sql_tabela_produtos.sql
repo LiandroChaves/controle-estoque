@@ -28,10 +28,6 @@ where id = 19;
 
 SELECT * FROM produtos;
 
-SELECT * 
-FROM produtos
-WHERE imagem IS NOT NULL AND imagem <> '';
-
 -- ======================= Tabela de Vendas ====================================
 CREATE TABLE IF NOT EXISTS vendas (
     id SERIAL PRIMARY KEY,

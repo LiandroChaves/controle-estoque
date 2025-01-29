@@ -44,6 +44,45 @@ router.get('/produtos/favoritos/:usuario_id', async (req, res) => {
 });
 
 
+router.get('/produtos/favoritosOrdenadosAtoZ/:usuario_id', async (req, res) => {
+    const { usuario_id } = req.params;
+    try {
+        const result = await pool.query(
+            `SELECT * FROM produtos WHERE usuario_id = $1 AND favorito = true ORDER BY nome ASC`,
+            [usuario_id]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar produtos favoritos ordenados:', error);
+        res.status(500).json({
+            error: 'Erro ao consultar o banco de dados',
+            message: error.message,
+            stack: error.stack,
+        });
+    }
+});
+
+
+router.get('/produtos/favoritosOrdenadosZtoA/:usuario_id', async (req, res) => {
+    const { usuario_id } = req.params;
+    try {
+        const result = await pool.query(
+            `SELECT * FROM produtos WHERE usuario_id = $1 AND favorito = true ORDER BY nome DESC`,
+            [usuario_id]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar produtos favoritos ordenados:', error);
+        res.status(500).json({
+            error: 'Erro ao consultar o banco de dados',
+            message: error.message,
+            stack: error.stack,
+        });
+    }
+});
+
+
+
 router.put('/produtos/:id/favorito', async (req, res) => {
     const { id } = req.params;
     const { favorito } = req.body;

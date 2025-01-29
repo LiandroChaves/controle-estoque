@@ -42,6 +42,7 @@ export default function Produtos() {
     const [isVisible, setIsVisible] = useState(false);
     const [menuVisivel, setMenuVisivel] = useState(false);
     const toggleMenu = () => setMenuVisivel((prev) => !prev);
+    const [ordemAtual, setOrdemAtual] = useState<"asc" | "desc" | null>(null);
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
@@ -430,20 +431,36 @@ export default function Produtos() {
 
 
     const alternarFavoritos = async () => {
-        setMostrarFavoritos((prevState) => !prevState); // Atualiza o estado
-
+        const novoEstado = !mostrarFavoritos; // Estado atualizado antes da requisição
+        setMostrarFavoritos(novoEstado);
+    
         try {
             const data = await fetchUsuario();
-            const novoEstado = !mostrarFavoritos; // Calcula o novo estado manualmente
-            const endpoint = novoEstado
-                ? `http://localhost:5000/api/produtos/favoritos/${data.id}`
-                : `http://localhost:5000/api/produtos/${data.id}`;
-
+            let endpoint = `http://localhost:5000/api/produtos/favoritos/${data.id}`;
+    
+            // Se favoritos estão ativados e há ordenação, mudar a URL
+            if (novoEstado && ordemAtual) {
+                if (ordemAtual === "asc") {
+                    endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${data.id}`;
+                } else if (ordemAtual === "desc") {
+                    endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${data.id}`;
+                }
+            } 
+            // Se favoritos estão desativados, buscar todos os produtos
+            else if (!novoEstado) {
+                endpoint = `http://localhost:5000/api/produtos/${data.id}`;
+                if (ordemAtual === "asc") {
+                    endpoint = `http://localhost:5000/api/produtos/ordenarAtoZ/${data.id}`;
+                } else if (ordemAtual === "desc") {
+                    endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${data.id}`;
+                }
+            }
+    
             const response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
-
+    
             const dados = await response.json();
             setProdutos(dados);
             setProdutosBuscados(dados);
@@ -553,101 +570,57 @@ export default function Produtos() {
 
     const ordenarProdutosAtoZ = async () => {
         try {
-            console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
-
             const usuario = await fetchUsuario();
-            const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
-            if (!usuarioId) {
-                throw new Error('ID do usuário não encontrado.');
+            const usuarioId = usuario.id;
+            if (!usuarioId) throw new Error("ID do usuário não encontrado.");
+    
+            let endpoint = `http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`;
+    
+            if (mostrarFavoritos) {
+                endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${usuarioId}`;
             }
-
-            console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
-
-            const response = await fetch(`http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao buscar produtos ordenados');
-            }
-
+    
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
+    
             const produtosOrdenados = await response.json();
-            console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
             setProdutos(produtosOrdenados);
-            setProdutosBuscados(produtosOrdenados)
+            setProdutosBuscados(produtosOrdenados);
+            setOrdemAtual("asc");
         } catch (error: any) {
-            console.error('Erro ao ordenar produtos:', error.message);
-            alert('Erro ao ordenar produtos.');
+            console.error("Erro ao ordenar produtos:", error.message);
+            alert("Erro ao ordenar produtos.");
         }
     };
 
     const ordenarProdutosZtoA = async () => {
         try {
-            console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
-
             const usuario = await fetchUsuario();
-            const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
-            if (!usuarioId) {
-                throw new Error('ID do usuário não encontrado.');
+            const usuarioId = usuario.id;
+            if (!usuarioId) throw new Error("ID do usuário não encontrado.");
+    
+            let endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`;
+    
+            if (mostrarFavoritos) {
+                endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${usuarioId}`;
             }
-
-            console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
-
-            const response = await fetch(`http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao buscar produtos ordenados');
-            }
-
+    
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
+    
             const produtosOrdenados = await response.json();
-            console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
             setProdutos(produtosOrdenados);
-            setProdutosBuscados(produtosOrdenados)
+            setProdutosBuscados(produtosOrdenados);
+            setOrdemAtual("desc");
         } catch (error: any) {
-            console.error('Erro ao ordenar produtos:', error.message);
-            alert('Erro ao ordenar produtos.');
+            console.error("Erro ao ordenar produtos:", error.message);
+            alert("Erro ao ordenar produtos.");
         }
     };
 
     const ordenarProdutosToNormal = async () => {
-        try {
-            console.log('Iniciando ordenação de produtos...'); // Verifique se o log aparece no console
-
-            const usuario = await fetchUsuario();
-            const usuarioId = usuario.id; // Supondo que o id do usuário está em 'usuario.id'
-            if (!usuarioId) {
-                throw new Error('ID do usuário não encontrado.');
-            }
-
-            console.log('usuarioId enviado:', usuarioId); // Verifique se o ID é numérico
-
-            const response = await fetch(`http://localhost:5000/api/produtos/ordenarToNormal/${usuarioId}`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao buscar produtos ordenados');
-            }
-
-            const produtosOrdenados = await response.json();
-            console.log('Produtos ordenados:', produtosOrdenados); // Verifique se os produtos estão sendo recebidos
-            setProdutos(produtosOrdenados);
-            setProdutosBuscados(produtosOrdenados)
-        } catch (error: any) {
-            console.error('Erro ao ordenar produtos:', error.message);
-            alert('Erro ao ordenar produtos.');
-        }
+        setOrdemAtual(null);
+        carregarProdutos();
     };
 
     // ============================= Renderização ===============================
