@@ -49,6 +49,9 @@ export default function Produtos() {
     const handleAbrirModal = () => setModalAbertoin(true);
     const handleFecharModal = () => setModalAbertoin(false);
 
+    const [isDarkMode, setIsDarkMode] = useState(true);
+
+
     const fetchCategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
@@ -433,11 +436,11 @@ export default function Produtos() {
     const alternarFavoritos = async () => {
         const novoEstado = !mostrarFavoritos; // Estado atualizado antes da requisição
         setMostrarFavoritos(novoEstado);
-    
+
         try {
             const data = await fetchUsuario();
             let endpoint = `http://localhost:5000/api/produtos/favoritos/${data.id}`;
-    
+
             // Se favoritos estão ativados e há ordenação, mudar a URL
             if (novoEstado && ordemAtual) {
                 if (ordemAtual === "asc") {
@@ -445,7 +448,7 @@ export default function Produtos() {
                 } else if (ordemAtual === "desc") {
                     endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${data.id}`;
                 }
-            } 
+            }
             // Se favoritos estão desativados, buscar todos os produtos
             else if (!novoEstado) {
                 endpoint = `http://localhost:5000/api/produtos/${data.id}`;
@@ -455,12 +458,12 @@ export default function Produtos() {
                     endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${data.id}`;
                 }
             }
-    
+
             const response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
-    
+
             const dados = await response.json();
             setProdutos(dados);
             setProdutosBuscados(dados);
@@ -573,16 +576,16 @@ export default function Produtos() {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-    
+
             let endpoint = `http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`;
-    
+
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${usuarioId}`;
             }
-    
+
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-    
+
             const produtosOrdenados = await response.json();
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
@@ -598,16 +601,16 @@ export default function Produtos() {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-    
+
             let endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`;
-    
+
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${usuarioId}`;
             }
-    
+
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-    
+
             const produtosOrdenados = await response.json();
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
@@ -626,11 +629,16 @@ export default function Produtos() {
     // ============================= Renderização ===============================
     return (
         <>
-            <header className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 shadow-lg py-6">
+            <header className={`${isDarkMode
+                ? "bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800"
+                : "bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800"
+                } shadow-lg py-6 transition-all`}>
                 <div className="container mx-auto flex justify-between items-center px-6">
-                    <h1 className="text-4xl font-bold text-teal-400 flex items-center gap-4">
+                    <h1 className={`text-4xl font-bold ${isDarkMode ? "text-teal-400" : "text-white"
+                        }`}>
                         EasyControl
-                        <span className="text-lg font-medium bg-teal-500 text-gray-900 px-3 py-1 rounded-full shadow-md">
+                        <span className={`ml-4 text-lg font-medium px-3 py-1 rounded-full shadow-md transition-all ${isDarkMode ? "bg-teal-500 text-gray-900" : "bg-gray-700 text-white"
+                            }`}>
                             Estoque
                         </span>
                     </h1>
@@ -638,7 +646,8 @@ export default function Produtos() {
                         {prodsCadastrados.map((item, index) => (
                             <div
                                 key={index}
-                                className="flex items-center gap-2 text-teal-400 bg-gray-700 px-4 py-2 rounded-lg shadow-md"
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-md transition-all ${isDarkMode ? "text-teal-400 bg-gray-700" : "text-white bg-gray-600"
+                                    }`}
                             >
                                 <h1 className="text-lg font-semibold">Produtos:</h1>
                                 <p className="text-xl font-bold">{item.quantProd}</p>
@@ -646,18 +655,25 @@ export default function Produtos() {
                         ))}
                         {infor.length > 0 ? (
                             infor.map((item, index) => (
-                                <div key={index} className="flex items-center gap-4 bg-gray-700 rounded-lg shadow-lg px-4 py-2">
+                                <div key={index} className={`flex items-center gap-4 ${isDarkMode ? "bg-gray-700" : "bg-gray-700"
+                                    } rounded-lg shadow-md px-4 py-2 transition-all`}>
                                     <Image
                                         src={imagemUsuario}
                                         alt="Imagem do perfil"
                                         width={100}
                                         height={100}
-                                        className="w-16 h-16 rounded-full border-2 border-teal-500"
+                                        className={`w-16 h-16 rounded-full border-2 transition-all ${isDarkMode ? "border-teal-500" : "border-white"
+                                            }`}
                                     />
                                     <div className="flex flex-col gap-2">
                                         <button
                                             onClick={() => setIsVisible(!isVisible)}
-                                            className={`text-sm mt-1 p-2 ${isVisible ? "bg-red-500 hover:bg-red-600 w-9 relative" : "bg-teal-500 hover:bg-teal-600"} text-white rounded-lg cursor-pointer`}
+                                            className={`text-sm mt-1 p-2 rounded-lg cursor-pointer transition-all ${isVisible
+                                                ? "bg-red-500 hover:bg-red-600 w-9 relative text-white"
+                                                : isDarkMode
+                                                    ? "bg-teal-500 hover:bg-teal-600 text-white"
+                                                    : "bg-gray-400 hover:bg-gray-500 text-white"
+                                                }`}
                                         >
                                             {isVisible ? "X" : "☰"}
                                         </button>
@@ -684,15 +700,35 @@ export default function Produtos() {
                                         onChange={handleImageChange}
                                     />
                                     <div className="flex flex-col">
-                                        <p className="text-teal-400 font-bold">Nome: {item.nome}</p>
-                                        <p className="text-gray-400 font-medium">Empresa: {item.empresa}</p>
+                                        <p
+                                            className={`font-bold transition-all ${isDarkMode ? "text-teal-400" : "text-white"
+                                                }`}
+                                        >
+                                            Nome: {item.nome}
+                                        </p>
+                                        <p
+                                            className={`font-medium transition-all ${isDarkMode ? "text-gray-400" : "text-white"
+                                                }`}
+                                        >
+                                            Empresa: {item.empresa}
+                                        </p>
                                     </div>
                                     <p
                                         onClick={funcaoSair}
-                                        className="ml-4 text-red-500 font-bold cursor-pointer hover:underline"
-                                    >
+                                        className={`font-bold cursor-pointer underline ${isDarkMode ? "text-red-500" : "text-red-500"
+                                            }`}                                    >
                                         Sair
                                     </p>
+                                    <button
+                                        onClick={() => setIsDarkMode(!isDarkMode)}
+                                        className={`p-2 rounded-lg font-bold transition-all ${isDarkMode
+
+                                            ? "bg-gray-500 text-teal-600 hover:bg-teal-500 hover:text-white"
+                                            : "bg-gray-500 text-teal-400 hover:bg-teal-600 hover:text-white"
+                                            }`}
+                                    >
+                                        {isDarkMode ? "☀️" : "🌙"}
+                                    </button>
                                 </div>
                             ))
                         ) : (
@@ -730,44 +766,65 @@ export default function Produtos() {
                     </select>
                     <button
                         onClick={alternarFavoritos}
-                        className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
+                        className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                            ? "bg-gray-600 text-teal-400 hover:bg-teal-600 hover:text-white"
+                            : "bg-gray-600 text-white hover:bg-teal-500 hover:text-white"
+                            }`}
                     >
                         {mostrarFavoritos ? "Mostrar Todos" : "Favoritos"}
                     </button>
                     <button
                         onClick={() => router.push("/compras")}
-                        className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
+                        className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                            ? "bg-gray-600 text-teal-400 hover:bg-teal-600 hover:text-white"
+                            : "bg-gray-600 text-white hover:bg-teal-500 hover:text-white"
+                            }`}
                     >
                         Compras
                     </button>
                     <button
                         onClick={() => router.push("/vendas")}
-                        className="bg-gray-600 text-teal-400 px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-600 hover:text-white transform hover:scale-105 transition-all"
+                        className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                            ? "bg-gray-600 text-teal-400 hover:bg-teal-600 hover:text-white"
+                            : "bg-gray-600 text-white hover:bg-teal-500 hover:text-white"
+                            }`}
                     >
                         Carrinho
                     </button>
                     <div className="ml-auto flex items-center gap-4">
                         {produtosBuscados.length === 0 && (
-                            <p className="text-gray-400">Nenhum produto encontrado</p>
+                            <p className={`mr-5 mt-2 transition-all ${isDarkMode ? "text-white" : "text-white"
+                                }`}>Nenhum produto encontrado</p>
                         )}
                         <input
                             type="text"
                             placeholder="Pesquisar por nome"
                             value={buscarTermo}
                             onChange={(e) => setBuscarTermo(e.target.value)}
-                            className="bg-gray-600 text-gray-300 px-4 py-2 rounded-lg shadow-md focus:ring-teal-500"
+                            className={`rounded-md px-4 py-2 transition-all ${isDarkMode
+                                ? "bg-gray-700 text-white"
+                                : "bg-gray-200 text-gray-900"
+                                }`}
                         />
                     </div>
                 </div>
             </nav>
 
             <main
-                className="bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 min-h-screen px-6 py-12 text-gray-300"
+                className={`min-h-screen px-6 py-12 transition-all ${isDarkMode
+                    ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
+                    : "bg-gradient-to-b from-gray-300 via-gray-400 to-gray-200 text-white"
+                    }`}
             >
                 <div className="flex justify-center gap-2 mb-6">
                     <button
                         onClick={toggleMenu}
-                        className={`${menuVisivel ? "bg-red-600 hover:bg-red-500" : "bg-teal-600 hover:bg-teal-500"} transform hover:scale-105 transition-all text-white px-6 py-2 rounded-lg shadow-md font-bold`}
+                        className={`${menuVisivel
+                            ? "bg-red-600 hover:bg-red-500"
+                            : isDarkMode
+                                ? "bg-teal-600 hover:bg-teal-500"
+                                : "bg-gray-600 hover:bg-teal-500"} transform hover:scale-105 transition-all text-white px-6 py-2 rounded-lg shadow-md font-bold`}
+
                     >
                         {menuVisivel ? "X" : "☰"}
                     </button>
@@ -775,19 +832,29 @@ export default function Produtos() {
                         <div className="flex gap-2">
                             <button
                                 onClick={ordenarProdutosAtoZ}
-                                className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                                className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                                    ? "bg-teal-600 text-white hover:bg-teal-500"
+                                    : "bg-gray-600 text-white hover:bg-teal-500"
+                                    }`}
+
                             >
                                 Ordenar de A - Z
                             </button>
                             <button
                                 onClick={ordenarProdutosZtoA}
-                                className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                                className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                                    ? "bg-teal-600 text-white hover:bg-teal-500"
+                                    : "bg-gray-600 text-white hover:bg-teal-500"
+                                    }`}
                             >
                                 Ordenar de Z - A
                             </button>
                             <button
                                 onClick={ordenarProdutosToNormal}
-                                className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                                className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                                    ? "bg-teal-600 text-white hover:bg-teal-500"
+                                    : "bg-gray-600 text-white hover:bg-teal-500"
+                                    }`}
                             >
                                 Remover ordem
                             </button>
@@ -795,7 +862,11 @@ export default function Produtos() {
                     )}
                     <button
                         onClick={handleAbrirModal}
-                        className="bg-teal-600 text-white px-6 py-2 rounded-lg shadow-md font-bold hover:bg-teal-500 transform hover:scale-105 transition-all"
+                        className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                            ? "bg-teal-600 text-white hover:bg-teal-500"
+                            : "bg-gray-600 text-white hover:bg-teal-500"
+                            }`}
+
                     >
                         Adicionar Produto
                     </button>
@@ -806,9 +877,11 @@ export default function Produtos() {
                         />
                     )}
                 </div>
-                <table className="w-full text-left border-collapse shadow-lg bg-gray-700 rounded-lg">
+                <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-500"
+                    }`}>
                     <thead>
-                        <tr className="bg-gray-800 text-teal-400">
+                        <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"
+                                }`}>
                             {["Produto", "Categoria", "Subcategoria", "Estoque", "Preço", "Editar", "Deletar"].map(
                                 (header, index) => (
                                     <th key={index} className="p-4 border-b border-gray-600 text-center">
