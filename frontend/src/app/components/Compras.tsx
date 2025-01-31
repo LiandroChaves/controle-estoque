@@ -684,7 +684,7 @@ export default function Compras() {
                                         className={`p-2 rounded-lg font-bold transition-all ${isDarkMode
 
                                             ? "bg-gray-500 text-teal-600 hover:bg-teal-500 hover:text-white"
-                                            : "bg-gray-500 text-teal-400 hover:bg-teal-600 hover:text-white"
+                                            : "bg-gray-500 text-teal-400 hover:bg-teal-500 hover:text-white"
                                             }`}
                                     >
                                         {isDarkMode ? "☀️" : "🌙"}

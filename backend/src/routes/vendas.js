@@ -8,7 +8,7 @@ const router = express.Router();
 // Rota para buscar vendas de um usuário
 router.get('/api/vendas/:usuario_id', autenticarUsuario, async (req, res) => {
     const usuarioId = req.params.usuario_id;
-
+    console.log(usuarioId);
     try {
         // Verifica se o ID do usuário autenticado corresponde ao solicitado
         if (parseInt(usuarioId, 10) !== req.usuario.id) {
@@ -93,5 +93,60 @@ router.delete('/api/vendas/usuario/:usuario_id', autenticarUsuario, async (req, 
         res.status(500).json({ error: 'Erro ao esvaziar o carrinho' });
     }
 });
+
+router.get('/api/vendas/categoria/:categoria', autenticarUsuario, async (req, res) => {
+    const { categoria } = req.params;
+    const usuarioId = req.usuario?.id;
+    const categoriaDecodificada = decodeURIComponent(categoria); // Decodifica categoria
+
+    console.log("🔍 Categoria recebida (bruta):", categoria);
+    console.log("🔍 Categoria decodificada:", categoriaDecodificada);
+    console.log("🔍 ID do usuário autenticado:", usuarioId);
+
+    try {
+        if (!categoriaDecodificada || !usuarioId) {
+            return res.status(400).json({ error: "Categoria ou usuário não informado" });
+        }
+
+        const vendas = await pool.query(
+            `SELECT vendas.id, vendas.quantidade, vendas.preco, produtos.nome AS produto, produtos.categoria 
+             FROM vendas
+             JOIN produtos ON vendas.cod_produto = produtos.id
+             WHERE produtos.categoria = $1 AND vendas.usuario_id = $2`,
+            [categoriaDecodificada, usuarioId]
+        );
+
+        console.log("✅ Vendas encontradas:", vendas.rows);
+        res.json(vendas.rows);
+    } catch (err) {
+        console.error("❌ Erro ao buscar vendas por categoria:", err);
+        res.status(500).json({ error: "Erro ao buscar vendas por categoria" });
+    }
+});
+
+router.get('/api/categorias/vendas', async (req, res) => {
+    const { userId } = req.query; // ID do usuário vindo da query string
+
+    if (!userId) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT DISTINCT p.categoria 
+             FROM vendas v
+             JOIN produtos p ON v.cod_produto = p.id
+             WHERE v.usuario_id = $1`,
+            [userId]
+        );
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('❌ Erro ao buscar categorias de vendas:', error);
+        res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
+    }
+});
+
+
 
 module.exports = router;
