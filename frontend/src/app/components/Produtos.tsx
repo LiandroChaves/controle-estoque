@@ -11,6 +11,8 @@ import Footer from "./Footer";
 import AdicionarProdutoModal from "./modalAddProduto";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "../../utils/context/ThemeContext";
+
 
 export default function Produtos() {
     type Produto = {

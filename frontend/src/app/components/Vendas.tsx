@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import logoEditar from '../../../public/assets/caneta.png'
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
+import { useTheme } from "../../utils/context/ThemeContext";
 
 
 export default function Vendas() {
@@ -20,7 +21,7 @@ export default function Vendas() {
     const [erro, setErro] = useState<string | null>(null);
     const [infor, setInfor] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [isDarkMode, setIsDarkMode] = useState(true);
+    const { isDarkMode, toggleTheme } = useTheme();
     const [isVisible, setIsVisible] = useState(false);
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
     const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
@@ -482,7 +483,7 @@ export default function Vendas() {
                                         <strong>Sair</strong>
                                     </p>
                                     <button
-                                        onClick={() => setIsDarkMode(!isDarkMode)}
+                                        onClick={toggleTheme}
                                         className={`p-2 rounded-lg font-bold transition-all ${isDarkMode
 
                                             ? "bg-gray-500 text-teal-600 hover:bg-teal-500 hover:text-white"

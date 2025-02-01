@@ -13,8 +13,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import imgFundo from "../../../public/assets/comprar-online.png";
 import logoDetalhes from "../../../public/assets/detalhes-do-produto.png";
-
-
+import { useTheme } from "../../utils/context/ThemeContext";
+    
 export default function Compras() {
     type Produto = {
         id?: number;
@@ -52,8 +52,7 @@ export default function Compras() {
     const [produtoDetalhado, setProdutoDetalhado] = useState<any | null>(null);
     const [isDetalheModalAberto, setIsDetalheModalAberto] = useState(false);
 
-    const [isDarkMode, setIsDarkMode] = useState(true);
-
+    const { isDarkMode, toggleTheme } = useTheme();
 
     const fetchCategorias = async () => {
         try {
@@ -683,7 +682,7 @@ export default function Compras() {
                                         <strong>Sair</strong>
                                     </p>
                                     <button
-                                        onClick={() => setIsDarkMode(!isDarkMode)}
+                                        onClick={toggleTheme}
                                         className={`p-2 rounded-lg font-bold transition-all ${isDarkMode
 
                                             ? "bg-gray-500 text-teal-600 hover:bg-teal-500 hover:text-white"

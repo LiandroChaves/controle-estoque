@@ -1,38 +1,35 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
-import Produtos from './components/Produtos';
-import ProtectedRoute from '../utils/protectedRoute';
-import PaginaVendas from './components/Vendas';
-import Compras from './components/Compras';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Login from "./components/Login";
+import Produtos from "./components/Produtos";
+import PaginaVendas from "./components/Vendas";
+import Compras from "./components/Compras";
 
 export default function Home() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
-        const checkAuth = () => {
-            const token = localStorage.getItem('authToken'); 
-            setIsAuthenticated(!!token);
-        };
-        
-        checkAuth();
-    }, []);
+        const token = localStorage.getItem("token");
+        setIsAuthenticated(!!token);
+
+        if (!token) {
+            router.push("/login"); // Redireciona para a página de login se não estiver autenticado
+        }
+    }, [router]);
+
+    if (!isAuthenticated) {
+        return <Login />;
+    }
 
     return (
-        <Router>
-            <Routes>
-                {!isAuthenticated ? (
-                    <Route path="/" element={<Login />} />
-                ) : (
-                    <>
-                        <Route path="/compras" element={<ProtectedRoute isAuthenticated={isAuthenticated}><Produtos /></ProtectedRoute>} />
-                        <Route path="/produtos" element={<ProtectedRoute isAuthenticated={isAuthenticated}><Produtos /></ProtectedRoute>} />
-                        <Route path="/vendas" element={<ProtectedRoute isAuthenticated={isAuthenticated}><PaginaVendas /></ProtectedRoute>} />
-                    </>
-                )}
-            </Routes>
-        </Router>
+        <div>
+            <h1 className="text-white text-center text-2xl">Bem-vindo ao Controle Financeiro</h1>
+            <Produtos />
+            <PaginaVendas />
+            <Compras />
+        </div>
     );
 }
