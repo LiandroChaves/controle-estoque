@@ -8,7 +8,6 @@ const router = express.Router();
 // Rota para buscar vendas de um usuário
 router.get('/api/vendas/:usuario_id', autenticarUsuario, async (req, res) => {
     const usuarioId = req.params.usuario_id;
-    console.log(usuarioId);
     try {
         // Verifica se o ID do usuário autenticado corresponde ao solicitado
         if (parseInt(usuarioId, 10) !== req.usuario.id) {
@@ -101,7 +100,6 @@ router.get('/api/vendas/categoria/:categoria', autenticarUsuario, async (req, re
 
     console.log("🔍 Categoria recebida (bruta):", categoria);
     console.log("🔍 Categoria decodificada:", categoriaDecodificada);
-    console.log("🔍 ID do usuário autenticado:", usuarioId);
 
     try {
         if (!categoriaDecodificada || !usuarioId) {
@@ -116,7 +114,6 @@ router.get('/api/vendas/categoria/:categoria', autenticarUsuario, async (req, re
             [categoriaDecodificada, usuarioId]
         );
 
-        console.log("✅ Vendas encontradas:", vendas.rows);
         res.json(vendas.rows);
     } catch (err) {
         console.error("❌ Erro ao buscar vendas por categoria:", err);

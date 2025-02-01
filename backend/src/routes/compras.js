@@ -70,8 +70,6 @@ router.post("/api/compras/verificarsenha", autenticarUsuario, async (req, res) =
     }
 });
 
-
-
 router.post('/api/compras/:usuario_id', autenticarUsuario, async (req, res) => {
     const usuarioId = req.params.usuario_id;
     const { quantidade, id } = req.body; // Use 'id' no lugar de 'cod_produto'

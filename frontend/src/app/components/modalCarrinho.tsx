@@ -55,22 +55,22 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
             alert("A quantidade deve ser maior que zero.");
             return;
         }
-
-        if (!produto.id) { // Agora verificamos 'id'
-            alert("O ID do produto é obrigatório.");
+    
+        if (!produto || !produto.id) { // Corrigido para usar 'produto' vindo das props
+            alert("Selecione um produto válido.");
             return;
         }
-
+    
         try {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
-
+    
             const token = localStorage.getItem("token");
             if (!token) {
                 alert("Você precisa estar autenticado para realizar a compra.");
                 return;
             }
-
+    
             const resposta = await fetch(`http://localhost:5000/api/compras/${usuarioId}`, {
                 method: "POST",
                 headers: {
@@ -78,15 +78,15 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    quantidade: quantidade,
-                    id: produto.id, // Altere 'cod_produto' para 'id'
-                }),                
+                    quantidade,
+                    id: produto.id, // Agora garantimos que estamos pegando o ID correto do produto recebido
+                }),
             });
-
+    
             const dados = await resposta.json();
-
+    
             if (resposta.ok) {
-                onAdicionarCarrinho({ ...produto, quantidade });
+                onAdicionarCarrinho({ ...produto, quantidade }); // Aqui também corrigimos para usar 'produto'
             } else {
                 alert(dados.error || "Erro ao realizar a compra");
             }
@@ -94,9 +94,11 @@ const ObterProdutoModal: React.FC<ModalProps> = ({ produto, onClose, onAdicionar
             console.error("Erro ao realizar a compra:", err);
             alert("Erro ao realizar a compra");
         }
-
+    
         onClose();
-    };    
+    };
+    
+    
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 animate__animated animate__fadeIn animate__faster">

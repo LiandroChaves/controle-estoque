@@ -224,7 +224,6 @@ export default function Vendas() {
     const fetchUsuario = async () => {
         try {
             const token = localStorage.getItem('token');
-            console.log('Token:', token); // Log para depuração
 
             if (!token || token === 'undefined') {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
@@ -256,7 +255,6 @@ export default function Vendas() {
         try {
             usuarioId = localStorage.getItem('userId') as unknown as number;
             const token = localStorage.getItem('token');
-            console.log('Token:', token); // Log para depuração
 
             if (!token || token === 'undefined') {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
@@ -598,10 +596,10 @@ export default function Vendas() {
 
             <main className={`min-h-screen px-6 py-12 transition-all ${isDarkMode
                 ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
-                : "bg-gradient-to-b from-gray-300 via-gray-400 to-gray-200 text-white"
+                : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}>
                 <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
-                    <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-500"
+                    <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
                         }`}>
                         <thead>
                             <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"
@@ -617,7 +615,7 @@ export default function Vendas() {
                             {vendasBuscados.length > 0 ? (
                                 // Se houver vendas buscadas, renderiza essas vendas
                                 vendasBuscados.map((venda) => (
-                                    <tr key={venda.id} className="hover:bg-gray-600 transition-all duration-200">
+                                    <tr key={venda.id} className="hover:bg-gray-500 transition-all duration-200">
                                         <td className="p-4 border-b border-gray-600 text-center">{venda.produto}</td>
                                         <td className="p-4 border-b border-gray-600 text-center">{venda.categoria}</td>
                                         <td className="p-4 border-b border-gray-600 text-center">{venda.quantidade}</td>
@@ -645,7 +643,7 @@ export default function Vendas() {
                             {vendas.length > 0 && vendasBuscados.length === 0 && (
                                 // Caso não haja vendas buscadas, renderiza todas as vendas
                                 vendas.map((venda) => (
-                                    <tr key={venda.id} className="hover:bg-gray-600 transition-all duration-200">
+                                    <tr key={venda.id} className="hover:bg-gray-500 transition-all duration-200">
                                         <td className="p-4 border-b border-gray-600 text-center">{venda.produto}</td>
                                         <td className="p-4 border-b border-gray-600 text-center">{venda.categoria}</td>
                                         <td className="p-4 border-b border-gray-600 text-center">{venda.quantidade}</td>

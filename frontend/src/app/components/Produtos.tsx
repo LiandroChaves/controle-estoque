@@ -22,6 +22,7 @@ export default function Produtos() {
         preco: number;
         catalogo: string;
         favorito: boolean;
+        imagem?: string;
     };
 
 
@@ -576,50 +577,71 @@ export default function Produtos() {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-
+    
             let endpoint = `http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`;
-
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${usuarioId}`;
             }
-
+    
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-
-            const produtosOrdenados = await response.json();
+    
+            const produtosOrdenados: Produto[] = await response.json();
+    
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
+    
+            // Atualiza o produto selecionado caso ainda esteja na lista
+            const produtoAindaSelecionado = produtosOrdenados.find(p => p.id === produtoSelecionado?.id);
+            setProdutoSelecionado(produtoAindaSelecionado || null);
+    
             setOrdemAtual("asc");
         } catch (error: any) {
             console.error("Erro ao ordenar produtos:", error.message);
             alert("Erro ao ordenar produtos.");
         }
     };
+    
+    useEffect(() => {
+        if (produtoSelecionado) {
+            const produtoAtualizado = produtos.find(p => p.id === produtoSelecionado.id);
+            if (produtoAtualizado) {
+                setProdutoSelecionado(produtoAtualizado);
+            }
+        }
+    }, [produtos]);  // Sempre que a lista de produtos mudar, verifica se o produto selecionado ainda está lá
+    
 
     const ordenarProdutosZtoA = async () => {
         try {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-
+    
             let endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`;
-
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${usuarioId}`;
             }
-
+    
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-
-            const produtosOrdenados = await response.json();
+    
+            const produtosOrdenados: Produto[] = await response.json();
+    
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
+    
+            // Mantém o produto selecionado atualizado
+            const produtoAindaSelecionado = produtosOrdenados.find((p: Produto) => p.id === produtoSelecionado?.id);
+            setProdutoSelecionado(produtoAindaSelecionado || null);
+    
             setOrdemAtual("desc");
         } catch (error: any) {
             console.error("Erro ao ordenar produtos:", error.message);
             alert("Erro ao ordenar produtos.");
         }
     };
+    
 
     const ordenarProdutosToNormal = async () => {
         setOrdemAtual(null);
@@ -813,7 +835,7 @@ export default function Produtos() {
             <main
                 className={`min-h-screen px-6 py-12 transition-all ${isDarkMode
                     ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
-                    : "bg-gradient-to-b from-gray-300 via-gray-400 to-gray-200 text-white"
+                    : "bg-gradient-to-b from-white via-white to-white text-white"
                     }`}
             >
                 <div className="flex justify-center gap-2 mb-6">
@@ -877,7 +899,7 @@ export default function Produtos() {
                         />
                     )}
                 </div>
-                <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-500"
+                <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
                     }`}>
                     <thead>
                         <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"
@@ -895,7 +917,7 @@ export default function Produtos() {
                         {produtosBuscados.map((produto, index) => (
                             <tr
                                 key={index}
-                                className="group hover:bg-gray-600 transition-all duration-200 relative"
+                                className="group hover:bg-gray-500 transition-all duration-200 relative"
                             >
                                 <td className="p-4 border-b border-gray-600 text-center">
                                     {produto.favorito && (

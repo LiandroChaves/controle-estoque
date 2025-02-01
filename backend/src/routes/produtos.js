@@ -259,24 +259,24 @@ router.post('/produtos/reset-sequence', async (req, res) => {
 });
 
 
-    router.get('/categorias', async (req, res) => {
-        const { userId } = req.query; // ID do usuário da query string
+router.get('/categorias', async (req, res) => {
+    const { userId } = req.query; // ID do usuário da query string
 
-        if (!userId) {
-            return res.status(400).json({ error: 'ID do usuário é obrigatório' });
-        }
+    if (!userId) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
 
-        try {
-            const result = await pool.query(
-                'SELECT DISTINCT categoria FROM produtos WHERE usuario_id = $1',
-                [userId]
-            );
-            res.json(result.rows);
-        } catch (error) {
-            console.error('Erro ao buscar categorias:', error);
-            res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
-        }
-    });
+    try {
+        const result = await pool.query(
+            'SELECT DISTINCT categoria FROM produtos WHERE usuario_id = $1',
+            [userId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+        res.status(500).json({ error: 'Erro ao consultar o banco de dados' });
+    }
+});
 
 
 router.get('/subcategorias', async (req, res) => {
@@ -310,18 +310,19 @@ router.get('/produtos/ordenarAtoZ/:id', async (req, res) => {
         // Aqui, adicionando o log da query para verificar o valor passado
         const result = await pool.query(`
             SELECT 
-                nome,
-                categoria,
-                subcategoria,
-                estoque,
-                preco,
-                favorito,
-                imagem,
-                descricao,
-                catalogo
-            FROM produtos
-            WHERE usuario_id = $1
-            ORDER BY nome ASC
+            id, 
+            nome,
+            descricao, 
+            categoria,
+            subcategoria,
+            estoque,
+            preco,
+            favorito,
+            imagem,
+            catalogo
+        FROM produtos
+        WHERE usuario_id = $1
+        ORDER BY nome ASC;
         `, [usuarioId]);
 
         res.status(200).json(result.rows);
@@ -343,18 +344,19 @@ router.get('/produtos/ordenarZtoA/:id', async (req, res) => {
         // Aqui, adicionando o log da query para verificar o valor passado
         const result = await pool.query(`
             SELECT 
-                nome,
-                categoria,
-                subcategoria,
-                estoque,
-                preco,
-                favorito,
-                imagem,
-                descricao,
-                catalogo
-            FROM produtos
-            WHERE usuario_id = $1
-            ORDER BY nome DESC
+            id, 
+            nome,
+            descricao, 
+            categoria,
+            subcategoria,
+            estoque,
+            preco,
+            favorito,
+            imagem,
+            catalogo
+        FROM produtos
+        WHERE usuario_id = $1
+        ORDER BY nome DESC;
         `, [usuarioId]);
 
         res.status(200).json(result.rows);

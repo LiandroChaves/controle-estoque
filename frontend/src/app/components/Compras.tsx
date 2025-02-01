@@ -25,6 +25,7 @@ export default function Compras() {
         preco: number;
         catalogo: string;
         favorito: boolean;
+        imagem?: string;
     };
 
 
@@ -527,17 +528,21 @@ export default function Compras() {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-
+    
             let endpoint = `http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`;
-
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${usuarioId}`;
             }
-
+    
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-
-            const produtosOrdenados = await response.json();
+    
+            const produtosOrdenados: Produto[] = await response.json();
+    
+            // Mantém o produto selecionado após a ordenação
+            const produtoAindaSelecionado = produtosOrdenados.find((p) => p.id === produtoSelecionado?.id);
+            setProdutoSelecionado(produtoAindaSelecionado || null);
+    
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
             setOrdemAtual("asc");
@@ -547,23 +552,21 @@ export default function Compras() {
         }
     };
 
-
-
     const ordenarProdutosZtoA = async () => {
         try {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-
+    
             let endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`;
-
+    
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${usuarioId}`;
             }
-
+    
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-
+    
             const produtosOrdenados = await response.json();
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
@@ -573,6 +576,7 @@ export default function Compras() {
             alert("Erro ao ordenar produtos.");
         }
     };
+    
 
 
     const ordenarProdutosToNormal = async () => {
@@ -818,7 +822,7 @@ export default function Compras() {
             </nav>
             <main className={`min-h-screen px-6 py-12 transition-all ${isDarkMode
                 ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
-                : "bg-gradient-to-b from-gray-300 via-gray-400 to-gray-200 text-white"
+                : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}
             >
                 {produtosBuscados.length === 0 && (
@@ -854,7 +858,7 @@ export default function Compras() {
                     Remover ordem
                 </button>
                 <table
-                    className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-500"
+                    className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
                         }`}
                 >
                     <thead>
@@ -874,7 +878,7 @@ export default function Compras() {
                     <tbody>
                         {produtosBuscados.map((produto, index) => (
                             <tr key={index}
-                                className="group hover:bg-gray-600 transition-all duration-200 relative">
+                                className="group hover:bg-gray-500 transition-all duration-200 relative">
                                 <td className="p-4 border-b border-gray-600 text-center">
                                     {produto.favorito && (
                                         <span className="text-yellow-400 mr-2" title="Favorito">
