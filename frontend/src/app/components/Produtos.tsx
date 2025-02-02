@@ -52,7 +52,9 @@ export default function Produtos() {
     const handleAbrirModal = () => setModalAbertoin(true);
     const handleFecharModal = () => setModalAbertoin(false);
 
-    const [isDarkMode, setIsDarkMode] = useState(true);
+    // const [isDarkMode, setIsDarkMode] = useState(true);
+    const { isDarkMode, toggleTheme } = useTheme();
+
 
 
     const fetchCategorias = async () => {
@@ -744,7 +746,7 @@ export default function Produtos() {
                                         Sair
                                     </p>
                                     <button
-                                        onClick={() => setIsDarkMode(!isDarkMode)}
+                                        onClick={toggleTheme}
                                         className={`p-2 rounded-lg font-bold transition-all ${isDarkMode
 
                                             ? "bg-gray-500 text-teal-600 hover:bg-teal-500 hover:text-white"
