@@ -215,15 +215,29 @@ router.put('/produtos/:id', async (req, res) => {
     }
 
     try {
+        // Buscar a imagem atual do produto no banco
+        const produtoAtual = await pool.query(
+            `SELECT imagem FROM produtos WHERE id = $1`,
+            [id]
+        );
+
+        if (produtoAtual.rowCount === 0) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+
+        const imagemAtual = produtoAtual.rows[0].imagem;
+
+        // Se a imagem não foi alterada no frontend, mantém a atual
+        const imagemFinal = imagem ? imagem : imagemAtual;
+
         // Atualização do produto no banco de dados
         const result = await pool.query(
             `UPDATE produtos
              SET nome = $1, descricao = $2, categoria = $3, subcategoria = $4, estoque = $5, preco = $6, imagem = $7
              WHERE id = $8 RETURNING *`,
-            [nome, descricao, categoria, subcategoria, estoque, preco, imagem, id]
+            [nome, descricao, categoria, subcategoria, estoque, preco, imagemFinal, id]
         );
 
-        // Verificação se o produto foi encontrado
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Produto não encontrado.' });
         }
@@ -238,10 +252,8 @@ router.put('/produtos/:id', async (req, res) => {
 
         console.log('Produto atualizado com sucesso:', produtoAtualizado);
 
-        // Retorna a resposta com sucesso
         res.status(200).json({ message: 'Produto atualizado com sucesso', produto: produtoAtualizado });
     } catch (error) {
-        // Tratamento de erros gerais
         console.error('Erro ao atualizar produto:', error);
         res.status(500).json({ error: 'Erro ao atualizar o produto no banco de dados.' });
     }

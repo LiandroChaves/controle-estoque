@@ -396,23 +396,31 @@ export default function Produtos() {
 
 
     const salvarAlteracoes = async () => {
-        if (!produtoSelecionado || !produtoSelecionado.id) return;
-
-        // Verificar se os campos necessários existem
-        const { nome, categoria, subcategoria, estoque, preco } = produtoSelecionado;
+        if (!produtoSelecionado || !produtoSelecionado.id) {
+            console.error("Produto inválido ou sem ID.");
+            return;
+        }
+    
+        const { nome, categoria, subcategoria, estoque, preco, imagem } = produtoSelecionado;
         if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
             console.error('Faltam campos obrigatórios para atualização');
             return;
         }
-
+    
         try {
-            const imagemCorrigida = imagemUsuarioProd?.replace('http://localhost:5000', '');
-
+            // Se uma nova imagem foi selecionada, remover a URL base
+            let imagemCorrigida = imagemUsuarioProd
+                ? imagemUsuarioProd.replace('http://localhost:5000', '') // Removendo a base
+                : imagem?.replace('http://localhost:5000', ''); // Garantindo que a imagem existente também esteja correta
+    
             const produtoAtualizado = {
                 ...produtoSelecionado,
-                imagem: imagemCorrigida, // Garante que a imagem está no formato correto
+                imagem: imagemCorrigida, // Sempre no formato "/uploads/nomeimagem.extensao"
             };
-
+    
+            console.log("Enviando requisição para:", `http://localhost:5000/produtos/${produtoSelecionado.id}`);
+            console.log("Dados enviados:", produtoAtualizado);
+    
             const response = await fetch(
                 `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
                 {
@@ -423,19 +431,22 @@ export default function Produtos() {
                     body: JSON.stringify(produtoAtualizado),
                 }
             );
-
+    
             if (!response.ok) {
-                throw new Error("Erro ao salvar alterações");
+                const errorText = await response.text();
+                throw new Error(`Erro ao salvar alterações: ${errorText}`);
             }
-
+    
             const data = await response.json();
             console.log("Produto atualizado:", data);
-
+    
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
     };
+    
+    
 
 
     const alternarFavoritos = async () => {
