@@ -665,9 +665,8 @@ export default function Vendas() {
                             )}
                             <tr>
                                 <td colSpan={5} className="p-4 border-t border-gray-600 text-white text-center font-bold rounded-lg">
-                                    <span className={`px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"
-                                        }`}>
-                                        Total: R$ {totalVendas.toFixed(2)}
+                                    <span className={`px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}>
+                                        Total: R$ {totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </td>
                             </tr>
