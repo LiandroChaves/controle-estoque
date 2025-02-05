@@ -668,6 +668,13 @@ export default function Vendas() {
                                     <span className={`px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}>
                                         Total: R$ {totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
+                                    {vendas.length > 0 && (
+                                        <button
+                                            onClick={() => router.push("/finalizarCompras")}
+                                            className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}>
+                                            Finalizar compra
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         </tbody>
