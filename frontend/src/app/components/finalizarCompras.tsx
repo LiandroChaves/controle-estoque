@@ -347,17 +347,34 @@ export default function FinalizarCompras() {
                     </div>
                 </div>
             </header>
+            <nav className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 shadow-md py-4">
+                <div className="container mx-auto flex items-center justify-between gap-8 px-6">
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={() => router.push("/vendas")}
+                            className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                                ? "bg-gray-600 text-teal-400 hover:bg-teal-600 hover:text-white"
+                                : "bg-gray-600 text-white hover:bg-teal-500 hover:text-white"
+                                }`}
+                        >
+                            Carrinho
+                        </button>
+                    </div>
+                </div>
+            </nav>
             <main className={`min-h-screen px-6 py-12 transition-all ${isDarkMode
                 ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
                 : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}
             >
-                <div className="grid grid-cols-auto-fill sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 justify-center">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6 ${isDarkMode ? "bg-gray-700" : "bg-gray-700"
+                    }`}>
                     {vendas.length > 0 ? (
                         vendas.map((venda) => (
                             <div
                                 key={venda.id}
-                                className="bg-gray-800 p-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105 min-w-[250px] max-w-[300px] mx-auto"
+                                className={`p-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105 ${isDarkMode ? "bg-gray-800" : "bg-white"
+                                    }`}
                             >
                                 {venda.imagem ? (
                                     <Image
@@ -372,11 +389,11 @@ export default function FinalizarCompras() {
                                         <span className="text-gray-400">Sem imagem</span>
                                     </div>
                                 )}
-                                <h3 className="text-xl font-bold text-teal-400 text-center">{venda.produto}</h3>
-                                <p className="text-gray-400 text-sm text-center">{venda.categoria}</p>
-                                <p className="text-gray-400 text-sm text-center">{venda.subcategoria}</p>
-                                <p className="text-gray-300 text-center mt-2">Quantidade: <span className="font-bold">{venda.quantidade}</span></p>
-                                <p className="text-gray-300 text-center mt-1">Preço: <span className="font-bold">R$ {venda.preco}</span></p>
+                                <h3 className={`text-xl font-bold text-center ${isDarkMode ? "text-teal-400" : "text-gray-800"}`}>{venda.produto}</h3>
+                                <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{venda.categoria}</p>
+                                <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{venda.subcategoria}</p>
+                                <p className={`text-center mt-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Quantidade: <span className="font-bold">{venda.quantidade}</span></p>
+                                <p className={`text-center mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Preço: <span className="font-bold">R$ {venda.preco}</span></p>
                             </div>
                         ))
                     ) : (
@@ -385,7 +402,7 @@ export default function FinalizarCompras() {
                 </div>
 
                 <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} />
-            </main>
+            </main >
             <Footer />
 
         </>
