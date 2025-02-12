@@ -7,14 +7,16 @@ import { useRouter } from "next/navigation";
 import logoCarrinho from '../../../public/assets/carrinho-de-compras.png';
 import Footer from "./Footer";
 import ObterProdutoModal from "./modalCarrinho";
-import logoEditar from '../../../public/assets/caneta.png'
-import logoDeletar from '../../../public/assets/excluir.png'
+import logoEditar from '../../../public/assets/caneta.png';
+import logoDeletar from '../../../public/assets/excluir.png';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import imgFundo from "../../../public/assets/comprar-online.png";
 import logoDetalhes from "../../../public/assets/detalhes-do-produto.png";
 import { useTheme } from "../../utils/context/ThemeContext";
-    
+import mudarModo from "../../../public/assets/ciclo.png";
+import imgPadrao from "../../../public/assets/sem-imagens.png";
+
 export default function Compras() {
     type Produto = {
         id?: number;
@@ -39,7 +41,7 @@ export default function Compras() {
     const [error, setError] = useState<string | null>(null);
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
-
+    const [modoTabela, setModoTabela] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [senha, setSenha] = useState("");
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
@@ -583,6 +585,10 @@ export default function Compras() {
         carregarProdutos();
     };
 
+    const alterarModo = () => {
+        setModoTabela(!modoTabela);
+    };
+
     // ============================= Renderização ===============================
     return (
         <>
@@ -855,70 +861,128 @@ export default function Compras() {
                 >
                     Remover ordem
                 </button>
-                <table
-                    className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
-                        }`}
+                <button
+                    onClick={alterarModo}
+                    className={`relative left-[52%] mb-6 mt-5 px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                        ? "bg-teal-600 text-white hover:bg-teal-500"
+                        : "bg-gray-600 text-white hover:bg-teal-500"
+                        } ml-auto`}
                 >
-                    <thead>
-                        <tr
-                            className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"
-                                }`}
-                        >
-                            <th className="p-4 border-b border-gray-600 text-center">Produto</th>
-                            <th className="p-4 border-b border-gray-600 text-center">Categoria</th>
-                            <th className="p-4 border-b border-gray-600 text-center">Subcategoria</th>
-                            <th className="p-4 border-b border-gray-600 text-center">Quant. Estoque</th>
-                            <th className="p-4 border-b border-gray-600 text-center">Preço</th>
-                            <th className="p-4 border-b border-gray-600 text-center">Obter no Carrinho</th>
-                            <th className="p-4 border-b border-gray-600 text-center text-wrap w-40">Produto detalhado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                    <Image src={mudarModo} alt="mudarModo" width={40} height={40} className="invert"></Image>
+                </button>
+                {modoTabela ? (
+                    <div
+                        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6 ${isDarkMode ? "bg-gray-700" : "bg-gray-700"
+                            }`}
+                    >
                         {produtosBuscados.map((produto, index) => (
-                            <tr key={index}
-                                className="group hover:bg-gray-500 transition-all duration-200 relative">
-                                <td className="p-4 border-b border-gray-600 text-center">
-                                    {produto.favorito && (
-                                        <span className="text-yellow-400 mr-2" title="Favorito">
-                                            ★
-                                        </span>
-                                    )}
+                            <div
+                                key={index}
+                                className={`p-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105 ${isDarkMode ? "bg-gray-800" : "bg-white"
+                                    }`}
+                            >
+                                <Image
+                                    src={
+                                        produto.imagem && typeof produto.imagem === "string" && produto.imagem.startsWith("http")
+                                            ? produto.imagem
+                                            : produto.imagem
+                                                ? `http://localhost:5000${produto.imagem}`
+                                                : imgPadrao
+                                    }
+                                    alt={produto.nome}
+                                    width={200}
+                                    height={200}
+                                    className="rounded-lg mx-auto mb-4"
+                                />
+
+                                <h3 className={`text-xl font-bold text-center ${isDarkMode ? "text-teal-400" : "text-gray-800"}`}>
                                     {produto.nome}
-                                </td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.categoria}</td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.subcategoria}</td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.estoque}</td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.preco} R$</td>
-                                <td className="p-4 border-b border-gray-600 text-center">
+                                </h3>
+                                <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{produto.categoria}</p>
+                                <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{produto.subcategoria}</p>
+                                <p className={`text-center mt-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                                    Quantidade em estoque: <span className="font-bold">{produto.estoque}</span>
+                                </p>
+                                <p className={`text-center mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                                    Preço: <span className="font-bold">R$ {produto.preco}</span>
+                                </p>
+                                <div className="flex justify-center mt-4">
                                     <button
-                                        onClick={() => abrirModal(produto)}
-                                        className=" text-white py-2 rounded-md invert"
-                                    >
-                                        <Image src={logoCarrinho} alt="Logo-Carrinho" width={40} height={40}></Image>
-                                    </button>
-                                </td>
-                                <td className="p-4 border-b border-gray-600 text-center">
-                                    <button
-                                        onClick={() => abrirDetalheModal(produto)}
-                                        className=" text-white py-2 rounded-md invert"
-                                    >
-                                        <Image src={logoDetalhes} alt="Detalhes" width={50} height={50} />
-                                    </button>
-                                </td>
-                                <td
-                                    className="absolute left-[190px] top-[55px] transform -translate-x-1/2 opacity-0 group-hover:opacity-100 -bottom-8 group-hover:bottom-2 transition-all duration-300"
-                                >
-                                    <button
-                                        className="bg-gray-700 hover:bg-teal-500 text-white px-4 py-2 rounded-lg shadow-lg"
+                                        className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-700 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                            }`}
                                         onClick={() => favoritarProduto(produto)}
                                     >
-                                        {produto.favorito ? "💔 Desfavoritar produto" : "❤️ Favoritar Produto"}
+                                        {produto.favorito ? "❤️ Favorito" : "🤍 Favoritar"}
                                     </button>
-                                </td>
-                            </tr>
+                                </div>
+                                <div className="flex justify-between mt-4">
+                                    <button
+                                        onClick={() => abrirModal(produto)}
+                                        className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                            }`}
+                                    >
+                                        <Image className="invert" src={logoCarrinho} alt="Logo-Carrinho" width={40} height={40} />
+                                    </button>
+                                    <button
+                                        onClick={() => abrirDetalheModal(produto)}
+                                        className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                            }`}
+                                    >
+                                        <Image className="invert" src={logoDetalhes} alt="Detalhes" width={50} height={50} />
+                                    </button>
+                                </div>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
+                    </div>
+                ) : (
+                    <table
+                        className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
+                            }`}
+                    >
+                        <thead>
+                            <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"}`}>
+                                <th className="p-4 border-b border-gray-600 text-center">Produto</th>
+                                <th className="p-4 border-b border-gray-600 text-center">Categoria</th>
+                                <th className="p-4 border-b border-gray-600 text-center">Subcategoria</th>
+                                <th className="p-4 border-b border-gray-600 text-center">Quant. Estoque</th>
+                                <th className="p-4 border-b border-gray-600 text-center">Preço</th>
+                                <th className="p-4 border-b border-gray-600 text-center">Obter no Carrinho</th>
+                                <th className="p-4 border-b border-gray-600 text-center">Produto detalhado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {produtosBuscados.map((produto, index) => (
+                                <tr key={index} className="group hover:bg-gray-500 transition-all duration-200 relative">
+                                    <td className="p-4 border-b border-gray-600 text-center relative">
+                                        {produto.nome}
+                                        <button
+                                            className={`absolute left-16 top-[65%] mt-1 px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity ${isDarkMode ? "bg-gray-700 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                                }`}
+                                            onClick={() => favoritarProduto(produto)}
+                                        >
+                                            {produto.favorito ? "❤️ Favorito" : "🤍 Favoritar"}
+                                        </button>
+                                    </td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.categoria}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.subcategoria}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.estoque}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.preco} R$</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">
+                                        <button onClick={() => abrirModal(produto)} className="text-white py-2 rounded-md invert">
+                                            <Image src={logoCarrinho} alt="Logo-Carrinho" width={40} height={40} />
+                                        </button>
+                                    </td>
+                                    <td className="p-4 border-b border-gray-600 text-center">
+                                        <button onClick={() => abrirDetalheModal(produto)} className="text-white py-2 rounded-md invert">
+                                            <Image src={logoDetalhes} alt="Detalhes" width={50} height={50} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+
+                    </table>
+                )}
                 {/* Modal de detalhes */}
                 {isDetalheModalAberto && produtoDetalhado && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

@@ -252,14 +252,15 @@ export default function Vendas() {
         }
     };
 
-    const fetchVendas = async (usuarioId: number) => {
+    const fetchVendas = async (usuarioId: number): Promise<Venda[]> => {
         try {
-            usuarioId = localStorage.getItem('userId') as unknown as number;
+            usuarioId = parseInt(localStorage.getItem('userId') || '0', 10);
             const token = localStorage.getItem('token');
-
+    
             if (!token || token === 'undefined') {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
+    
             console.log('ID do usuário:', usuarioId);
             const response = await fetch(`http://localhost:5000/api/vendas/${usuarioId}`, {
                 method: 'GET',
@@ -267,21 +268,25 @@ export default function Vendas() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
+    
             if (!response.ok) {
-                const errorData = await response.json(); // Alterado para response.json()
+                const errorData = await response.json();
                 console.error('Erro na API:', errorData);
                 throw new Error(errorData.error || 'Erro ao buscar vendas');
             }
-
+    
             const data = await response.json();
-            console.log('Dados das vendas:', data); // Log para depuração
-            setVendas(data);  // Armazena os dados das vendas
+            console.log('Dados das vendas:', data);
+    
+            setVendas(data); // Atualiza o estado
+            return data; // ✅ Agora retorna os dados corretamente
         } catch (err: any) {
             console.error('Erro ao buscar vendas:', err.message);
             setErro(err.message);
+            return []; // Retorna um array vazio em caso de erro
         }
     };
+    
 
     useEffect(() => {
         const carregarDados = async () => {
@@ -395,6 +400,17 @@ export default function Vendas() {
 
         fetchUserData();
     }, []); // Quando o componente é montado, chama o fetchUserData
+
+    useEffect(() => {
+        if (usuario && usuario.id) {
+            fetchVendas(usuario.id).then((dados) => {
+                if (dados && dados.length > 0) {
+                    localStorage.setItem("vendasFinalizar", JSON.stringify(dados));
+                }
+            });
+        }
+    }, [usuario]);
+    
 
 
     const totalVendas = vendas.reduce((total, venda) => total + Number(venda.preco), 0);
@@ -670,8 +686,12 @@ export default function Vendas() {
                                     </span>
                                     {vendas.length > 0 && (
                                         <button
-                                            onClick={() => router.push("/finalizarCompras")}
-                                            className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}>
+                                            onClick={() => {
+                                                localStorage.setItem("vendasFinalizar", JSON.stringify(vendas));
+                                                router.push("/finalizarCompras");
+                                            }}
+                                            className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}
+                                        >
                                             Finalizar compra
                                         </button>
                                     )}

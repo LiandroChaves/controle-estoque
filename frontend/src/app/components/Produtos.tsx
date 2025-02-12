@@ -12,6 +12,8 @@ import AdicionarProdutoModal from "./modalAddProduto";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../../utils/context/ThemeContext";
+import mudarModo from "../../../public/assets/ciclo.png";
+import imgPadrao from "../../../public/assets/sem-imagens.png";
 
 
 export default function Produtos() {
@@ -51,6 +53,8 @@ export default function Produtos() {
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
     const handleAbrirModal = () => setModalAbertoin(true);
     const handleFecharModal = () => setModalAbertoin(false);
+    const [modoTabela, setModoTabela] = useState(true);
+
 
     // const [isDarkMode, setIsDarkMode] = useState(true);
     const { isDarkMode, toggleTheme } = useTheme();
@@ -400,27 +404,27 @@ export default function Produtos() {
             console.error("Produto inválido ou sem ID.");
             return;
         }
-    
+
         const { nome, categoria, subcategoria, estoque, preco, imagem } = produtoSelecionado;
         if (!nome || !categoria || !subcategoria || estoque === undefined || preco === undefined) {
             console.error('Faltam campos obrigatórios para atualização');
             return;
         }
-    
+
         try {
             // Se uma nova imagem foi selecionada, remover a URL base
             let imagemCorrigida = imagemUsuarioProd
                 ? imagemUsuarioProd.replace('http://localhost:5000', '') // Removendo a base
                 : imagem?.replace('http://localhost:5000', ''); // Garantindo que a imagem existente também esteja correta
-    
+
             const produtoAtualizado = {
                 ...produtoSelecionado,
                 imagem: imagemCorrigida, // Sempre no formato "/uploads/nomeimagem.extensao"
             };
-    
+
             console.log("Enviando requisição para:", `http://localhost:5000/produtos/${produtoSelecionado.id}`);
             console.log("Dados enviados:", produtoAtualizado);
-    
+
             const response = await fetch(
                 `http://localhost:5000/api/produtos/${produtoSelecionado.id}`,
                 {
@@ -431,23 +435,24 @@ export default function Produtos() {
                     body: JSON.stringify(produtoAtualizado),
                 }
             );
-    
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Erro ao salvar alterações: ${errorText}`);
             }
-    
+
             const data = await response.json();
             console.log("Produto atualizado:", data);
-    
+
             setModalAberto(false);
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
     };
-    
-    
 
+    const alterarModo = () => {
+        setModoTabela(!modoTabela);
+    };
 
     const alternarFavoritos = async () => {
         const novoEstado = !mostrarFavoritos; // Estado atualizado antes da requisição
@@ -592,31 +597,31 @@ export default function Produtos() {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-    
+
             let endpoint = `http://localhost:5000/api/produtos/ordenarAtoZ/${usuarioId}`;
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${usuarioId}`;
             }
-    
+
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-    
+
             const produtosOrdenados: Produto[] = await response.json();
-    
+
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
-    
+
             // Atualiza o produto selecionado caso ainda esteja na lista
             const produtoAindaSelecionado = produtosOrdenados.find(p => p.id === produtoSelecionado?.id);
             setProdutoSelecionado(produtoAindaSelecionado || null);
-    
+
             setOrdemAtual("asc");
         } catch (error: any) {
             console.error("Erro ao ordenar produtos:", error.message);
             alert("Erro ao ordenar produtos.");
         }
     };
-    
+
     useEffect(() => {
         if (produtoSelecionado) {
             const produtoAtualizado = produtos.find(p => p.id === produtoSelecionado.id);
@@ -625,38 +630,38 @@ export default function Produtos() {
             }
         }
     }, [produtos]);  // Sempre que a lista de produtos mudar, verifica se o produto selecionado ainda está lá
-    
+
 
     const ordenarProdutosZtoA = async () => {
         try {
             const usuario = await fetchUsuario();
             const usuarioId = usuario.id;
             if (!usuarioId) throw new Error("ID do usuário não encontrado.");
-    
+
             let endpoint = `http://localhost:5000/api/produtos/ordenarZtoA/${usuarioId}`;
             if (mostrarFavoritos) {
                 endpoint = `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${usuarioId}`;
             }
-    
+
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Erro ao buscar produtos ordenados");
-    
+
             const produtosOrdenados: Produto[] = await response.json();
-    
+
             setProdutos(produtosOrdenados);
             setProdutosBuscados(produtosOrdenados);
-    
+
             // Mantém o produto selecionado atualizado
             const produtoAindaSelecionado = produtosOrdenados.find((p: Produto) => p.id === produtoSelecionado?.id);
             setProdutoSelecionado(produtoAindaSelecionado || null);
-    
+
             setOrdemAtual("desc");
         } catch (error: any) {
             console.error("Erro ao ordenar produtos:", error.message);
             alert("Erro ao ordenar produtos.");
         }
     };
-    
+
 
     const ordenarProdutosToNormal = async () => {
         setOrdemAtual(null);
@@ -913,80 +918,104 @@ export default function Produtos() {
                             onProdutoAdicionado={handleProdutoAdicionado}
                         />
                     )}
+                    <button
+                        onClick={alterarModo}
+                        className={`relative px-6 py-1 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
+                            ? "bg-teal-600 text-white hover:bg-teal-500"
+                            : "bg-gray-600 text-white hover:bg-teal-500"
+                            } ml-auto`}
+                    >
+                        <Image src={mudarModo} alt="mudarModo" width={40} height={40} className="invert"></Image>
+                    </button>
                 </div>
-                <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
-                    }`}>
-                    <thead>
-                        <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"
-                                }`}>
-                            {["Produto", "Categoria", "Subcategoria", "Estoque", "Preço", "Editar", "Deletar"].map(
-                                (header, index) => (
-                                    <th key={index} className="p-4 border-b border-gray-600 text-center">
-                                        {header}
-                                    </th>
-                                )
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody>
+                {modoTabela ? (
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6 ${isDarkMode ? "bg-gray-700" : "bg-gray-700"
+                        }`}>
                         {produtosBuscados.map((produto, index) => (
-                            <tr
-                                key={index}
-                                className="group hover:bg-gray-500 transition-all duration-200 relative"
-                            >
-                                <td className="p-4 border-b border-gray-600 text-center">
-                                    {produto.favorito && (
-                                        <span className="text-yellow-400 mr-2" title="Favorito">
-                                            ★
-                                        </span>
-                                    )}
-                                    {produto.nome}
-                                </td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.categoria}</td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.subcategoria}</td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.estoque}</td>
-                                <td className="p-4 border-b border-gray-600 text-center">{produto.preco} R$</td>
-                                <td className="p-4 border-b border-gray-600 text-center">
-                                    <button onClick={() => abrirModal(produto)}>
-                                        <Image
-                                            src={logoEditar}
-                                            alt="editar"
-                                            width={40}
-                                            height={40}
-                                            className="invert"
-                                        />
+                            <div key={index} className={`p-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105 ${isDarkMode ? "bg-gray-800" : "bg-white"
+                                }`}>
+                                <Image
+                                    src={
+                                        produto.imagem && typeof produto.imagem === "string" && produto.imagem.startsWith("http")
+                                            ? produto.imagem
+                                            : produto.imagem
+                                                ? `http://localhost:5000${produto.imagem}`
+                                                : imgPadrao
+                                    }
+                                    alt={produto.nome}
+                                    width={200}
+                                    height={200}
+                                    className="rounded-lg mx-auto mb-4"
+                                />
+                                <h3 className={`text-xl font-bold text-center ${isDarkMode ? "text-teal-400" : "text-gray-800"}`}>{produto.nome}</h3>
+                                <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{produto.categoria}</p>
+                                <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{produto.subcategoria}</p>
+                                <p className={`text-center mt-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                                    Estoque: <span className="font-bold">{produto.estoque}</span>
+                                </p>
+                                <p className={`text-center mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                                    Preço: <span className="font-bold">R$ {produto.preco}</span>
+                                </p>
+                                <div className="flex justify-center mt-4">
+                                    <button className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-700 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"}`} onClick={() => favoritarProduto(produto)}>
+                                        {produto.favorito ? "❤️ Favorito" : "🤍 Favoritar"}
                                     </button>
-                                </td>
-                                <td className="p-4 border-b border-gray-600 text-center">
-                                    <button onClick={() => deletarProduto(produto)}>
-                                        <Image
-                                            src={logoDeletar}
-                                            alt="deletar"
-                                            width={40}
-                                            height={40}
-                                            className="invert"
-                                        />
+                                </div>
+                                <div className="flex justify-between mt-4">
+                                    <button onClick={() => abrirModal(produto)} className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                        }`}>
+                                        <Image className="invert" src={logoEditar} alt="Editar" width={40} height={40} />
                                     </button>
-                                </td>
-                                {/* Botão de coração visível apenas no hover */}
-                                <td
-                                    className="absolute left-[190px] top-[55px] transform -translate-x-1/2 opacity-0 group-hover:opacity-100 -bottom-8 group-hover:bottom-2 transition-all duration-300"
-                                >
-                                    <button
-                                        className="bg-gray-700 hover:bg-teal-500 text-white px-4 py-2 rounded-lg shadow-lg"
-                                        onClick={() => favoritarProduto(produto)}
-                                    >
-                                        {produto.favorito ? "💔 Desfavoritar produto" : "❤️ Favoritar Produto"}
+                                    <button onClick={() => deletarProduto(produto)} className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                        }`}>
+                                        <Image className="invert" src={logoDeletar} alt="Deletar" width={40} height={40} />
                                     </button>
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
                         ))}
-
-                    </tbody>
-                </table>
+                    </div>
+                ) : (
+                    <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"}`}>
+                        <thead>
+                            <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"}`}>
+                                {["Produto", "Categoria", "Subcategoria", "Estoque", "Preço", "Editar", "Deletar"].map((header, index) => (
+                                    <th key={index} className="p-4 border-b border-gray-600 text-center">{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {produtosBuscados.map((produto, index) => (
+                                <tr key={index} className="group hover:bg-gray-500 transition-all duration-200 relative">
+                                    <td className="p-4 border-b border-gray-600 text-center relative">
+                                        {produto.nome}
+                                        <button
+                                            className={`absolute left-16 top-[65%] mt-1 px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity ${isDarkMode ? "bg-gray-700 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                                }`}
+                                            onClick={() => favoritarProduto(produto)}
+                                        >
+                                            {produto.favorito ? "❤️ Favorito" : "🤍 Favoritar"}
+                                        </button>
+                                    </td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.categoria}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.subcategoria}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">{produto.estoque}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">R$ {produto.preco}</td>
+                                    <td className="p-4 border-b border-gray-600 text-center">
+                                        <button onClick={() => abrirModal(produto)}>
+                                            <Image className="invert" src={logoEditar} alt="Editar" width={40} height={40} />
+                                        </button>
+                                    </td>
+                                    <td className="p-4 border-b border-gray-600 text-center">
+                                        <button onClick={() => deletarProduto(produto)}>
+                                            <Image className="invert" src={logoDeletar} alt="Deletar" width={40} height={40} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </main>
-
-
             <Modal
                 isOpen={modalAberto}
                 onClose={() => setModalAberto(false)}

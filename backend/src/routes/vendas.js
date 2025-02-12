@@ -14,11 +14,18 @@ router.get('/api/vendas/:usuario_id', autenticarUsuario, async (req, res) => {
             return res.status(403).json({ error: 'Acesso negado' });
         }
 
-        // Consulta ao banco para obter vendas com informações do produto
+        // Consulta ao banco para obter vendas com informações do produto (incluindo imagem)
         const vendas = await pool.query(`
-            SELECT vendas.id, vendas.quantidade, vendas.preco, produtos.nome AS produto, produtos.categoria
+            SELECT 
+                vendas.id, 
+                vendas.quantidade, 
+                vendas.preco, 
+                produtos.nome AS produto, 
+                produtos.categoria,
+                produtos.subcategoria, 
+                produtos.imagem
             FROM vendas
-            JOIN produtos ON vendas.cod_produto = produtos.id
+            INNER JOIN produtos ON vendas.cod_produto = produtos.id
             WHERE vendas.usuario_id = $1
         `, [usuarioId]);
 
@@ -28,6 +35,7 @@ router.get('/api/vendas/:usuario_id', autenticarUsuario, async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar vendas' });
     }
 });
+
 
 // Rota para excluir uma venda pelo ID
 // Rota para excluir uma venda pelo ID
