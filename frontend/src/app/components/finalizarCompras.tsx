@@ -25,6 +25,12 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
     const totalComDesconto = totalVendas * (1 - desconto / 100);
 
     if (!isOpen) return null;
+    
+    if (!formaPagamento) {
+        const btnFinalizar = document.getElementById("formaPagamento") as HTMLButtonElement;
+        if (btnFinalizar) btnFinalizar.disabled = true;
+    }
+    
 
     const handleFinalizarCompra = async () => {
         if (!formaPagamento) {
@@ -46,8 +52,6 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
             });
 
             if (!response.ok) throw new Error("Erro ao finalizar vendas");
-
-            toast.success("Compra finalizada com sucesso!");
             setIsOpen(false);
         } catch (error) {
             console.error(error);
@@ -55,9 +59,47 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
         }
     };
 
+    const esvaziarCarrinho = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token || token === 'undefined') {
+                throw new Error('Usuário não autenticado. Faça login novamente.');
+            }
+
+            const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
+            if (!userId) {
+                throw new Error('Usuário não autenticado. Faça login novamente.');
+            }
+
+            const response = await fetch(`http://localhost:5000/api/vendas/usuario/${userId}/limpar`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Erro ao esvaziar o carrinho');
+            }
+
+            toast.success('Carrinho esvaziado com sucesso!', {
+                position: 'bottom-right',
+                autoClose: 3000
+            });
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } catch (error: any) {
+            console.error('Erro ao esvaziar o carrinho:', error.message);
+            alert(error.message);
+        }
+    }
+
     const handleClick = async () => {
         try {
-            await handleFinalizarCompra(); // Chama a função para enviar os dados ao backend
+            await handleFinalizarCompra();
+            await esvaziarCarrinho();
             toast.success("Compra finalizada com sucesso!"); // Exibe o toast de sucesso
             setIsOpen(false); // Fecha o modal
         } catch (error) {
@@ -65,7 +107,7 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
             toast.error("Erro ao finalizar a compra");
         }
     };
-    
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -118,10 +160,14 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
                     </button>
                     <button
                         onClick={handleClick}
-                        className="px-4 py-2 bg-teal-600 text-white rounded-md"
+                        className="px-4 py-2 rounded-md text-white 
+        disabled:bg-gray-500 disabled:cursor-not-allowed 
+        bg-teal-600 hover:bg-teal-500 transition"
+                        disabled={!formaPagamento} // O botão desativa automaticamente baseado no estado
                     >
                         Finalizar
                     </button>
+
                 </div>
             </div>
         </div>

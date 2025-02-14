@@ -15,16 +15,17 @@ import mudarModo from "../../../public/assets/ciclo.png";
 
 export default function Vendas(vendass: any) {
     const router = useRouter();
-
+    const [subcategoriaSelecionada, setSubcategoriaSelecionada] = useState("");
+    const [subcategorias, setSubCategorias] = useState<string[]>([]);
     const [buscarTermo, setBuscarTermo] = useState("");
-    const [vendas, setVendas] = useState<Venda[]>([]); // Estado para todas as vendas
+    const [vendas, setVendas] = useState<Venda[]>([]);
     const [vendasBuscados, setVendasBuscados] = useState<Venda[]>([]);
     const [erro, setErro] = useState<string | null>(null);
     const [infor, setInfor] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
     const { isDarkMode, toggleTheme } = useTheme();
     const [isVisible, setIsVisible] = useState(false);
-    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
+    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil);
     const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
     const [categorias, setCategorias] = useState<string[]>([]);
     const [exibirComoCards, setExibirComoCards] = useState(false);
@@ -138,6 +139,37 @@ export default function Vendas(vendass: any) {
         fetchCategoriasVendas(); // Chama a função ao montar o componente
     }, []);
 
+    const fetchSubCategoriasVendas = async () => {
+        try {
+            const usuario = await fetchUsuario(); // Obtém o usuário
+            const userId = usuario?.id;
+
+            if (!userId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+
+            const response = await fetch(`http://localhost:5000/api/subcategorias/vendas?userId=${userId}`);
+
+            if (!response.ok) {
+                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
+            }
+
+            const dados = await response.json();
+            const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
+
+            console.log("📌 Subcategorias recebidas:", subcategorias); // Debugging
+
+            setSubCategorias(subcategorias);
+        } catch (error) {
+            console.error('❌ Erro ao buscar categorias de vendas:', error);
+        }
+    };
+
+
+    useEffect(() => {
+        fetchSubCategoriasVendas(); // Chama a função ao montar o componente
+    }, []);
+
     const aplicarFiltros = () => {
         if (buscarTermo.trim() === "") {
             // Se o termo de busca estiver vazio, exibe todas as vendas
@@ -194,11 +226,11 @@ export default function Vendas(vendass: any) {
     const fetchVendasPorCategoria = async (categoria: string) => {
         try {
             if (!categoria) {
-                setVendas([]); // Se nenhuma categoria for selecionada, limpa os dados
+                setVendas([]);
                 return;
             }
 
-            const token = localStorage.getItem('token'); // Obtém o token do localStorage
+            const token = localStorage.getItem('token');
 
             if (!token || token === "undefined") {
                 throw new Error("Usuário não autenticado. Faça login novamente.");
@@ -207,7 +239,7 @@ export default function Vendas(vendass: any) {
             const response = await fetch(`http://localhost:5000/api/vendas/categoria/${encodeURIComponent(categoria)}`, {
                 method: "GET",
                 headers: {
-                    Authorization: `Bearer ${token}`, // Adiciona o token no cabeçalho
+                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -217,9 +249,43 @@ export default function Vendas(vendass: any) {
             }
 
             const dados = await response.json();
-            console.log("📌 Vendas filtradas:", dados); // Debug
+            console.log("📌 Vendas filtradas:", dados);
 
-            setVendas(dados); // Atualiza o estado com os dados filtrados
+            setVendas(dados);
+        } catch (error) {
+            console.error("❌ Erro ao buscar vendas por categoria:", error);
+        }
+    };
+
+    const fetchVendasPorSubCategoria = async (subcategoria: string) => {
+        try {
+            if (!subcategoria) {
+                setVendas([]);
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+
+            if (!token || token === "undefined") {
+                throw new Error("Usuário não autenticado. Faça login novamente.");
+            }
+
+            const response = await fetch(`http://localhost:5000/api/vendas/subcategoria/${encodeURIComponent(subcategoria)}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro na resposta da API: ${response.statusText}`);
+            }
+
+            const dados = await response.json();
+            console.log("📌 Vendas filtradas:", dados);
+
+            setVendas(dados);
         } catch (error) {
             console.error("❌ Erro ao buscar vendas por categoria:", error);
         }
@@ -386,12 +452,8 @@ export default function Vendas(vendass: any) {
         const fetchUserData = async () => {
             try {
                 const userData = await fetchUsuario();
-                const userId = userData.id; // Assumindo que o ID do usuário vem da resposta do fetch
-
-                // Salvar o userId no localStorage
+                const userId = userData.id;
                 localStorage.setItem('userId', userId);
-
-                // Recupera a imagem do usuário baseado no userId
                 const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
                 if (imagemSalva) {
                     setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
@@ -523,13 +585,10 @@ export default function Vendas(vendass: any) {
                             onChange={async (e) => {
                                 const categoria = e.target.value;
                                 setCategoriaSelecionada(categoria);
-
                                 if (categoria === "") {
-                                    // Se a categoria selecionada for "Selecione uma categoria"
                                     const usuario = await fetchUsuario();
                                     fetchVendas(usuario);
                                 } else {
-                                    // Caso contrário, busca as vendas por categoria
                                     fetchVendasPorCategoria(categoria);
                                 }
                             }}
@@ -542,6 +601,28 @@ export default function Vendas(vendass: any) {
                                 </option>
                             ))}
                         </select>
+                        <select
+                            value={subcategoriaSelecionada}
+                            onChange={async (e) => {
+                                const subcategoria = e.target.value;
+                                setSubcategoriaSelecionada(subcategoria);
+                                if (subcategoria === "") {
+                                    const usuario = await fetchUsuario();
+                                    fetchVendas(usuario);
+                                } else {
+                                    fetchVendasPorSubCategoria(subcategoria);
+                                }
+                            }}
+                            className="bg-gray-600 text-gray-300 rounded-lg px-4 py-2 shadow-md focus:ring-teal-500"
+                        >
+                            <option value="">Selecione uma categoria</option>
+                            {subcategorias.map((subcategoria, index) => (
+                                <option key={index} value={subcategoria}>
+                                    {subcategoria}
+                                </option>
+                            ))}
+                        </select>
+
                     </div>
                     <div className="flex items-center gap-6">
                         <button
@@ -623,7 +704,6 @@ export default function Vendas(vendass: any) {
                 : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}>
                 {exibirComoCards ? (
-
                     // Layout em Tabela
                     <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
                         <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"}`}>
