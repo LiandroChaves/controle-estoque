@@ -18,8 +18,8 @@ const CadastroModal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [erro, setErro] = useState("");
 
     const handleSubmit = () => {
-        if (!login || !senha || !nome || !empresa) {
-            setErro("Todos os campos são obrigatórios!");
+        if (!login || !senha || !nome) {
+            setErro("Os campos login, senha e nome são obrigatórios!");
             return;
         }
         setErro("");
@@ -103,7 +103,7 @@ const CadastroModal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-white">Empresa</label>
+                    <label className="block text-sm font-medium text-white">{"Empresa (opcional)"}</label>
                     <input
                         type="text"
                         value={empresa}

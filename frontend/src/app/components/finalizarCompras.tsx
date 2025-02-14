@@ -25,12 +25,12 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
     const totalComDesconto = totalVendas * (1 - desconto / 100);
 
     if (!isOpen) return null;
-    
+
     if (!formaPagamento) {
         const btnFinalizar = document.getElementById("formaPagamento") as HTMLButtonElement;
         if (btnFinalizar) btnFinalizar.disabled = true;
     }
-    
+
 
     const handleFinalizarCompra = async () => {
         if (!formaPagamento) {
@@ -126,15 +126,22 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
                 <label className="block text-white mb-2">Desconto (Opcional):</label>
                 <input
                     type="number"
-                    value={desconto > 0 ? desconto : ""} // Se for 0, exibe string vazia
+                    min={0}
+                    max={100}
+                    value={desconto > 0 ? desconto : ""}
                     onChange={(e) => {
-                        const valor = Number(e.target.value);
-                        setDesconto(valor >= 0 ? valor : 0); // Impede valores negativos
+                        let valor = Number(e.target.value);
+                        if (valor > 100) valor = 100;
+                        if (valor < 0 || e.target.value === "-") valor = 0;
+                        setDesconto(valor);
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e" || e.key === "." || e.key === "+" || e.key === ",") {
+                            e.preventDefault();
+                        }
                     }}
                     className="w-full p-2 rounded-md bg-gray-800 text-white mb-4"
                 />
-
-
                 <p className="text-white text-center mb-2">
                     Total com desconto: R$ {totalComDesconto.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>

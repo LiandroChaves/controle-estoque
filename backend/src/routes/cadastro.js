@@ -3,7 +3,7 @@ const pool = require("../database/db");
 const router = express.Router();
 
 router.post("/cadastro", async (req, res) => {
-    const { login, senha, nome, empresa } = req.body;
+    const { login, senha, nome, empresa = null } = req.body;
 
     try {
         const result = await pool.query(
@@ -23,9 +23,5 @@ router.post("/cadastro", async (req, res) => {
         });
     }
 });
-
-// router.put("/cadastro", async (req, res) =>{
-//     const { login, senha, nome ,empresa } = req.body
-// });
 
 module.exports = router;

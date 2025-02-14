@@ -62,7 +62,7 @@ export default function Login() {
 
             const result = await response.json();
             alert(`Usuário cadastrado com sucesso: ${result.usuario.nome}`);
-            setIsModalOpen(false); // Fecha o modal após o cadastro
+            setIsModalOpen(false); 
         } catch (error: any) {
             console.error("Erro ao cadastrar usuário:", error.message);
             alert(error.message);

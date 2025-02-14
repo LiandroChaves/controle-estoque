@@ -17,7 +17,7 @@ const informacoeslogin = sequelize.define('informacoeslogin', {
     },
     empresa: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     imagem: {
        type: DataTypes.STRING,

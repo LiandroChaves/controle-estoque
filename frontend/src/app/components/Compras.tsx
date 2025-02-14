@@ -673,12 +673,20 @@ export default function Compras() {
                                         >
                                             Nome: {item.nome}
                                         </p>
-                                        <p
+                                        {item.empresa ? (<p
                                             className={`font-medium transition-all ${isDarkMode ? "text-gray-400" : "text-white"
                                                 }`}
                                         >
                                             Empresa: {item.empresa}
-                                        </p>
+                                        </p>) : (
+                                            <p
+                                                className={`font-medium transition-all ${isDarkMode ? "text-gray-400" : "text-white"
+                                                    }`}
+                                            >
+                                                
+                                                Empresa não informada
+                                            </p>
+                                        )}
                                     </div>
                                     <p
                                         onClick={funcaoSair}
