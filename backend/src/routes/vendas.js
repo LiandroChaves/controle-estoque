@@ -115,7 +115,7 @@ router.get('/api/vendas/categoria/:categoria', autenticarUsuario, async (req, re
         }
 
         const vendas = await pool.query(
-            `SELECT vendas.id, vendas.quantidade, vendas.preco, produtos.nome AS produto, produtos.categoria 
+            `SELECT vendas.id, vendas.quantidade, vendas.preco, produtos.nome AS produto, produtos.categoria, produtos.subcategoria, produtos.imagem
              FROM vendas
              JOIN produtos ON vendas.cod_produto = produtos.id
              WHERE produtos.categoria = $1 AND vendas.usuario_id = $2`,

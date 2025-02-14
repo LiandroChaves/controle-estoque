@@ -10,9 +10,10 @@ import "react-toastify/dist/ReactToastify.css";
 import logoEditar from '../../../public/assets/caneta.png'
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
 import { useTheme } from "../../utils/context/ThemeContext";
+import ModalFinalizarCompras from "./finalizarCompras";
+import mudarModo from "../../../public/assets/ciclo.png";
 
-
-export default function Vendas() {
+export default function Vendas(vendass: any) {
     const router = useRouter();
 
     const [buscarTermo, setBuscarTermo] = useState("");
@@ -26,7 +27,8 @@ export default function Vendas() {
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
     const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
     const [categorias, setCategorias] = useState<string[]>([]);
-
+    const [exibirComoCards, setExibirComoCards] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const [usuario, setUsuario] = useState<any>(null);
 
 
@@ -34,8 +36,10 @@ export default function Vendas() {
         id: number;
         produto: string;
         categoria: string;
+        subcategoria: string;
         quantidade: number;
         preco: number;
+        imagem?: string;
     }
 
     const deletarImg = async () => {
@@ -256,11 +260,11 @@ export default function Vendas() {
         try {
             usuarioId = parseInt(localStorage.getItem('userId') || '0', 10);
             const token = localStorage.getItem('token');
-    
+
             if (!token || token === 'undefined') {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
-    
+
             console.log('ID do usuário:', usuarioId);
             const response = await fetch(`http://localhost:5000/api/vendas/${usuarioId}`, {
                 method: 'GET',
@@ -268,16 +272,16 @@ export default function Vendas() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Erro na API:', errorData);
                 throw new Error(errorData.error || 'Erro ao buscar vendas');
             }
-    
+
             const data = await response.json();
             console.log('Dados das vendas:', data);
-    
+
             setVendas(data); // Atualiza o estado
             return data; // ✅ Agora retorna os dados corretamente
         } catch (err: any) {
@@ -286,11 +290,14 @@ export default function Vendas() {
             return []; // Retorna um array vazio em caso de erro
         }
     };
-    
+
 
     useEffect(() => {
         const carregarDados = async () => {
-            await fetchUsuario();
+            const user = await fetchUsuario();
+            if (user && user.id) {
+                fetchVendas(user.id);
+            }
         };
         carregarDados();
     }, []);
@@ -399,21 +406,12 @@ export default function Vendas() {
         };
 
         fetchUserData();
-    }, []); // Quando o componente é montado, chama o fetchUserData
-
-    useEffect(() => {
-        if (usuario && usuario.id) {
-            fetchVendas(usuario.id).then((dados) => {
-                if (dados && dados.length > 0) {
-                    localStorage.setItem("vendasFinalizar", JSON.stringify(dados));
-                }
-            });
-        }
-    }, [usuario]);
-    
+    }, []);
 
 
-    const totalVendas = vendas.reduce((total, venda) => total + Number(venda.preco), 0);
+    const totalVendas = vendas.length > 0
+        ? vendas.reduce((total, venda) => total + Number(venda.preco || 0), 0)
+        : 0;
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -618,89 +616,130 @@ export default function Vendas() {
                 ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
                 : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}>
-                <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
-                    <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"
-                        }`}>
-                        <thead>
-                            <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"
-                                }`}>
-                                <th className="p-4 border-b border-gray-600 text-center">Produto</th>
-                                <th className="p-4 border-b border-gray-600 text-center">Categoria</th>
-                                <th className="p-4 border-b border-gray-600 text-center">Quantidade</th>
-                                <th className="p-4 border-b border-gray-600 text-center">Preço</th>
-                                <th className="p-4 border-b border-gray-600 text-center">Deletar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {vendasBuscados.length > 0 ? (
-                                // Se houver vendas buscadas, renderiza essas vendas
-                                vendasBuscados.map((venda) => (
-                                    <tr key={venda.id} className="hover:bg-gray-500 transition-all duration-200">
-                                        <td className="p-4 border-b border-gray-600 text-center">{venda.produto}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">{venda.categoria}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">{venda.quantidade}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">R$ {venda.preco}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">
+                <button
+                    onClick={() => setExibirComoCards(!exibirComoCards)}
+                    className={`-mt-10 mb-5 px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}
+                >
+                    <Image src={mudarModo} alt="mudarModo" width={40} height={40} className="invert"></Image>
+                </button>
+                {exibirComoCards ? (
+                    
+                    // Layout em Tabela
+                    <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
+                        <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"}`}>
+                            <thead>
+                                <tr className={`transition-all ${isDarkMode ? "bg-gray-800 text-teal-400" : "bg-gray-700 text-white"}`}>
+                                    <th className="p-4 border-b border-gray-600 text-center">Produto</th>
+                                    <th className="p-4 border-b border-gray-600 text-center">Categoria</th>
+                                    <th className="p-4 border-b border-gray-600 text-center">Quantidade</th>
+                                    <th className="p-4 border-b border-gray-600 text-center">Preço</th>
+                                    <th className="p-4 border-b border-gray-600 text-center">Deletar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {vendasBuscados.length > 0 ? (
+                                    vendasBuscados.map((venda) => (
+                                        <tr key={venda.id} className="hover:bg-gray-500 transition-all duration-200">
+                                            <td className="p-4 border-b border-gray-600 text-center">{venda.produto}</td>
+                                            <td className="p-4 border-b border-gray-600 text-center">{venda.categoria}</td>
+                                            <td className="p-4 border-b border-gray-600 text-center">{venda.quantidade}</td>
+                                            <td className="p-4 border-b border-gray-600 text-center">R$ {venda.preco}</td>
+                                            <td className="p-4 border-b border-gray-600 text-center">
+                                                <button
+                                                    onClick={() => deletarProduto(venda)}
+                                                    className="text-white py-2 rounded-md hover:text-red-500 transition-all"
+                                                >
+                                                    <Image src={logoDeletar} alt="deletar" width={40} height={40} className="invert" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={5} className="text-center p-4 text-white">Nenhuma venda encontrada</td>
+                                    </tr>
+                                )}
+                                <tr>
+                                    <td colSpan={5} className="p-4 border-t border-gray-600 text-white text-center font-bold rounded-lg">
+                                        <span className={`px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}>
+                                            Total: R$ {totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
+                                        {vendas.length > 0 && (
+                                            <button
+                                                onClick={() => setIsOpen(true)} className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}
+                                            >
+                                                Finalizar compra
+                                            </button>
+                                        )}
+                                        {isOpen && vendas.length > 0 && (
+                                            <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />
+                                        )}                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div>
+                        {/* Layout em Cards */}
+                        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6 ${isDarkMode ? "bg-gray-700" : "bg-gray-700"}`}>
+                            {vendas.length > 0 ? (
+                                vendas.map((venda) => (
+                                    <div
+                                        key={venda.id}
+                                        className={`p-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105 ${isDarkMode ? "bg-gray-800" : "bg-white"}`}
+                                    >
+                                        {venda.imagem ? (
+                                            <Image
+                                                src={venda.imagem.startsWith("http") ? venda.imagem : `http://localhost:5000${venda.imagem}`}
+                                                alt={venda.produto}
+                                                width={200}
+                                                height={200}
+                                                className="rounded-lg mx-auto mb-4"
+                                            />
+                                        ) : (
+                                            <div className="w-48 h-48 bg-gray-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                                <span className="text-gray-400">Sem imagem</span>
+                                            </div>
+                                        )}
+                                        <h3 className={`text-xl font-bold text-center ${isDarkMode ? "text-teal-400" : "text-gray-800"}`}>{venda.produto}</h3>
+                                        <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{venda.categoria}</p>
+                                        <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{venda.subcategoria}</p>
+                                        <p className={`text-center mt-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Quantidade: <span className="font-bold">{venda.quantidade}</span></p>
+                                        <p className={`text-center mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Preço: <span className="font-bold">R$ {venda.preco}</span></p>
+
+                                        {/* Botão de deletar */}
+                                        <div className="flex justify-center mt-4">
                                             <button
                                                 onClick={() => deletarProduto(venda)}
                                                 className="text-white py-2 rounded-md hover:text-red-500 transition-all"
                                             >
                                                 <Image src={logoDeletar} alt="deletar" width={40} height={40} className="invert" />
                                             </button>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
                                 ))
                             ) : (
-                                vendasBuscados.length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className={`text-center p-4 ${isDarkMode ? "text-white" : "text-white"
-                                            }`}>
-                                            Nenhuma venda encontrada
-                                        </td>
-                                    </tr>
-                                )
+                                <p className="text-gray-400 text-center col-span-full">Nenhum produto para finalizar.</p>
                             )}
-                            {vendas.length > 0 && vendasBuscados.length === 0 && (
-                                // Caso não haja vendas buscadas, renderiza todas as vendas
-                                vendas.map((venda) => (
-                                    <tr key={venda.id} className="hover:bg-gray-500 transition-all duration-200">
-                                        <td className="p-4 border-b border-gray-600 text-center">{venda.produto}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">{venda.categoria}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">{venda.quantidade}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">R$ {venda.preco}</td>
-                                        <td className="p-4 border-b border-gray-600 text-center">
-                                            <button
-                                                onClick={() => deletarProduto(venda)}
-                                                className="text-white py-2 rounded-md hover:text-red-500 transition-all"
-                                            >
-                                                <Image src={logoDeletar} alt="deletar" width={40} height={40} className="invert" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                            <tr>
-                                <td colSpan={5} className="p-4 border-t border-gray-600 text-white text-center font-bold rounded-lg">
-                                    <span className={`px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}>
-                                        Total: R$ {totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </span>
-                                    {vendas.length > 0 && (
-                                        <button
-                                            onClick={() => {
-                                                localStorage.setItem("vendasFinalizar", JSON.stringify(vendas));
-                                                router.push("/finalizarCompras");
-                                            }}
-                                            className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600" : "bg-gray-700 text-white"}`}
-                                        >
-                                            Finalizar compra
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                        </div>
 
+                        {/* Total e botão de finalizar compra */}
+                        {vendas.length > 0 && (
+                            <div className="mt-6 text-center">
+                                <span className={`px-4 py-2 rounded-md shadow-md text-lg font-bold ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}>
+                                    Total: R$ {totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                                <button
+                                    onClick={() => setIsOpen(true)} className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}
+                                >
+                                    Finalizar compra
+                                </button>
+                                {isOpen && vendas.length > 0 && (
+                                    <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />
+                                )}                            </div>
+                        )}
+                    </div>
+                )}
             </main>
             <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar aria-label={undefined} aria-live="polite" />
             <Footer />
