@@ -5,6 +5,7 @@ const cadastroRouter = require("./src/routes/cadastro");
 const vendasRouter = require("./src/routes/vendas");
 const comprasRouter = require("./src/routes/compras");
 const uploadRouter = require("./src/routes/upload");
+const finalizarvendaRouter = require("./src/routes/finalizarvenda");
 const cors = require('cors');
 const pool = require('./src/database/db');
 const path = require('path');
@@ -35,6 +36,7 @@ app.use('/api', produtosRouter);
 app.use("/api", loginRouter);
 app.use("/api", cadastroRouter);
 app.use("/api", uploadRouter);
+app.use("/api", finalizarvendaRouter);
 app.use(vendasRouter);
 app.use(comprasRouter);
 

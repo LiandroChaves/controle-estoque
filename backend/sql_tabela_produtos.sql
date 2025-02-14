@@ -52,6 +52,19 @@ CREATE TABLE IF NOT EXISTS compras (
     CONSTRAINT fk_usuario FOREIGN KEY (usuario_id) REFERENCES informacoeslogin(id)
 );
 
+-- ======================= Tabela de finalizar vendas ==========================
+CREATE TABLE IF NOT EXISTS finalizarvendas (
+    id SERIAL PRIMARY KEY,
+    venda_id INT NOT NULL,
+    nome_produto VARCHAR(255) NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    desconto DECIMAL(5,2) NOT NULL, -- Porcentagem de desconto
+    valor_final DECIMAL(10,2) NOT NULL, -- Preço final após desconto
+    forma_pagamento VARCHAR(50) NOT NULL,
+    data_finalizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (venda_id) REFERENCES vendas(id)
+);
+
 -- ======================= Tabela de Logs dos Produtos =========================
 CREATE TABLE IF NOT EXISTS logsprodutos (
     id SERIAL PRIMARY KEY,
@@ -160,3 +173,4 @@ SELECT * FROM informacoeslogin;
 SELECT * FROM vendas;
 SELECT * FROM compras;
 SELECT * FROM logsprodutos;
+select * from finalizarvendas;

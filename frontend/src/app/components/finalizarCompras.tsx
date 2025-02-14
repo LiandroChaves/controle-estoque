@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import Footer from "./Footer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import imgFundo from "../../../public/assets/comprar-online.png";
 
 interface ModalFinalizarComprasProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-    vendas: { preco?: number }[];
+    vendas: {
+        id: any; preco?: number
+    }[];
 }
 
 export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }: ModalFinalizarComprasProps) {
@@ -23,9 +26,55 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
 
     if (!isOpen) return null;
 
+    const handleFinalizarCompra = async () => {
+        if (!formaPagamento) {
+            toast.error("Selecione uma forma de pagamento!");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5000/api/finalizarvenda", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    vendas: vendas.map(venda => ({
+                        vendaId: venda.id, // ID da venda
+                        desconto: desconto, // Desconto aplicado
+                        formaPagamento: formaPagamento, // Forma de pagamento
+                    })),
+                }),
+            });
+
+            if (!response.ok) throw new Error("Erro ao finalizar vendas");
+
+            toast.success("Compra finalizada com sucesso!");
+            setIsOpen(false);
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro ao finalizar as compras");
+        }
+    };
+
+    const handleClick = async () => {
+        try {
+            await handleFinalizarCompra(); // Chama a função para enviar os dados ao backend
+            toast.success("Compra finalizada com sucesso!"); // Exibe o toast de sucesso
+            setIsOpen(false); // Fecha o modal
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro ao finalizar a compra");
+        }
+    };
+    
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-96">
+            <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-96"
+                style={{
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(${imgFundo.src})`,
+                    backgroundSize: "500px",
+                    backgroundPosition: "top",
+                }}>
                 <h2 className="text-xl text-white font-bold text-center mb-4">Finalizar Compra</h2>
 
                 <p className="text-white text-center mb-2">
@@ -68,10 +117,7 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
                         Cancelar
                     </button>
                     <button
-                        onClick={() => {
-                            toast.success("Compra finalizada com sucesso!");
-                            setIsOpen(false);
-                        }}
+                        onClick={handleClick}
                         className="px-4 py-2 bg-teal-600 text-white rounded-md"
                     >
                         Finalizar

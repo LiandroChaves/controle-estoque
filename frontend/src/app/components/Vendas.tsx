@@ -608,6 +608,12 @@ export default function Vendas(vendass: any) {
                         >
                             Esvaziar o carrinho
                         </button>
+                        <button
+                            onClick={() => setExibirComoCards(!exibirComoCards)}
+                            className={`px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}
+                        >
+                            <Image src={mudarModo} alt="mudarModo" width={40} height={40} className="invert"></Image>
+                        </button>
                     </div>
                 </div>
             </nav>
@@ -616,14 +622,8 @@ export default function Vendas(vendass: any) {
                 ? "bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 text-gray-300"
                 : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}>
-                <button
-                    onClick={() => setExibirComoCards(!exibirComoCards)}
-                    className={`-mt-10 mb-5 px-4 py-2 rounded-md shadow-md transition-all ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}
-                >
-                    <Image src={mudarModo} alt="mudarModo" width={40} height={40} className="invert"></Image>
-                </button>
                 {exibirComoCards ? (
-                    
+
                     // Layout em Tabela
                     <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
                         <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"}`}>
@@ -647,7 +647,8 @@ export default function Vendas(vendass: any) {
                                             <td className="p-4 border-b border-gray-600 text-center">
                                                 <button
                                                     onClick={() => deletarProduto(venda)}
-                                                    className="text-white py-2 rounded-md hover:text-red-500 transition-all"
+                                                    className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                                        }`}
                                                 >
                                                     <Image src={logoDeletar} alt="deletar" width={40} height={40} className="invert" />
                                                 </button>
@@ -673,7 +674,8 @@ export default function Vendas(vendass: any) {
                                         )}
                                         {isOpen && vendas.length > 0 && (
                                             <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />
-                                        )}                                    </td>
+                                        )}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -711,7 +713,8 @@ export default function Vendas(vendass: any) {
                                         <div className="flex justify-center mt-4">
                                             <button
                                                 onClick={() => deletarProduto(venda)}
-                                                className="text-white py-2 rounded-md hover:text-red-500 transition-all"
+                                                className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                                    }`}
                                             >
                                                 <Image src={logoDeletar} alt="deletar" width={40} height={40} className="invert" />
                                             </button>
@@ -736,7 +739,8 @@ export default function Vendas(vendass: any) {
                                 </button>
                                 {isOpen && vendas.length > 0 && (
                                     <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />
-                                )}                            </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 )}

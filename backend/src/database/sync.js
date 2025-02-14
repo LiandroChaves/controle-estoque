@@ -1,4 +1,4 @@
-const { sequelize, Produto, InformacoesLogin, Venda, Compra } = require('./models');
+const { sequelize, Produto, InformacoesLogin, Venda, Compra, FinalizarVendas } = require('./models');
 
 (async () => {
   try {
