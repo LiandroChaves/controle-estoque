@@ -3,14 +3,15 @@ const sequelize = require('../config/database');
 const Venda = require('./venda'); // Importando o modelo de vendas
 
 const FinalizarVendas = sequelize.define(
-  'FinalizarVendas',
+  'finalizarvendas',
   {
     venda_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true, // Permite NULL, pois agora "SET NULL" é possível
       references: {
-        model: 'vendas', // Nome da tabela de referência
+        model: 'vendas',
         key: 'id',
+        onDelete: 'SET NULL', // Adicionando o comportamento "ON DELETE SET NULL"
       },
     },
     nome_produto: {
@@ -43,14 +44,14 @@ const FinalizarVendas = sequelize.define(
     tableName: 'finalizarvendas',
     hooks: {
       // Hook para realizar algum tipo de operação antes de criar o registro
-      beforeCreate: async (finalizarVenda, options) => {
+      beforeCreate: async (finalizarvendas, options) => {
         try {
           // Localiza a venda associada ao finalizarVenda
-          const venda = await Venda.findByPk(finalizarVenda.venda_id);
+          const venda = await Venda.findByPk(finalizarvendas.venda_id);
           if (venda) {
             // Calcula o valor final com o desconto
-            finalizarVenda.valor_final = venda.preco - (venda.preco * finalizarVenda.desconto / 100);
-            console.log(`Valor final calculado para a venda ID ${venda.id}: ${finalizarVenda.valor_final}`);
+            finalizarvendas.valor_final = venda.preco - (venda.preco * finalizarvendas.desconto / 100);
+            console.log(`Valor final calculado para a venda ID ${venda.id}: ${finalizarvendas.valor_final}`);
           } else {
             throw new Error('Venda não encontrada');
           }

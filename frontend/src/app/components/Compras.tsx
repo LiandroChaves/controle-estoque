@@ -44,7 +44,7 @@ export default function Compras() {
     const [modoTabela, setModoTabela] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [senha, setSenha] = useState("");
-    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
+    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil);
     // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
@@ -683,7 +683,7 @@ export default function Compras() {
                                                 className={`font-medium transition-all ${isDarkMode ? "text-gray-400" : "text-white"
                                                     }`}
                                             >
-                                                
+
                                                 Empresa não informada
                                             </p>
                                         )}
@@ -754,7 +754,6 @@ export default function Compras() {
                         >
                             {mostrarFavoritos ? "Mostrar Todos" : "Favoritos"}
                         </button>
-
                         <button
                             onClick={() => setShowModal(true)}
                             className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode

@@ -55,10 +55,10 @@ CREATE TABLE IF NOT EXISTS compras (
 -- ======================= Tabela de finalizar vendas ==========================
 CREATE TABLE IF NOT EXISTS finalizarvendas (
     id SERIAL PRIMARY KEY,
-    venda_id INT NOT NULL,
+    venda_id INT,
     nome_produto VARCHAR(255) NOT NULL,
     preco DECIMAL(10,2) NOT NULL,
-    desconto DECIMAL(5,2) NOT NULL, -- Porcentagem de desconto
+    desconto DECIMAL(5,2), -- Porcentagem de desconto
     valor_final DECIMAL(10,2) NOT NULL, -- Preço final após desconto
     forma_pagamento VARCHAR(50) NOT NULL,
     data_finalizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -167,7 +167,7 @@ VALUES
 (2, 3, 1); -- Compra para o produto 'Filtro de óleo'
 
 -- ========================== Selects =========================================
-
+ 
 SELECT * FROM produtos;
 SELECT * FROM informacoeslogin;
 SELECT * FROM vendas;

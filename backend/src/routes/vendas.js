@@ -113,14 +113,6 @@ router.delete('/api/vendas/usuario/:usuario_id/limpar', autenticarUsuario, async
             return res.status(403).json({ error: 'Acesso negado' });
         }
 
-        // Primeiro, exclui registros dependentes na tabela "finalizarvendas"
-        await pool.query(
-            `DELETE FROM finalizarvendas WHERE venda_id IN (
-                SELECT id FROM vendas WHERE usuario_id = $1
-            )`, 
-            [usuarioId]
-        );
-
         // Agora, exclui as vendas
         const resultado = await pool.query(
             `DELETE FROM vendas WHERE usuario_id = $1`, 

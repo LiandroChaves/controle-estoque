@@ -100,8 +100,8 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
         try {
             await handleFinalizarCompra();
             await esvaziarCarrinho();
-            toast.success("Compra finalizada com sucesso!"); // Exibe o toast de sucesso
-            setIsOpen(false); // Fecha o modal
+            toast.success("Compra finalizada com sucesso!");
+            setIsOpen(false);
         } catch (error) {
             console.error(error);
             toast.error("Erro ao finalizar a compra");
