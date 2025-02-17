@@ -5,23 +5,22 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import imgFundo from "../../../public/assets/comprar-online.png";
 
-interface ModalFinalizarComprasProps {
-    isOpen: boolean;
-    setIsOpen: (isOpen: boolean) => void;
-    vendas: {
-        id: any; preco?: number
-    }[];
+interface ModalFinalizarComprasUnicasProps {
+    isOpenNow: boolean;
+    setIsOpenNow: (isOpenNow: boolean) => void;
+    venda: { id: any; preco?: number } | null; // Apenas UMA venda
 }
 
-export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }: ModalFinalizarComprasProps) {
+
+export default function ModalFinalizarComprasUnicas({ isOpenNow, setIsOpenNow, venda = null }: ModalFinalizarComprasUnicasProps) {
     const [desconto, setDesconto] = useState(0);
     const [formaPagamento, setFormaPagamento] = useState("");
 
-    // Verifica se "vendas" é um array antes de usar "reduce"
-    const totalVendas = vendas.reduce((total, venda) => total + Number(venda.preco || 0), 0);
+    const totalVendas = venda?.preco ? Number(venda.preco) : 0;
     const totalComDesconto = totalVendas * (1 - desconto / 100);
+    
 
-    if (!isOpen) return null;
+    if (!isOpenNow) return null;
 
     if (!formaPagamento) {
         const btnFinalizar = document.getElementById("formaPagamento") as HTMLButtonElement;
@@ -30,75 +29,76 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
 
 
     const handleFinalizarCompra = async () => {
+        if (!venda) return; // Verifica se há uma venda selecionada
+    
         if (!formaPagamento) {
             toast.error("Selecione uma forma de pagamento!");
             return;
         }
-
+    
         try {
-            const response = await fetch("http://localhost:5000/api/finalizarvenda", {
+            const response = await fetch("http://localhost:5000/api/finalizarvendaUnica", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    vendas: vendas.map(venda => ({
-                        vendaId: venda.id, // ID da venda
-                        desconto: desconto, // Desconto aplicado
-                        formaPagamento: formaPagamento, // Forma de pagamento
-                    })),
+                    vendaId: venda.id, // Apenas um ID
+                    desconto: desconto,
+                    formaPagamento: formaPagamento,
                 }),
             });
-
-            if (!response.ok) throw new Error("Erro ao finalizar vendas");
-            setIsOpen(false);
+    
+            if (!response.ok) throw new Error("Erro ao finalizar venda");
+            setIsOpenNow(false);
+            toast.success("Compra finalizada com sucesso!");
         } catch (error) {
             console.error(error);
-            toast.error("Erro ao finalizar as compras");
+            toast.error("Erro ao finalizar a compra");
         }
     };
+    
 
-    const esvaziarCarrinho = async () => {
+    const removerItemCarrinho = async (vendaId: string) => {
         try {
             const token = localStorage.getItem('token');
             if (!token || token === 'undefined') {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
-
-            const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
-            if (!userId) {
-                throw new Error('Usuário não autenticado. Faça login novamente.');
-            }
-
-            const response = await fetch(`http://localhost:5000/api/vendas/usuario/${userId}/limpar`, {
+    
+            const response = await fetch(`http://localhost:5000/api/vendas/${vendaId}/limparUnico`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Erro ao esvaziar o carrinho');
+                throw new Error(errorData.error || 'Erro ao remover item do carrinho');
             }
-
-            toast.success('Carrinho esvaziado com sucesso!', {
+    
+            toast.success('Item removido com sucesso!', {
                 position: 'bottom-right',
                 autoClose: 3000
             });
+    
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
         } catch (error: any) {
-            console.error('Erro ao esvaziar o carrinho:', error.message);
+            console.error('Erro ao remover item do carrinho:', error.message);
             alert(error.message);
         }
-    }
+    };
+    
 
     const handleClick = async () => {
         try {
             await handleFinalizarCompra();
-            await esvaziarCarrinho();
+            if (venda) {
+                await removerItemCarrinho(venda.id);
+            }
             toast.success("Compra finalizada com sucesso!"); // Exibe o toast de sucesso
-            setIsOpen(false); // Fecha o modal
+            setIsOpenNow(false); // Fecha o modal
         } catch (error) {
             console.error(error);
             toast.error("Erro ao finalizar a compra");
@@ -157,7 +157,7 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
 
                 <div className="flex justify-between">
                     <button
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => setIsOpenNow(false)}
                         className="px-4 py-2 bg-red-600 text-white rounded-md"
                     >
                         Cancelar

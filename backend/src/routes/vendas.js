@@ -104,7 +104,7 @@ router.delete('/api/vendas/usuario/:usuario_id', autenticarUsuario, async (req, 
 // Rota para esvaziar o carrinho sem restaurar o estoque
 router.delete('/api/vendas/usuario/:usuario_id/limpar', autenticarUsuario, async (req, res) => {
     const usuarioId = req.params.usuario_id;
-
+    
     console.log(`🛒 Tentando esvaziar carrinho do usuário: ${usuarioId}`);
 
     try {
@@ -128,6 +128,39 @@ router.delete('/api/vendas/usuario/:usuario_id/limpar', autenticarUsuario, async
     }
 });
 
+
+router.delete('/api/vendas/:venda_id/limparUnico', autenticarUsuario, async (req, res) => {
+    const { venda_id } = req.params;
+
+    console.log(`🛒 Tentando remover venda ID: ${venda_id}`);
+
+    try {
+        // Verifica se a venda pertence ao usuário autenticado
+        const venda = await pool.query(
+            "SELECT usuario_id FROM vendas WHERE id = $1",
+            [venda_id]
+        );
+
+        if (venda.rows.length === 0) {
+            return res.status(404).json({ error: "Venda não encontrada." });
+        }
+
+        if (venda.rows[0].usuario_id !== req.usuario.id) {
+            console.error('🚫 Acesso negado: Venda não pertence ao usuário autenticado.');
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+
+        // Exclui apenas a venda específica
+        await pool.query("DELETE FROM vendas WHERE id = $1", [venda_id]);
+
+        console.log(`✅ Venda ID ${venda_id} removida com sucesso!`);
+
+        res.status(200).json({ message: "Item removido do carrinho!" });
+    } catch (error) {
+        console.error('❌ Erro ao remover item do carrinho:', error);
+        res.status(500).json({ error: 'Erro ao remover item do carrinho' });
+    }
+});
 
 
 router.get('/api/vendas/categoria/:categoria', autenticarUsuario, async (req, res) => {

@@ -12,6 +12,8 @@ import ftPerfil from "../../../public/assets/ftPerfil.webp";
 import { useTheme } from "../../utils/context/ThemeContext";
 import ModalFinalizarCompras from "./finalizarCompras";
 import mudarModo from "../../../public/assets/ciclo.png";
+import logoFinalizar from "../../../public/assets/carrinho-de-compras-finalizadas.png";
+import ModalFinalizarComprasUnicas from './finalizarComprasUnicas';
 
 export default function Vendas(vendass: any) {
     const router = useRouter();
@@ -30,7 +32,9 @@ export default function Vendas(vendass: any) {
     const [categorias, setCategorias] = useState<string[]>([]);
     const [exibirComoCards, setExibirComoCards] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenNow, setIsOpenNow] = useState(false);
     const [usuario, setUsuario] = useState<any>(null);
+    const [vendaSelecionada, setVendaSelecionada] = useState<Venda | null>(null);
 
 
     interface Venda {
@@ -554,7 +558,7 @@ export default function Vendas(vendass: any) {
                                                 className={`font-medium transition-all ${isDarkMode ? "text-gray-400" : "text-white"
                                                     }`}
                                             >
-                                                
+
                                                 Empresa não informada
                                             </p>
                                         )}
@@ -798,13 +802,23 @@ export default function Vendas(vendass: any) {
                                         <p className={`text-center mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Preço: <span className="font-bold">R$ {venda.preco}</span></p>
 
                                         {/* Botão de deletar */}
-                                        <div className="flex justify-center mt-4">
+                                        <div className="flex justify-between mt-4">
                                             <button
                                                 onClick={() => deletarProduto(venda)}
                                                 className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
                                                     }`}
                                             >
                                                 <Image src={logoDeletar} alt="deletar" width={40} height={40} className="invert" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setVendaSelecionada(venda); // Define a venda correta
+                                                    setIsOpenNow(true);
+                                                }}
+                                                className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                                    }`}
+                                            >
+                                                <Image src={logoFinalizar} alt="deletar" width={40} height={40} className="invert" />
                                             </button>
                                         </div>
                                     </div>
@@ -813,7 +827,9 @@ export default function Vendas(vendass: any) {
                                 <p className="text-gray-400 text-center col-span-full">Nenhum produto para finalizar.</p>
                             )}
                         </div>
-
+                        {isOpenNow && vendaSelecionada && (
+                            <ModalFinalizarComprasUnicas isOpenNow={isOpenNow} setIsOpenNow={setIsOpenNow} venda={vendaSelecionada} />
+                        )}
                         {/* Total e botão de finalizar compra */}
                         {vendas.length > 0 && (
                             <div className="mt-6 text-center">
@@ -823,7 +839,7 @@ export default function Vendas(vendass: any) {
                                 <button
                                     onClick={() => setIsOpen(true)} className={`ml-6 px-4 py-2 rounded-md shadow-md transition-all focus:outline-double active:translate-y-1 ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}
                                 >
-                                    Finalizar compra
+                                    Finalizar compras
                                 </button>
                                 {isOpen && vendas.length > 0 && (
                                     <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />

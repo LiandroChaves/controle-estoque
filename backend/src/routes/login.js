@@ -88,6 +88,11 @@ router.get('/login', async (req, res) => {
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ error: 'Token inválido ou expirado' });
         }
+        if (error.name === 'jwt expired') {
+            alert('Sua sessão expirou, faça login novamente');
+            router.push('/login');        
+            return res.status(401).json({ error: 'Token expirado' });
+        }
         res.status(500).json({ error: 'Erro interno ao autenticar o usuário' });
     }
 });
