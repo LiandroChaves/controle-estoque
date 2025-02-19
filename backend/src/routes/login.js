@@ -20,10 +20,14 @@ const autenticarUsuario = (req, res, next) => {
         next(); // Chama a próxima função/middleware
     } catch (error) {
         console.error('Erro ao verificar token:', error.message);
+        
+        if (error.name === 'jwt expired') {
+            return res.status(401).json({ error: 'Sessão expirada. Faça login novamente.' });
+        }
+
         return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
 };
-
 
 // Rota de login
 router.post('/login', async (req, res) => {
@@ -88,10 +92,10 @@ router.get('/login', async (req, res) => {
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ error: 'Token inválido ou expirado' });
         }
-        if (error.name === 'jwt expired') {
-            alert('Sua sessão expirou, faça login novamente');
-            router.push('/login');        
-            return res.status(401).json({ error: 'Token expirado' });
+        if (res.status === 401) {
+            alert("Sua sessão expirou. Faça login novamente.");
+            window.location.href = "/login";
+            return;
         }
         res.status(500).json({ error: 'Erro interno ao autenticar o usuário' });
     }

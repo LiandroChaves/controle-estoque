@@ -10,7 +10,7 @@ type AdicionarProdutoModalProps = {
     onProdutoAdicionado: (produto: any) => void; // Ajuste o tipo `any` conforme necessário
 };
 
-const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, onProdutoAdicionado }) => {
+const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onProdutoAdicionado, onClose }) => {
     const [produto, setProduto] = useState({
         nome: "",
         descricao: "",
@@ -22,8 +22,9 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
         imagem: "",
         favorito: false,
     });
-
     const [usuarioId, setUsuarioId] = useState<string | null>(null);
+    const [produtoAdicionado, setProdutoAdicionado] = useState(null);
+
 
     const fetchUsuario = async (): Promise<string> => {
         try {
@@ -75,14 +76,14 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
         try {
             const token = localStorage.getItem('token');
             if (!token) throw new Error('Usuário não autenticado.');
-    
+
             // Obtém o ID do usuário
             const produtoId = await fetchUsuario(); // Agora você já possui o produtoId
-    
+
             const formData = new FormData();
             formData.append('image', file);
             formData.append('produtoId', produtoId); // Adiciona o produtoId ao formData
-    
+
             const response = await fetch('http://localhost:5000/api/produto/upload', {
                 method: 'POST',
                 headers: {
@@ -90,12 +91,12 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
                 },
                 body: formData,
             });
-    
+
             if (!response.ok) {
                 const errorText = await response.text(); // Recebe o erro como texto
                 throw new Error(`Erro ao fazer upload: ${errorText}`);
             }
-    
+
             const data = await response.json();
             return data.imagePath; // Caminho da imagem salva
         } catch (error: any) {
@@ -103,7 +104,7 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
             throw error;
         }
     };
-    
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
@@ -118,25 +119,25 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
             alert("ID do usuário não encontrado. Faça login novamente.");
             return;
         }
-
+    
         try {
             const response = await fetch(`http://localhost:5000/api/produtos/${usuarioId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(produto),
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
+                
                 onProdutoAdicionado(data.produto);
-                onClose();
+    
                 toast.success(`Produto: ${produto.nome} adicionado com sucesso!`, {
                     position: "bottom-right",
-                    autoClose: 3000
+                    autoClose: 3000,
                 });
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+    
+                onClose();
             } else {
                 const errorData = await response.json();
                 alert(`Erro: ${errorData.error}`);
@@ -146,6 +147,15 @@ const AdicionarProdutoModal: React.FC<AdicionarProdutoModalProps> = ({ onClose, 
             alert("Erro ao adicionar produto.");
         }
     };
+    
+    
+    useEffect(() => {
+        if (!produtoAdicionado) return;
+    
+        onProdutoAdicionado(produtoAdicionado);
+        setProdutoAdicionado(null);
+    }, [produtoAdicionado]);
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 animate__animated animate__fadeIn animate__faster">

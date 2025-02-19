@@ -15,7 +15,6 @@ import { useTheme } from "../../utils/context/ThemeContext";
 import mudarModo from "../../../public/assets/ciclo.png";
 import imgPadrao from "../../../public/assets/sem-imagens.png";
 
-
 export default function Produtos() {
     type Produto = {
         id?: number;
@@ -42,8 +41,8 @@ export default function Produtos() {
     const [modalAbertoin, setModalAbertoin] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null);
     const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
-    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil); // Estado para armazenar a imagem do usuário
-    const [imagemUsuarioProd, setImagemUsuarioProd] = useState<string | any>(); // Estado para armazenar a imagem do usuário
+    const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil);
+    const [imagemUsuarioProd, setImagemUsuarioProd] = useState<string | any>();
     const [isVisible, setIsVisible] = useState(false);
     const [menuVisivel, setMenuVisivel] = useState(false);
     const toggleMenu = () => setMenuVisivel((prev) => !prev);
@@ -54,12 +53,62 @@ export default function Produtos() {
     const handleAbrirModal = () => setModalAbertoin(true);
     const handleFecharModal = () => setModalAbertoin(false);
     const [modoTabela, setModoTabela] = useState(true);
-
-
-    // const [isDarkMode, setIsDarkMode] = useState(true);
+    const [prodsCadastrados, setProdsCadastrados] = useState([{ quantProd: `${produtos.length} produtos cadastrados` }]);
+    const [favorito, setFavorito] = useState(null);
+    const [atualizar, setAtualizar] = useState(false);
     const { isDarkMode, toggleTheme } = useTheme();
+    // ============================== Dados Contadores ========================
 
+    useEffect(() => {
+        setProdsCadastrados([{ quantProd: `${produtos.length} produtos cadastrados` }]);
+    }, [produtos]);
+    
+    useEffect(() => {
+        carregarProdutos();
+        setAtualizar(false); // Reseta o gatilho
+    }, [mostrarFavoritos, ordemAtual, atualizar]);
 
+    useEffect(() => {
+        if (!atualizar || favorito === null) return;
+
+        const favoritarProduto = async (produto: any) => {
+            try {
+                const response = await fetch(`http://localhost:5000/api/produtos/${produto.id}/favorito`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ favorito }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao favoritar produto.");
+                }
+
+                setProdutos((produtosAtuais) =>
+                    produtosAtuais.map((p) =>
+                        p.id === produto.id ? { ...p, favorito } : p
+                    )
+                );
+
+                toast.success(
+                    `${produto.nome} foi ${favorito ? "adicionado aos favoritos" : "removido dos favoritos"} com sucesso!`,
+                    {
+                        position: "bottom-right",
+                        autoClose: 2000,
+                    }
+                );
+            } catch (error) {
+                console.error("Erro ao favoritar produto:", error);
+                toast.error("Erro ao favoritar produto.", {
+                    position: "bottom-right",
+                    autoClose: 2000,
+                });
+            } finally {
+                setAtualizar(false);
+            }
+        };
+
+        favoritarProduto(favorito);
+    }, [favorito, atualizar]);
 
     const fetchCategorias = async () => {
         try {
@@ -115,7 +164,6 @@ export default function Produtos() {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
 
-
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -134,7 +182,6 @@ export default function Produtos() {
             }
         }
     };
-
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -166,10 +213,8 @@ export default function Produtos() {
         try {
             const userId = localStorage.getItem('userId');
             if (userId) {
-                // Remove a imagem do localStorage
                 localStorage.removeItem(`imagemUsuario_${userId}`);
 
-                // Define uma imagem padrão (se necessário)
                 setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
 
                 const token = localStorage.getItem('token');
@@ -288,13 +333,6 @@ export default function Produtos() {
         }
     };
 
-    // ============================== Dados Contadores ========================
-    const prodsCadastrados = [
-        {
-            quantProd: `${produtos.length} produtos cadastrados`,
-        },
-    ];
-
     // ========================== Função para carregar produtos ==================
 
     const fetchUsuario = async () => {
@@ -326,28 +364,46 @@ export default function Produtos() {
         }
     };
 
-
-    const handleProdutoAdicionado = (produto: Produto) => {
-        console.log("Produto adicionado:", produto);
+    const handleProdutoAdicionado = (novoProduto : any) => {
+        setProdutos((produtosAtuais) => [...produtosAtuais, novoProduto]);
+        setProdsCadastrados([{ quantProd: `${produtos.length + 1} produtos cadastrados` }]); 
+        const novosProdutos = [...produtos, novoProduto];
+        setProdutosBuscados(novosProdutos);
+        return novosProdutos;
     };
-
+    
+    useEffect(() => {
+        setProdutosBuscados(produtos); 
+    }, [produtos]);
+    
 
     const funcaoSair = () => {
         localStorage.removeItem("token");
         router.push("/login");
     };
 
-
     const carregarProdutos = async () => {
         try {
             const data = await fetchUsuario();
-            const endpoint = mostrarFavoritos ? `http://localhost:5000/api/produtos/favoritos/${data.id}` : `http://localhost:5000/api/produtos/${data.id}`;
-
+            let endpoint = mostrarFavoritos
+                ? `http://localhost:5000/api/produtos/favoritos/${data.id}`
+                : `http://localhost:5000/api/produtos/${data.id}`;
+    
+            if (ordemAtual === "asc") {
+                endpoint = mostrarFavoritos
+                    ? `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${data.id}`
+                    : `http://localhost:5000/api/produtos/ordenarAtoZ/${data.id}`;
+            } else if (ordemAtual === "desc") {
+                endpoint = mostrarFavoritos
+                    ? `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${data.id}`
+                    : `http://localhost:5000/api/produtos/ordenarZtoA/${data.id}`;
+            }
+    
             const response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
-
+    
             const dados = await response.json();
             setProdutos(dados);
             setProdutosBuscados(dados);
@@ -355,7 +411,6 @@ export default function Produtos() {
             console.error("Erro ao buscar produtos:", error);
         }
     };
-
 
     useEffect(() => {
         carregarProdutos();
@@ -387,7 +442,6 @@ export default function Produtos() {
         setProdutosBuscados(filtrado);
     };
 
-
     useEffect(() => {
         aplicarFiltros();
     }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
@@ -397,7 +451,6 @@ export default function Produtos() {
         setProdutoSelecionado(produto);
         setModalAberto(true);
     };
-
 
     const salvarAlteracoes = async () => {
         if (!produtoSelecionado || !produtoSelecionado.id) {
@@ -551,9 +604,6 @@ export default function Produtos() {
                     position: "bottom-right",
                     autoClose: 2000
                 });
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
                 carregarProdutos();
             } catch (error) {
                 console.error("Erro ao deletar produto:", error);
@@ -563,26 +613,34 @@ export default function Produtos() {
 
     const favoritarProduto = async (produto: any) => {
         try {
+            const novoFavorito = !produto.favorito;
             const response = await fetch(`http://localhost:5000/api/produtos/${produto.id}/favorito`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ favorito: !produto.favorito }),
+                body: JSON.stringify({ favorito: novoFavorito }),
             });
-
+    
             if (!response.ok) {
                 throw new Error("Erro ao favoritar produto.");
             }
-
-            toast.success(
-                `${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"
-                } com sucesso!`, {
-                position: "bottom-right",
-                autoClose: 2000,
-            }
+    
+            // Atualiza a lista local sem precisar buscar tudo de novo
+            setProdutos((produtosAtuais) =>
+                produtosAtuais.map((p) =>
+                    p.id === produto.id ? { ...p, favorito: novoFavorito } : p
+                )
             );
-            setTimeout(() => {
-                window.location.reload(); // Ou atualize o estado local para refletir a mudança
-            }, 3000);
+    
+            toast.success(
+                `${produto.nome} foi ${novoFavorito ? "adicionado aos favoritos" : "removido dos favoritos"} com sucesso!`,
+                {
+                    position: "bottom-right",
+                    autoClose: 2000,
+                }
+            );
+    
+            // Gatilho para recarregar os produtos se estiver na aba de favoritos
+            setAtualizar(true);
         } catch (error) {
             console.error("Erro ao favoritar produto:", error);
             toast.error("Erro ao favoritar produto.", {
@@ -629,8 +687,7 @@ export default function Produtos() {
                 setProdutoSelecionado(produtoAtualizado);
             }
         }
-    }, [produtos]);  // Sempre que a lista de produtos mudar, verifica se o produto selecionado ainda está lá
-
+    }, [produtos]);
 
     const ordenarProdutosZtoA = async () => {
         try {
@@ -662,12 +719,11 @@ export default function Produtos() {
         }
     };
 
-
     const ordenarProdutosToNormal = async () => {
         setOrdemAtual(null);
         carregarProdutos();
     };
-
+  
     // ============================= Renderização ===============================
     return (
         <>
@@ -758,7 +814,7 @@ export default function Produtos() {
                                                 className={`font-medium transition-all ${isDarkMode ? "text-gray-400" : "text-white"
                                                     }`}
                                             >
-                                                
+
                                                 Empresa não informada
                                             </p>
                                         )}
@@ -787,7 +843,6 @@ export default function Produtos() {
                     </div>
                 </div>
             </header>
-
             <nav className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 shadow-md py-4">
                 <div className="container mx-auto flex items-center gap-8 px-6">
                     <select
@@ -922,8 +977,8 @@ export default function Produtos() {
                     </button>
                     {modalAbertoin && (
                         <AdicionarProdutoModal
-                            onClose={handleFecharModal}
                             onProdutoAdicionado={handleProdutoAdicionado}
+                            onClose={handleFecharModal}
                         />
                     )}
                     <button

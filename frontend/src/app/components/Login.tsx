@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CadastroModal from "./modalCadastro";
 import { useTheme } from "../../utils/context/ThemeContext";
+import CookieConsent from "./CookieConsent";
 
 export default function Login() {
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -11,8 +12,25 @@ export default function Login() {
     const [senha, setSenha] = useState("");
     const [erro, setErro] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar o modal
-    const router = useRouter();
     const { isDarkMode, toggleTheme } = useTheme();
+    const [cookiesAceitos, setCookiesAceitos] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkConsent = () => {
+            const consent = localStorage.getItem("cookieConsent") === "true";
+            console.log("Consentimento de cookies:", consent);
+            setCookiesAceitos(consent);
+        };
+
+        checkConsent();
+
+        window.addEventListener("cookieConsentAccepted", checkConsent);
+
+        return () => {
+            window.removeEventListener("cookieConsentAccepted", checkConsent);
+        };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,6 +89,7 @@ export default function Login() {
 
     return (
         <>
+            <CookieConsent />
             <div className={`flex items-center justify-center min-h-screen transition-all ${isDarkMode
                 ? "bg-gradient-to-br from-gray-900 via-teal-900 to-gray-800"
                 : "bg-gradient-to-br from-gray-100 via-teal-200 to-gray-300"
@@ -163,6 +182,7 @@ export default function Login() {
 
                         <button
                             type="submit"
+                            disabled={!cookiesAceitos}
                             className={`w-full py-3 font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 ${
                                 isDarkMode 
                                     ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700" 
