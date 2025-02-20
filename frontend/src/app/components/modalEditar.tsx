@@ -29,12 +29,9 @@ export default function Modal({
         if (onSave) {
             await onSave();
             toast.success("Alterações salvas com sucesso!", {
-                position: "bottom-right", // Posição do toast
-                autoClose: 3000, // Duração do toast em milissegundos
+                position: "bottom-right",
+                autoClose: 3000,
             });
-            setTimeout(() => {
-                window.location.reload()
-            }, 2000);
         }
     };
 
@@ -46,7 +43,7 @@ export default function Modal({
                 className="bg-gray-800 p-8 rounded-lg shadow-2xl w-full max-w-xl border-t-4 border-teal-500 animate__animated animate__zoomIn animate__faster"
                 style={{
                     backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${imgFundo.src})`,
-                    backgroundSize: "cover", // Faz a imagem cobrir todo o modal
+                    backgroundSize: "cover",
                     backgroundPosition: "center",
                 }}
             >
@@ -59,8 +56,6 @@ export default function Modal({
                         ✕
                     </button>
                 </div>
-
-                {/* Imagem decorativa ou ícone */}
                 <div className="mb-6 flex justify-center">
                     <Image
                         src={imgEstoque}
@@ -68,9 +63,7 @@ export default function Modal({
                         className="w-20 h-20 mb-4 animate__animated animate__pulse animate__infinite"
                     />
                 </div>
-
                 <div className="mb-6 text-gray-700">{children}</div>
-
                 <div className="flex justify-between gap-4 mt-6">
                     <button
                         onClick={onClose}
@@ -80,7 +73,7 @@ export default function Modal({
                     </button>
                     {showSaveButton && (
                         <button
-                            onClick={handleSave} // Agora chama a função handleSave
+                            onClick={handleSave}
                             className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-all duration-300 ease-in-out transform hover:scale-105"
                         >
                             {saveButtonText}

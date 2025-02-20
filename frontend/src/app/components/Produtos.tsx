@@ -1,5 +1,6 @@
 "use client";
 
+// ================================== Imports ==================================
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
@@ -47,7 +48,6 @@ export default function Produtos() {
     const [menuVisivel, setMenuVisivel] = useState(false);
     const toggleMenu = () => setMenuVisivel((prev) => !prev);
     const [ordemAtual, setOrdemAtual] = useState<"asc" | "desc" | null>(null);
-    // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
     const handleAbrirModal = () => setModalAbertoin(true);
@@ -57,8 +57,10 @@ export default function Produtos() {
     const [favorito, setFavorito] = useState(null);
     const [atualizar, setAtualizar] = useState(false);
     const { isDarkMode, toggleTheme } = useTheme();
-    // ============================== Dados Contadores ========================
+    const router = useRouter();
 
+
+    // ================================ Effects ================================
     useEffect(() => {
         setProdsCadastrados([{ quantProd: `${produtos.length} produtos cadastrados` }]);
     }, [produtos]);
@@ -110,78 +112,13 @@ export default function Produtos() {
         favoritarProduto(favorito);
     }, [favorito, atualizar]);
 
-    const fetchCategorias = async () => {
-        try {
-            const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
-            const userId = usuario?.id;
-
-            if (!userId) {
-                throw new Error('ID do usuário não encontrado.');
-            }
-
-            const response = await fetch(`http://localhost:5000/api/categorias?userId=${userId}`);
-            if (!response.ok) {
-                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
-            }
-
-            const dados = await response.json();
-            const categorias = dados.map((item: { categoria: string }) => item.categoria);
-
-            setCategorias(categorias);
-        } catch (error) {
-            console.error('Erro ao buscar categorias:', error);
-        }
-    };
-
     useEffect(() => {
         fetchCategorias(); // Chama a função ao montar o componente
     }, []);
 
-    const fetchSubcategorias = async () => {
-        try {
-            const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
-            const userId = usuario?.id;
-
-            if (!userId) {
-                throw new Error('ID do usuário não encontrado.');
-            }
-
-            const response = await fetch(`http://localhost:5000/api/subcategorias?userId=${userId}`);
-            if (!response.ok) {
-                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
-            }
-
-            const dados = await response.json();
-            const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
-
-            setSubCategorias(subcategorias);
-        } catch (error) {
-            console.error('Erro ao buscar categorias:', error);
-        }
-    };
-
     useEffect(() => {
         fetchSubcategorias(); // Chama a função ao montar o componente
     }, []);
-
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            try {
-                const imagePath = await uploadImagem(file);
-                const imageUrl = `http://localhost:5000${imagePath}`;
-                setImagemUsuario(imageUrl); // Atualiza a imagem com o caminho recebido
-
-                // Salva a URL no localStorage com a chave sendo o userId
-                const userId = localStorage.getItem('userId'); // Aqui você pega o userId
-                if (userId) {
-                    localStorage.setItem(`imagemUsuario_${userId}`, imageUrl);
-                }
-            } catch (error) {
-                alert('Erro ao fazer upload da imagem.');
-            }
-        }
-    };
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -208,6 +145,127 @@ export default function Produtos() {
 
         fetchUserData();
     }, []);
+
+    useEffect(() => {
+        setProdutosBuscados(produtos); 
+    }, [produtos]);
+    
+    useEffect(() => {
+        carregarProdutos();
+    }, []);
+
+    useEffect(() => {
+        aplicarFiltros();
+    }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
+
+    useEffect(() => {
+        const fetchInformacoes = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                if (!token || token === "undefined") {
+                    setError("Usuário não autenticado. Faça login novamente.");
+                    router.push("/login");
+                    return;
+                }
+
+                const response = await fetch("http://localhost:5000/api/login", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
+                }
+
+                const data = await response.json();
+                setInfor([data]);
+            } catch (err: any) {
+                console.error("Erro ao buscar informações do usuário:", err.message);
+                setError(err.message);
+            }
+        };
+
+        fetchInformacoes();
+    }, [router]);
+
+    useEffect(() => {
+        if (produtoSelecionado) {
+            const produtoAtualizado = produtos.find(p => p.id === produtoSelecionado.id);
+            if (produtoAtualizado) {
+                setProdutoSelecionado(produtoAtualizado);
+            }
+        }
+    }, [produtos]);
+
+    // ================================ Funções ================================
+    const fetchCategorias = async () => {
+        try {
+            const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
+            const userId = usuario?.id;
+
+            if (!userId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+
+            const response = await fetch(`http://localhost:5000/api/categorias?userId=${userId}`);
+            if (!response.ok) {
+                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
+            }
+
+            const dados = await response.json();
+            const categorias = dados.map((item: { categoria: string }) => item.categoria);
+
+            setCategorias(categorias);
+        } catch (error) {
+            console.error('Erro ao buscar categorias:', error);
+        }
+    };
+
+    const fetchSubcategorias = async () => {
+        try {
+            const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
+            const userId = usuario?.id;
+
+            if (!userId) {
+                throw new Error('ID do usuário não encontrado.');
+            }
+
+            const response = await fetch(`http://localhost:5000/api/subcategorias?userId=${userId}`);
+            if (!response.ok) {
+                throw new Error(`Erro na resposta do servidor: ${response.statusText}`);
+            }
+
+            const dados = await response.json();
+            const subcategorias = dados.map((item: { subcategoria: string }) => item.subcategoria);
+
+            setSubCategorias(subcategorias);
+        } catch (error) {
+            console.error('Erro ao buscar categorias:', error);
+        }
+    };
+
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                const imagePath = await uploadImagem(file);
+                const imageUrl = `http://localhost:5000${imagePath}`;
+                setImagemUsuario(imageUrl); // Atualiza a imagem com o caminho recebido
+
+                // Salva a URL no localStorage com a chave sendo o userId
+                const userId = localStorage.getItem('userId'); // Aqui você pega o userId
+                if (userId) {
+                    localStorage.setItem(`imagemUsuario_${userId}`, imageUrl);
+                }
+            } catch (error) {
+                alert('Erro ao fazer upload da imagem.');
+            }
+        }
+    };
 
     const deletarImg = async () => {
         try {
@@ -310,7 +368,6 @@ export default function Produtos() {
         }
     };
 
-
     const handleImageChangeProd = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -332,8 +389,6 @@ export default function Produtos() {
             }
         }
     };
-
-    // ========================== Função para carregar produtos ==================
 
     const fetchUsuario = async () => {
         try {
@@ -371,11 +426,6 @@ export default function Produtos() {
         setProdutosBuscados(novosProdutos);
         return novosProdutos;
     };
-    
-    useEffect(() => {
-        setProdutosBuscados(produtos); 
-    }, [produtos]);
-    
 
     const funcaoSair = () => {
         localStorage.removeItem("token");
@@ -412,11 +462,6 @@ export default function Produtos() {
         }
     };
 
-    useEffect(() => {
-        carregarProdutos();
-    }, []);
-
-    // ============================== Aplicar Filtros ============================
     const aplicarFiltros = () => {
         if (
             buscarTermo.trim() === "" &&
@@ -442,11 +487,6 @@ export default function Produtos() {
         setProdutosBuscados(filtrado);
     };
 
-    useEffect(() => {
-        aplicarFiltros();
-    }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
-
-    // ======================== Funções do Modal ================================
     const abrirModal = (produto: any) => {
         setProdutoSelecionado(produto);
         setModalAberto(true);
@@ -465,14 +505,13 @@ export default function Produtos() {
         }
 
         try {
-            // Se uma nova imagem foi selecionada, remover a URL base
             let imagemCorrigida = imagemUsuarioProd
-                ? imagemUsuarioProd.replace('http://localhost:5000', '') // Removendo a base
-                : imagem?.replace('http://localhost:5000', ''); // Garantindo que a imagem existente também esteja correta
+                ? imagemUsuarioProd.replace('http://localhost:5000', '')
+                : imagem?.replace('http://localhost:5000', ''); 
 
             const produtoAtualizado = {
                 ...produtoSelecionado,
-                imagem: imagemCorrigida, // Sempre no formato "/uploads/nomeimagem.extensao"
+                imagem: imagemCorrigida,
             };
 
             console.log("Enviando requisição para:", `http://localhost:5000/produtos/${produtoSelecionado.id}`);
@@ -496,8 +535,8 @@ export default function Produtos() {
 
             const data = await response.json();
             console.log("Produto atualizado:", data);
-
             setModalAberto(false);
+            carregarProdutos()
         } catch (error) {
             console.error("Erro ao salvar alterações:", error);
         }
@@ -545,43 +584,6 @@ export default function Produtos() {
             console.error("Erro ao buscar produtos:", error);
         }
     };
-
-    // ==================== Informações do Usuário ==============================
-    const router = useRouter();
-
-    useEffect(() => {
-        const fetchInformacoes = async () => {
-            try {
-                const token = localStorage.getItem("token");
-
-                if (!token || token === "undefined") {
-                    setError("Usuário não autenticado. Faça login novamente.");
-                    router.push("/login");
-                    return;
-                }
-
-                const response = await fetch("http://localhost:5000/api/login", {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
-                }
-
-                const data = await response.json();
-                setInfor([data]);
-            } catch (err: any) {
-                console.error("Erro ao buscar informações do usuário:", err.message);
-                setError(err.message);
-            }
-        };
-
-        fetchInformacoes();
-    }, [router]);
 
     const deletarProduto = async (produto: any) => {
         if (confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
@@ -679,15 +681,6 @@ export default function Produtos() {
             alert("Erro ao ordenar produtos.");
         }
     };
-
-    useEffect(() => {
-        if (produtoSelecionado) {
-            const produtoAtualizado = produtos.find(p => p.id === produtoSelecionado.id);
-            if (produtoAtualizado) {
-                setProdutoSelecionado(produtoAtualizado);
-            }
-        }
-    }, [produtos]);
 
     const ordenarProdutosZtoA = async () => {
         try {
