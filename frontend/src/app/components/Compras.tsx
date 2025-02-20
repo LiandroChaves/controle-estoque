@@ -1,5 +1,6 @@
 "use client";
 
+// ============================ Imports ================================
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import ftPerfil from "../../../public/assets/ftPerfil.webp";
@@ -45,17 +46,153 @@ export default function Compras() {
     const [showModal, setShowModal] = useState(false);
     const [senha, setSenha] = useState("");
     const [imagemUsuario, setImagemUsuario] = useState<string | any>(ftPerfil);
-    // ================================ Categorias ============================
     const [categorias, setCategorias] = useState<string[]>([]);
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
     const [isVisible, setIsVisible] = useState(false);
     const [ordemAtual, setOrdemAtual] = useState<"asc" | "desc" | null>(null);
-
     const [produtoDetalhado, setProdutoDetalhado] = useState<any | null>(null);
     const [isDetalheModalAberto, setIsDetalheModalAberto] = useState(false);
-
     const { isDarkMode, toggleTheme } = useTheme();
+    const [prodsCadastrados, setProdsCadastrados] = useState([{ quantProd: `${produtos.length} produtos cadastrados` }]);
+    const [favorito, setFavorito] = useState(null);
+    const [atualizar, setAtualizar] = useState(false);
+    const router = useRouter();
 
+    // ============================== Effects ================================
+    useEffect(() => {
+        setProdsCadastrados([{ quantProd: `${produtos.length} produtos cadastrados` }]);
+    }, [produtos]);
+    
+    useEffect(() => {
+        carregarProdutos();
+        setAtualizar(false); // Reseta o gatilho
+    }, [mostrarFavoritos, ordemAtual, atualizar]);
+
+    useEffect(() => {
+        if (!atualizar || favorito === null) return;
+
+        const favoritarProduto = async (produto: any) => {
+            try {
+                const response = await fetch(`http://localhost:5000/api/produtos/${produto.id}/favorito`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ favorito }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao favoritar produto.");
+                }
+
+                setProdutos((produtosAtuais) =>
+                    produtosAtuais.map((p) =>
+                        p.id === produto.id ? { ...p, favorito } : p
+                    )
+                );
+
+                toast.success(
+                    `${produto.nome} foi ${favorito ? "adicionado aos favoritos" : "removido dos favoritos"} com sucesso!`,
+                    {
+                        position: "bottom-right",
+                        autoClose: 2000,
+                    }
+                );
+            } catch (error) {
+                console.error("Erro ao favoritar produto:", error);
+                toast.error("Erro ao favoritar produto.", {
+                    position: "bottom-right",
+                    autoClose: 2000,
+                });
+            } finally {
+                setAtualizar(false);
+            }
+        };
+
+        favoritarProduto(favorito);
+    }, [favorito, atualizar]);
+
+    useEffect(() => {
+        fetchCategorias();
+    }, []);
+
+    useEffect(() => {
+        fetchSubcategorias();
+    }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await fetchUsuario();
+                const userId = userData.id; // Assumindo que o ID do usuário vem da resposta do fetch
+
+                // Salvar o userId no localStorage
+                localStorage.setItem('userId', userId);
+
+                // Recupera a imagem do usuário baseado no userId
+                const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
+                if (imagemSalva) {
+                    setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
+                } else {
+                    // Se não encontrar, você pode definir uma imagem padrão ou carregar uma imagem do servidor
+                    setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
+                }
+            } catch (err: any) {
+                console.error('Erro ao buscar dados do usuário:', err.message);
+                // Redireciona para login ou outro comportamento desejado
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    useEffect(() => {
+        carregarProdutos();
+    }, []);
+
+    useEffect(() => {
+        aplicarFiltros();
+    }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
+
+    useEffect(() => {
+        if (produtoDetalhado?.imagem) {
+            console.log('Imagem do produto detalhado:', produtoDetalhado.imagem);
+        }
+    }, [produtoDetalhado]);
+
+    useEffect(() => {
+        const fetchInformacoes = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                if (!token || token === "undefined") {
+                    setError("Usuário não autenticado. Faça login novamente.");
+                    router.push("/login");
+                    return;
+                }
+
+                const response = await fetch("http://localhost:5000/api/login", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
+                }
+
+                const data = await response.json();
+                setInfor([data]);
+            } catch (err: any) {
+                console.error("Erro ao buscar informações do usuário:", err.message);
+                setError(err.message);
+            }
+        };
+
+        fetchInformacoes();
+    }, [router]);
+
+    // ============================= Funções ================================
     const fetchCategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
@@ -79,11 +216,6 @@ export default function Compras() {
         }
     };
 
-    useEffect(() => {
-        fetchCategorias(); // Chama a função ao montar o componente
-    }, []);
-
-
     const fetchSubcategorias = async () => {
         try {
             const usuario = await fetchUsuario(); // Função que retorna as informações do usuário
@@ -106,10 +238,6 @@ export default function Compras() {
             console.error('Erro ao buscar categorias:', error);
         }
     };
-
-    useEffect(() => {
-        fetchSubcategorias(); // Chama a função ao montar o componente
-    }, []);
 
     const handleConfirmSenha = async () => {
         try {
@@ -219,34 +347,6 @@ export default function Compras() {
         }
     };
 
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userData = await fetchUsuario();
-                const userId = userData.id; // Assumindo que o ID do usuário vem da resposta do fetch
-
-                // Salvar o userId no localStorage
-                localStorage.setItem('userId', userId);
-
-                // Recupera a imagem do usuário baseado no userId
-                const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
-                if (imagemSalva) {
-                    setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
-                } else {
-                    // Se não encontrar, você pode definir uma imagem padrão ou carregar uma imagem do servidor
-                    setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
-                }
-            } catch (err: any) {
-                console.error('Erro ao buscar dados do usuário:', err.message);
-                // Redireciona para login ou outro comportamento desejado
-            }
-        };
-
-        fetchUserData();
-    }, []); // Quando o componente é montado, chama o fetchUserData
-
-
     const uploadImagem = async (file: File): Promise<string> => {
         try {
             const token = localStorage.getItem('token');
@@ -275,16 +375,6 @@ export default function Compras() {
             throw error;
         }
     };
-
-
-    // ============================== Dados Contadores ========================
-    const prodsCadastrados = [
-        {
-            quantProd: `${produtos.length} produtos cadastrados`,
-        },
-    ];
-
-    // ========================== Função para carregar produtos ==================
 
     const fetchUsuario = async () => {
         try {
@@ -315,7 +405,6 @@ export default function Compras() {
         }
     };
 
-
     const funcaoSair = () => {
         localStorage.removeItem("token");
         router.push("/login");
@@ -324,13 +413,25 @@ export default function Compras() {
     const carregarProdutos = async () => {
         try {
             const data = await fetchUsuario();
-            const endpoint = mostrarFavoritos ? `http://localhost:5000/api/produtos/favoritos/${data.id}` : `http://localhost:5000/api/produtos/${data.id}`;
-
+            let endpoint = mostrarFavoritos
+                ? `http://localhost:5000/api/produtos/favoritos/${data.id}`
+                : `http://localhost:5000/api/produtos/${data.id}`;
+    
+            if (ordemAtual === "asc") {
+                endpoint = mostrarFavoritos
+                    ? `http://localhost:5000/api/produtos/favoritosOrdenadosAtoZ/${data.id}`
+                    : `http://localhost:5000/api/produtos/ordenarAtoZ/${data.id}`;
+            } else if (ordemAtual === "desc") {
+                endpoint = mostrarFavoritos
+                    ? `http://localhost:5000/api/produtos/favoritosOrdenadosZtoA/${data.id}`
+                    : `http://localhost:5000/api/produtos/ordenarZtoA/${data.id}`;
+            }
+    
             const response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error("Erro ao buscar produtos");
             }
-
+    
             const dados = await response.json();
             setProdutos(dados);
             setProdutosBuscados(dados);
@@ -339,12 +440,6 @@ export default function Compras() {
         }
     };
 
-
-    useEffect(() => {
-        carregarProdutos();
-    }, []);
-
-    // ============================== Aplicar Filtros ============================
     const aplicarFiltros = () => {
         if (
             buscarTermo.trim() === "" &&
@@ -370,22 +465,9 @@ export default function Compras() {
         setProdutosBuscados(filtrado);
     };
 
-    useEffect(() => {
-        aplicarFiltros();
-    }, [buscarTermo, categoriaSelecionada, subcategoriaSelecionada]);
-
-    // ======================== Funções do Modal ================================
     const abrirModal = (produto: any) => {
         setProdutoSelecionado(produto);
     };
-
-
-    useEffect(() => {
-        if (produtoDetalhado?.imagem) {
-            console.log('Imagem do produto detalhado:', produtoDetalhado.imagem);
-        }
-    }, [produtoDetalhado]);
-
 
     const fecharModal = () => {
         setProdutoSelecionado(null);
@@ -401,9 +483,7 @@ export default function Compras() {
             position: "bottom-right",
             autoClose: 3000,
         });
-        setTimeout(() => {
-            window.location.reload();
-        }, 2000);
+        carregarProdutos()
     };
 
     const alternarFavoritos = async () => {
@@ -445,84 +525,54 @@ export default function Compras() {
         }
     };
 
-
-    // Função para abrir o modal
     const abrirDetalheModal = (produto: any) => {
         setProdutoDetalhado(produto);
         setIsDetalheModalAberto(true);
     };
 
-    // Função para fechar o modal
     const fecharDetalheModal = () => {
         setProdutoDetalhado(null);
         setIsDetalheModalAberto(false);
     };
 
-    // ==================== Informações do Usuário ==============================
-    const router = useRouter();
-
-    useEffect(() => {
-        const fetchInformacoes = async () => {
-            try {
-                const token = localStorage.getItem("token");
-
-                if (!token || token === "undefined") {
-                    setError("Usuário não autenticado. Faça login novamente.");
-                    router.push("/login");
-                    return;
-                }
-
-                const response = await fetch("http://localhost:5000/api/login", {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
-                }
-
-                const data = await response.json();
-                setInfor([data]);
-            } catch (err: any) {
-                console.error("Erro ao buscar informações do usuário:", err.message);
-                setError(err.message);
-            }
-        };
-
-        fetchInformacoes();
-    }, [router]);
-
     const favoritarProduto = async (produto: any) => {
         try {
+            const novoFavorito = !produto.favorito;
             const response = await fetch(`http://localhost:5000/api/produtos/${produto.id}/favorito`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ favorito: !produto.favorito }),
+                body: JSON.stringify({ favorito: novoFavorito }),
             });
-
+    
             if (!response.ok) {
                 throw new Error("Erro ao favoritar produto.");
             }
-
-            toast.success(`${produto.nome} foi ${produto.favorito ? "removido dos favoritos" : "adicionado aos favoritos"} com sucesso!`, {
-                position: "bottom-right",
-                autoClose: 3000,
-            })
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000)
+    
+            // Atualiza a lista local sem precisar buscar tudo de novo
+            setProdutos((produtosAtuais) =>
+                produtosAtuais.map((p) =>
+                    p.id === produto.id ? { ...p, favorito: novoFavorito } : p
+                )
+            );
+    
+            toast.success(
+                `${produto.nome} foi ${novoFavorito ? "adicionado aos favoritos" : "removido dos favoritos"} com sucesso!`,
+                {
+                    position: "bottom-right",
+                    autoClose: 2000,
+                }
+            );
+    
+            // Gatilho para recarregar os produtos se estiver na aba de favoritos
+            setAtualizar(true);
         } catch (error) {
             console.error("Erro ao favoritar produto:", error);
             toast.error("Erro ao favoritar produto.", {
                 position: "bottom-right",
-                autoClose: 3000,
+                autoClose: 2000,
             });
         }
     };
-
 
     const ordenarProdutosAtoZ = async () => {
         try {
@@ -577,8 +627,6 @@ export default function Compras() {
             alert("Erro ao ordenar produtos.");
         }
     };
-
-
 
     const ordenarProdutosToNormal = async () => {
         setOrdemAtual(null);
