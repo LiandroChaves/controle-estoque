@@ -204,7 +204,6 @@ export default function Login() {
                         Cadastrar-se
                     </button>
                 </div>
-
                 <CadastroModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}

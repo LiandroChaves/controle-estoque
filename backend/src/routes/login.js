@@ -21,10 +21,11 @@ const autenticarUsuario = (req, res, next) => {
     } catch (error) {
         console.error('Erro ao verificar token:', error.message);
         
-        if (error.name === 'jwt expired') {
-            return res.status(401).json({ error: 'Sessão expirada. Faça login novamente.' });
+        if (res.status === 401) {
+            alert("Sua sessão expirou. faça login novamente.");
+            window.location.href = "/login";
         }
-
+        
         return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
 };

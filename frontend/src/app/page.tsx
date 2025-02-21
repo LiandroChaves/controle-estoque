@@ -6,6 +6,7 @@ import Login from "./components/Login";
 import Produtos from "./components/Produtos";
 import PaginaVendas from "./components/Vendas";
 import Compras from "./components/Compras";
+import PoliticaDePrivacidade from "./components/PoliticaEPrivacidade";
 
 export default function Home() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,11 +17,12 @@ export default function Home() {
         setIsAuthenticated(!!token);
 
         if (!token) {
-            router.push("/login"); // Redireciona para a página de login se não estiver autenticado
+            router.push("/login");
         }
     }, [router]);
 
     if (!isAuthenticated) {
+        alert("Sua sessão expirou, por favor faça login novamente.");
         return <Login />;
     }
 
@@ -30,6 +32,7 @@ export default function Home() {
             <Produtos />
             <PaginaVendas />
             <Compras />
+            <PoliticaDePrivacidade />
         </div>
     );
 }

@@ -11,13 +11,13 @@ interface ModalFinalizarComprasProps {
     vendas: {
         id: any; preco?: number
     }[];
+    atualizarLista: () => void;
 }
 
-export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }: ModalFinalizarComprasProps) {
+export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [], atualizarLista}: ModalFinalizarComprasProps) {
     const [desconto, setDesconto] = useState(0);
     const [formaPagamento, setFormaPagamento] = useState("");
 
-    // Verifica se "vendas" é um array antes de usar "reduce"
     const totalVendas = vendas.reduce((total, venda) => total + Number(venda.preco || 0), 0);
     const totalComDesconto = totalVendas * (1 - desconto / 100);
 
@@ -28,22 +28,20 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
         if (btnFinalizar) btnFinalizar.disabled = true;
     }
 
-
     const handleFinalizarCompra = async () => {
         if (!formaPagamento) {
             toast.error("Selecione uma forma de pagamento!");
             return;
         }
-
         try {
             const response = await fetch("http://localhost:5000/api/finalizarvenda", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     vendas: vendas.map(venda => ({
-                        vendaId: venda.id, // ID da venda
-                        desconto: desconto, // Desconto aplicado
-                        formaPagamento: formaPagamento, // Forma de pagamento
+                        vendaId: venda.id,
+                        desconto: desconto,
+                        formaPagamento: formaPagamento,
                     })),
                 }),
             });
@@ -63,7 +61,7 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
 
-            const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
+            const userId = localStorage.getItem('userId');
             if (!userId) {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
@@ -84,9 +82,6 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
                 position: 'bottom-right',
                 autoClose: 3000
             });
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
         } catch (error: any) {
             console.error('Erro ao esvaziar o carrinho:', error.message);
             alert(error.message);
@@ -97,8 +92,8 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
         try {
             await handleFinalizarCompra();
             await esvaziarCarrinho();
-            toast.success("Compra finalizada com sucesso!"); // Exibe o toast de sucesso
-            setIsOpen(false); // Fecha o modal
+            toast.success("Compra finalizada com sucesso!");
+            setIsOpen(false);
         } catch (error) {
             console.error(error);
             toast.error("Erro ao finalizar a compra");
@@ -167,7 +162,7 @@ export default function ModalFinalizarCompras({ isOpen, setIsOpen, vendas = [] }
                         className="px-4 py-2 rounded-md text-white 
         disabled:bg-gray-500 disabled:cursor-not-allowed 
         bg-teal-600 hover:bg-teal-500 transition"
-                        disabled={!formaPagamento} // O botão desativa automaticamente baseado no estado
+                        disabled={!formaPagamento}
                     >
                         Finalizar
                     </button>

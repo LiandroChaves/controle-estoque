@@ -1,5 +1,6 @@
 "use client";
 
+// ============================ Imports ================================
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import logoDeletar from '../../../public/assets/excluir.png';
@@ -15,7 +16,7 @@ import mudarModo from "../../../public/assets/ciclo.png";
 import logoFinalizar from "../../../public/assets/carrinho-de-compras-finalizadas.png";
 import ModalFinalizarComprasUnicas from './finalizarComprasUnicas';
 
-export default function Vendas(vendass: any) {
+export default function Vendas() {
     const router = useRouter();
     const [subcategoriaSelecionada, setSubcategoriaSelecionada] = useState("");
     const [subcategorias, setSubCategorias] = useState<string[]>([]);
@@ -47,6 +48,122 @@ export default function Vendas(vendass: any) {
         imagem?: string;
     }
 
+    // ============================== Effects ================================
+    useEffect(() => {
+        fetchCategoriasVendas(); // Chama a função ao montar o componente
+    }, []);
+
+    useEffect(() => {
+        fetchSubCategoriasVendas(); // Chama a função ao montar o componente
+    }, []);
+
+    useEffect(() => {
+        aplicarFiltros();
+    }, [buscarTermo, vendas]);
+
+    useEffect(() => {
+        const carregarDados = async () => {
+            const user = await fetchUsuario();
+            if (user && user.id) {
+                fetchVendas(user.id);
+            }
+        };
+        carregarDados();
+    }, []);
+
+    useEffect(() => {
+        if (usuario && usuario.id) {
+            fetchVendas(usuario.id);
+        }
+    }, [usuario]);
+
+    useEffect(() => {
+        const fetchInformacoes = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                if (!token || token === "undefined") {
+                    setError("Usuário não autenticado. Faça login novamente.");
+                    router.push("/login");
+                    return;
+                }
+
+                const response = await fetch("http://localhost:5000/api/login", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
+                }
+
+                const data = await response.json();
+                setInfor([data]);
+            } catch (err: any) {
+                console.error("Erro ao buscar informações do usuário:", err.message);
+                setError(err.message);
+            }
+        };
+
+        fetchInformacoes();
+    }, [router]);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await fetchUsuario();
+                const userId = userData.id;
+                localStorage.setItem('userId', userId);
+                const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
+                if (imagemSalva) {
+                    setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
+                } else {
+                    // Se não encontrar, você pode definir uma imagem padrão ou carregar uma imagem do servidor
+                    setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
+                }
+            } catch (err: any) {
+                console.error('Erro ao buscar dados do usuário:', err.message);
+                // Redireciona para login ou outro comportamento desejado
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const userData = await fetchUsuario();
+            if (userData?.id) {
+                fetchVendas(userData.id);
+            }
+        };
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const carregarDados = async () => {
+            if (!usuario) {
+                const userData = await fetchUsuario();
+                if (userData?.id) {
+                    fetchVendas(userData.id);
+                }
+            } else {
+                fetchVendas(usuario.id);
+            }
+        };
+        carregarDados();
+    }, [isOpenNow, usuario]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            fetchVendas(usuario?.id);
+        }
+    }, [isOpen, usuario]);
+
+    // ============================= Funções ================================
     const deletarImg = async () => {
         try {
             const userId = localStorage.getItem('userId');
@@ -139,10 +256,6 @@ export default function Vendas(vendass: any) {
         }
     };
 
-    useEffect(() => {
-        fetchCategoriasVendas(); // Chama a função ao montar o componente
-    }, []);
-
     const fetchSubCategoriasVendas = async () => {
         try {
             const usuario = await fetchUsuario(); // Obtém o usuário
@@ -169,11 +282,6 @@ export default function Vendas(vendass: any) {
         }
     };
 
-
-    useEffect(() => {
-        fetchSubCategoriasVendas(); // Chama a função ao montar o componente
-    }, []);
-
     const aplicarFiltros = () => {
         if (buscarTermo.trim() === "") {
             // Se o termo de busca estiver vazio, exibe todas as vendas
@@ -192,11 +300,6 @@ export default function Vendas(vendass: any) {
         // Atualiza o estado com as vendas filtradas
         setVendasBuscados(filtrado);
     };
-
-    // Aplica os filtros sempre que o termo de busca mudar
-    useEffect(() => {
-        aplicarFiltros();
-    }, [buscarTermo, vendas]);
 
     const uploadImagem = async (file: File): Promise<string> => {
         try {
@@ -295,7 +398,6 @@ export default function Vendas(vendass: any) {
         }
     };
 
-
     const fetchUsuario = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -361,28 +463,6 @@ export default function Vendas(vendass: any) {
         }
     };
 
-
-    useEffect(() => {
-        const carregarDados = async () => {
-            const user = await fetchUsuario();
-            if (user && user.id) {
-                fetchVendas(user.id);
-            }
-        };
-        carregarDados();
-    }, []);
-
-    useEffect(() => {
-        if (usuario && usuario.id) {
-            fetchVendas(usuario.id);
-        }
-    }, [usuario]);
-
-
-    if (erro) {
-        return <div>Erro: {erro}</div>;
-    }
-
     const deletarProduto = async (venda: any) => {
         if (confirm(`Tem certeza que deseja excluir a venda do produto "${venda.produto} com o valor de ${venda.preco}"?`)) {
             try {
@@ -408,6 +488,7 @@ export default function Vendas(vendass: any) {
                     autoClose: 3000
                 });
                 setVendas((prevVendas) => prevVendas.filter((item) => item.id !== venda.id));
+                fetchVendas(usuario.id);
             } catch (error) {
                 console.error('Erro ao deletar venda:', error);
                 toast.error('Erro ao excluir a venda.', {
@@ -418,62 +499,9 @@ export default function Vendas(vendass: any) {
         }
     };
 
-    useEffect(() => {
-        const fetchInformacoes = async () => {
-            try {
-                const token = localStorage.getItem("token");
-
-                if (!token || token === "undefined") {
-                    setError("Usuário não autenticado. Faça login novamente.");
-                    router.push("/login");
-                    return;
-                }
-
-                const response = await fetch("http://localhost:5000/api/login", {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || "Erro ao buscar informações do usuário");
-                }
-
-                const data = await response.json();
-                setInfor([data]);
-            } catch (err: any) {
-                console.error("Erro ao buscar informações do usuário:", err.message);
-                setError(err.message);
-            }
-        };
-
-        fetchInformacoes();
-    }, [router]);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userData = await fetchUsuario();
-                const userId = userData.id;
-                localStorage.setItem('userId', userId);
-                const imagemSalva = localStorage.getItem(`imagemUsuario_${userId}`);
-                if (imagemSalva) {
-                    setImagemUsuario(imagemSalva); // Carrega a imagem do usuário
-                } else {
-                    // Se não encontrar, você pode definir uma imagem padrão ou carregar uma imagem do servidor
-                    setImagemUsuario('http://localhost:5000/uploads/default-image.webp');
-                }
-            } catch (err: any) {
-                console.error('Erro ao buscar dados do usuário:', err.message);
-                // Redireciona para login ou outro comportamento desejado
-            }
-        };
-
-        fetchUserData();
-    }, []);
-
+    if (erro) {
+        return <div>Erro: {erro}</div>;
+    }
 
     const totalVendas = vendas.length > 0
         ? vendas.reduce((total, venda) => total + Number(venda.preco || 0), 0)
@@ -688,9 +716,7 @@ export default function Vendas(vendass: any) {
                                             position: 'bottom-right',
                                             autoClose: 3000
                                         });
-                                        setTimeout(() => {
-                                            window.location.reload();
-                                        }, 2000);
+                                        fetchVendas(usuario.id);
                                     } catch (error: any) {
                                         console.error('Erro ao esvaziar o carrinho:', error.message);
                                         alert(error.message);
@@ -716,7 +742,6 @@ export default function Vendas(vendass: any) {
                 : "bg-gradient-to-b from-white via-white to-white text-white"
                 }`}>
                 {exibirComoCards ? (
-                    // Layout em Tabela
                     <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
                         <table className={`w-full text-left border-collapse shadow-lg rounded-lg transition-all ${isDarkMode ? "bg-gray-700" : "bg-gray-600"}`}>
                             <thead>
@@ -725,6 +750,7 @@ export default function Vendas(vendass: any) {
                                     <th className="p-4 border-b border-gray-600 text-center">Categoria</th>
                                     <th className="p-4 border-b border-gray-600 text-center">Quantidade</th>
                                     <th className="p-4 border-b border-gray-600 text-center">Preço</th>
+                                    <th className="p-4 border-b border-gray-600 text-center">Finalizar</th>
                                     <th className="p-4 border-b border-gray-600 text-center">Deletar</th>
                                 </tr>
                             </thead>
@@ -736,6 +762,18 @@ export default function Vendas(vendass: any) {
                                             <td className="p-4 border-b border-gray-600 text-center">{venda.categoria}</td>
                                             <td className="p-4 border-b border-gray-600 text-center">{venda.quantidade}</td>
                                             <td className="p-4 border-b border-gray-600 text-center">R$ {venda.preco}</td>
+                                            <td className="p-4 border-b border-gray-600 text-center">
+                                                <button
+                                                    onClick={() => {
+                                                        setVendaSelecionada(venda)
+                                                        setIsOpenNow(true);
+                                                    }}
+                                                    className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
+                                                        }`}
+                                                >
+                                                    <Image src={logoFinalizar} alt="deletar" width={40} height={40} className="invert" />
+                                                </button>
+                                            </td>
                                             <td className="p-4 border-b border-gray-600 text-center">
                                                 <button
                                                     onClick={() => deletarProduto(venda)}
@@ -765,16 +803,23 @@ export default function Vendas(vendass: any) {
                                             </button>
                                         )}
                                         {isOpen && vendas.length > 0 && (
-                                            <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />
+                                            <ModalFinalizarCompras
+                                                isOpen={isOpen}
+                                                setIsOpen={setIsOpen}
+                                                vendas={vendas}
+                                                atualizarLista={async () => { await fetchVendas(usuario?.id); }}
+                                            />
                                         )}
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                        {isOpenNow && vendaSelecionada && (
+                            <ModalFinalizarComprasUnicas isOpenNow={isOpenNow} setIsOpenNow={setIsOpenNow} venda={vendaSelecionada} atualizarLista={async () => { await fetchVendas(usuario.id); }} />
+                        )}
                     </div>
                 ) : (
                     <div>
-                        {/* Layout em Cards */}
                         <div className={`rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6 ${isDarkMode ? "bg-gray-700" : "bg-gray-700"}`}>
                             {vendas.length > 0 ? (
                                 vendas.map((venda) => (
@@ -800,8 +845,6 @@ export default function Vendas(vendass: any) {
                                         <p className={`text-sm text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{venda.subcategoria}</p>
                                         <p className={`text-center mt-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Quantidade: <span className="font-bold">{venda.quantidade}</span></p>
                                         <p className={`text-center mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Preço: <span className="font-bold">R$ {venda.preco}</span></p>
-
-                                        {/* Botão de deletar */}
                                         <div className="flex justify-between mt-4">
                                             <button
                                                 onClick={() => deletarProduto(venda)}
@@ -812,7 +855,7 @@ export default function Vendas(vendass: any) {
                                             </button>
                                             <button
                                                 onClick={() => {
-                                                    setVendaSelecionada(venda); // Define a venda correta
+                                                    setVendaSelecionada(venda)
                                                     setIsOpenNow(true);
                                                 }}
                                                 className={`px-4 py-2 rounded-lg shadow-lg ${isDarkMode ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-gray-400 hover:bg-teal-400 text-black"
@@ -828,9 +871,8 @@ export default function Vendas(vendass: any) {
                             )}
                         </div>
                         {isOpenNow && vendaSelecionada && (
-                            <ModalFinalizarComprasUnicas isOpenNow={isOpenNow} setIsOpenNow={setIsOpenNow} venda={vendaSelecionada} />
+                            <ModalFinalizarComprasUnicas isOpenNow={isOpenNow} setIsOpenNow={setIsOpenNow} venda={vendaSelecionada} atualizarLista={async () => { await fetchVendas(usuario.id); }} />
                         )}
-                        {/* Total e botão de finalizar compra */}
                         {vendas.length > 0 && (
                             <div className="mt-6 text-center">
                                 <span className={`px-4 py-2 rounded-md shadow-md text-lg font-bold ${isDarkMode ? "bg-teal-600 text-white" : "bg-gray-700 text-white"}`}>
@@ -842,8 +884,12 @@ export default function Vendas(vendass: any) {
                                     Finalizar compras
                                 </button>
                                 {isOpen && vendas.length > 0 && (
-                                    <ModalFinalizarCompras isOpen={isOpen} setIsOpen={setIsOpen} vendas={vendas} />
-                                )}
+                                    <ModalFinalizarCompras
+                                        isOpen={isOpen}
+                                        setIsOpen={setIsOpen}
+                                        vendas={vendas}
+                                        atualizarLista={async () => { await fetchVendas(usuario?.id); }}
+                                    />)}
                             </div>
                         )}
                     </div>

@@ -174,3 +174,4 @@ SELECT * FROM vendas;
 SELECT * FROM compras;
 SELECT * FROM logsprodutos;
 select * from finalizarvendas;
+

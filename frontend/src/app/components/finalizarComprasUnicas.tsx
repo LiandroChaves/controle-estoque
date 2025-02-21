@@ -8,11 +8,12 @@ import imgFundo from "../../../public/assets/comprar-online.png";
 interface ModalFinalizarComprasUnicasProps {
     isOpenNow: boolean;
     setIsOpenNow: (isOpenNow: boolean) => void;
-    venda: { id: any; preco?: number } | null; // Apenas UMA venda
+    venda: { id: any; preco?: number } | null;
+    atualizarLista: () => void;
 }
 
 
-export default function ModalFinalizarComprasUnicas({ isOpenNow, setIsOpenNow, venda = null }: ModalFinalizarComprasUnicasProps) {
+export default function ModalFinalizarComprasUnicas({ isOpenNow, setIsOpenNow, venda = null, atualizarLista }: ModalFinalizarComprasUnicasProps) {
     const [desconto, setDesconto] = useState(0);
     const [formaPagamento, setFormaPagamento] = useState("");
 
@@ -29,67 +30,64 @@ export default function ModalFinalizarComprasUnicas({ isOpenNow, setIsOpenNow, v
 
 
     const handleFinalizarCompra = async () => {
-        if (!venda) return; // Verifica se há uma venda selecionada
-    
+        if (!venda) return;
         if (!formaPagamento) {
             toast.error("Selecione uma forma de pagamento!");
             return;
         }
-    
+
         try {
             const response = await fetch("http://localhost:5000/api/finalizarvendaUnica", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    vendaId: venda.id, // Apenas um ID
+                    vendaId: venda.id,
                     desconto: desconto,
                     formaPagamento: formaPagamento,
                 }),
             });
-    
+
             if (!response.ok) throw new Error("Erro ao finalizar venda");
-            setIsOpenNow(false);
             toast.success("Compra finalizada com sucesso!");
+            setIsOpenNow(false);
+            atualizarLista(); // 🟢 Atualiza a lista sem recarregar a página
         } catch (error) {
             console.error(error);
             toast.error("Erro ao finalizar a compra");
         }
     };
-    
 
     const removerItemCarrinho = async (vendaId: string) => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token || token === 'undefined') {
-                throw new Error('Usuário não autenticado. Faça login novamente.');
+            const token = localStorage.getItem("token");
+            if (!token || token === "undefined") {
+                throw new Error("Usuário não autenticado. Faça login novamente.");
             }
-    
+
             const response = await fetch(`http://localhost:5000/api/vendas/${vendaId}/limparUnico`, {
-                method: 'DELETE',
+                method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Erro ao remover item do carrinho');
+                throw new Error(errorData.error || "Erro ao remover item do carrinho");
             }
-    
-            toast.success('Item removido com sucesso!', {
-                position: 'bottom-right',
-                autoClose: 3000
+
+            toast.success("Item removido com sucesso!", {
+                position: "bottom-right",
+                autoClose: 3000,
             });
-    
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+
+            atualizarLista();
+            setIsOpenNow(false);
         } catch (error: any) {
-            console.error('Erro ao remover item do carrinho:', error.message);
+            console.error("Erro ao remover item do carrinho:", error.message);
             alert(error.message);
         }
     };
-    
 
     const handleClick = async () => {
         try {
@@ -97,8 +95,6 @@ export default function ModalFinalizarComprasUnicas({ isOpenNow, setIsOpenNow, v
             if (venda) {
                 await removerItemCarrinho(venda.id);
             }
-            toast.success("Compra finalizada com sucesso!"); // Exibe o toast de sucesso
-            setIsOpenNow(false); // Fecha o modal
         } catch (error) {
             console.error(error);
             toast.error("Erro ao finalizar a compra");

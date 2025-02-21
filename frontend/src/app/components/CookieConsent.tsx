@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
+import PoliticaDePrivacidade from "./PoliticaEPrivacidade";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const CookieConsent = () => {
+    const router = useRouter();
     const [mostrarBanner, setMostrarBanner] = useState(false);
 
     useEffect(() => {
@@ -30,9 +34,12 @@ const CookieConsent = () => {
             <p className="text-sm max-w-md">
                 Usamos cookies para melhorar sua experiência, personalizar conteúdo e analisar nosso tráfego.
                 Ao continuar navegando, você concorda com nossa
-                <a href="/politica-de-privacidade" className="underline text-teal-400 hover:text-teal-300 ml-1">
-                    Política de Privacidade
-                </a>.
+                <button
+                    onClick={() => router.push("/politica")}
+                    className="underline text-teal-400 hover:text-teal-300 ml-1"
+                >
+                    Ir para Política de Privacidade
+                </button>
             </p>
             <div className="flex gap-4 mt-2 md:mt-0">
                 <button
