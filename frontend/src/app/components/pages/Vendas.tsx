@@ -3,18 +3,18 @@
 // ============================ Imports ================================
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import logoDeletar from '../../../public/assets/excluir.png';
+import logoDeletar from '../../../../public/assets/excluir.png';
 import Image from "next/image";
-import Footer from './Footer';
+import Footer from '../../../utils/utilities/Footer';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import logoEditar from '../../../public/assets/caneta.png'
-import ftPerfil from "../../../public/assets/ftPerfil.webp";
-import { useTheme } from "../../utils/context/ThemeContext";
-import ModalFinalizarCompras from "./finalizarCompras";
-import mudarModo from "../../../public/assets/ciclo.png";
-import logoFinalizar from "../../../public/assets/carrinho-de-compras-finalizadas.png";
-import ModalFinalizarComprasUnicas from './finalizarComprasUnicas';
+import logoEditar from '../../../../public/assets/caneta.png'
+import ftPerfil from "../../../../public/assets/ftPerfil.webp";
+import { useTheme } from "../../../utils/context/ThemeContext";
+import ModalFinalizarCompras from "../modals/finalizarCompras";
+import mudarModo from "../../../../public/assets/ciclo.png";
+import logoFinalizar from "../../../../public/assets/carrinho-de-compras-finalizadas.png";
+import ModalFinalizarComprasUnicas from '../modals/finalizarComprasUnicas';
 
 export default function Vendas() {
     const router = useRouter();
@@ -84,7 +84,7 @@ export default function Vendas() {
 
                 if (!token || token === "undefined") {
                     setError("Usuário não autenticado. Faça login novamente.");
-                    router.push("/login");
+                    router.push("/routes/login");
                     return;
                 }
 
@@ -210,7 +210,7 @@ export default function Vendas() {
 
     const funcaoSair = () => {
         localStorage.removeItem("token");
-        router.push("/login");
+        router.push("/routes/login");
     };
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -423,7 +423,7 @@ export default function Vendas() {
             return data;
         } catch (err: any) {
             console.error('Erro ao buscar informações do usuário:', err.message);
-            router.push('/login');
+            router.push('/routes/login');
             throw err;
         }
     };
@@ -666,7 +666,7 @@ export default function Vendas() {
                     </div>
                     <div className="flex items-center gap-6">
                         <button
-                            onClick={() => router.push("/compras")}
+                            onClick={() => router.push("/routes/compras")}
                             className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
                                 ? "bg-gray-600 text-teal-400 hover:bg-teal-600 hover:text-white"
                                 : "bg-gray-600 text-white hover:bg-teal-500 hover:text-white"

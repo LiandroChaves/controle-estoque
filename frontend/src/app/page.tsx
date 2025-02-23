@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Login from "./components/Login";
-import Produtos from "./components/Produtos";
-import PaginaVendas from "./components/Vendas";
-import Compras from "./components/Compras";
-import PoliticaDePrivacidade from "./components/PoliticaEPrivacidade";
+import Login from "./components/pages/Login";
+import Produtos from "./components/pages/Produtos";
+import PaginaVendas from "./components/pages/Vendas";
+import Compras from "./components/pages/Compras";
+import PoliticaDePrivacidade from "../utils/utilities/PoliticaEPrivacidade";
 
 export default function Home() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,7 +17,7 @@ export default function Home() {
         setIsAuthenticated(!!token);
 
         if (!token) {
-            router.push("/login");
+            router.push("/routes/login");
         }
     }, [router]);
 

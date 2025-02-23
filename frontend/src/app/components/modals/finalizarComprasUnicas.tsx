@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import imgFundo from "../../../public/assets/comprar-online.png";
+import imgFundo from "../../../../public/assets/comprar-online.png";
 
 interface ModalFinalizarComprasUnicasProps {
     isOpenNow: boolean;

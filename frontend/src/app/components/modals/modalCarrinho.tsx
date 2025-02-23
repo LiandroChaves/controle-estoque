@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import imgFundo from "../../../public/assets/comprar-online.png";
+import imgFundo from "../../../../public/assets/comprar-online.png";
 import "react-toastify/dist/ReactToastify.css";
 
 type Produto = {
     nome: string;
     preco: string;
-    id: number; // Incluindo código do produto
+    id: number;
 };
 
 type ModalProps = {

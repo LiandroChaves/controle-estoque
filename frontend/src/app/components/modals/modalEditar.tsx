@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
-import imgEstoque from "../../../public/assets/estoque.png";
-import imgFundo from "../../../public/assets/crescer.png"; // Novo caminho da imagem de fundo
+import imgEstoque from "../../../../public/assets/estoque.png";
+import imgFundo from "../../../../public/assets/crescer.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

@@ -3,20 +3,20 @@
 // ============================ Imports ================================
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import ftPerfil from "../../../public/assets/ftPerfil.webp";
+import ftPerfil from "../../../../public/assets/ftPerfil.webp";
 import { useRouter } from "next/navigation";
-import logoCarrinho from '../../../public/assets/carrinho-de-compras.png';
-import Footer from "./Footer";
-import ObterProdutoModal from "./modalCarrinho";
-import logoEditar from '../../../public/assets/caneta.png';
-import logoDeletar from '../../../public/assets/excluir.png';
+import logoCarrinho from '../../../../public/assets/carrinho-de-compras.png';
+import Footer from "../../../utils/utilities/Footer";
+import ObterProdutoModal from "../modals/modalCarrinho";
+import logoEditar from '../../../../public/assets/caneta.png';
+import logoDeletar from '../../../../public/assets/excluir.png';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import imgFundo from "../../../public/assets/comprar-online.png";
-import logoDetalhes from "../../../public/assets/detalhes-do-produto.png";
-import { useTheme } from "../../utils/context/ThemeContext";
-import mudarModo from "../../../public/assets/ciclo.png";
-import imgPadrao from "../../../public/assets/sem-imagens.png";
+import imgFundo from "../../../../public/assets/comprar-online.png";
+import logoDetalhes from "../../../../public/assets/detalhes-do-produto.png";
+import { useTheme } from "../../../utils/context/ThemeContext";
+import mudarModo from "../../../../public/assets/ciclo.png";
+import imgPadrao from "../../../../public/assets/sem-imagens.png";
 
 export default function Compras() {
     type Produto = {
@@ -165,7 +165,7 @@ export default function Compras() {
 
                 if (!token || token === "undefined") {
                     setError("Usuário não autenticado. Faça login novamente.");
-                    router.push("/login");
+                    router.push("/routes/login");
                     return;
                 }
 
@@ -262,7 +262,7 @@ export default function Compras() {
                 if (data.block) {
                     alert("Muitas tentativas mal sucedidas!\nPor questão de segurança, você será redirecionado para a página de login novamente.");
                     localStorage.removeItem("token");
-                    router.push("/login");
+                    router.push("/routes/login");
                     return;
                 }
 
@@ -277,7 +277,7 @@ export default function Compras() {
 
             setError("");
             setShowModal(false);
-            window.location.href = "/produtos";
+            window.location.href = "/routes/produtos";
         } catch (error: any) {
             console.error("Erro ao validar a senha:", error.message);
             setError("Erro ao conectar ao servidor.");
@@ -400,14 +400,14 @@ export default function Compras() {
             return data;
         } catch (err: any) {
             console.error('Erro ao buscar informações do usuário:', err.message);
-            router.push('/login');
+            router.push('/routes/login');
             throw err;
         }
     };
 
     const funcaoSair = () => {
         localStorage.removeItem("token");
-        router.push("/login");
+        router.push("/routes/login");
     };
 
     const carregarProdutos = async () => {
@@ -845,7 +845,7 @@ export default function Compras() {
                             </div>
                         )}
                         <button
-                            onClick={() => router.push("/vendas")}
+                            onClick={() => router.push("/routes/vendas")}
                             className={`px-6 py-2 rounded-lg shadow-md font-bold transform hover:scale-105 transition-all ${isDarkMode
                                 ? "bg-gray-600 text-teal-400 hover:bg-teal-600 hover:text-white"
                                 : "bg-gray-600 text-white hover:bg-teal-500 hover:text-white"

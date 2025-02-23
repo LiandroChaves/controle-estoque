@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import imgCadastro from "../../../public/assets/document.png";
-import imgFundo from "../../../public/assets/crescer.png";
+import imgCadastro from "../../../../public/assets/document.png";
+import imgFundo from "../../../../public/assets/crescer.png";
 
 interface ModalProps {
     isOpen: boolean;

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import CadastroModal from "./modalCadastro";
-import { useTheme } from "../../utils/context/ThemeContext";
-import CookieConsent from "./CookieConsent";
+import CadastroModal from "../modals/modalCadastro";
+import { useTheme } from "../../../utils/context/ThemeContext";
+import CookieConsent from "../../../utils/utilities/CookieConsent";
 
 export default function Login() {
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -56,7 +56,7 @@ export default function Login() {
 
             localStorage.setItem("token", data.token);
 
-            router.push("/compras");
+            router.push("/routes/compras");
         } catch (error) {
             setErro("Erro ao conectar ao servidor");
             console.error("Erro:", error);
